@@ -15,11 +15,10 @@ import Chatbot from './Chatbot';
 import { CartProvider, useCart } from './CartContext';
 import AdminLogin from './adminlogin';
 import SuperAdminDashboard from './SuperAdminDashboard';
-import AhadPharmacyDashboard from './AhadDashboard'; 
+import AhadPharmacyDashboard from './AhadDashboard';
 import AkhtarPharmacyDashboard from './AkhtarDashboard';
 import HassanPharmacyDashboard from './HassanDashboard';
 
-// Updated Cart Component with Checkout Button
 const SimpleCart = ({ setShowCheckout }) => {
   const { cart, removeFromCart, getCartTotal, clearCart, updateQuantity } = useCart();
 
@@ -182,35 +181,38 @@ const SimpleCart = ({ setShowCheckout }) => {
 };
 
 function App() {
-  const [count, setCount] = useState(0)
-  const [showCart, setShowCart] = useState(false)
-  const [showCheckout, setShowCheckout] = useState(false)
-  const [currentPage, setCurrentPage] = useState('home')
-  
-  const [searchTerm, setSearchTerm] = useState('')
-  const [searchResults, setSearchResults] = useState([])
+  const [showCart, setShowCart] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [currentPage, setCurrentPage] = useState("home");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
 
   const handleSearch = (term) => {
     setSearchTerm(term);
-    if (term.trim() === '') {
+    if (term.trim() === "") {
       setSearchResults([]);
       return;
     }
-
     const results = allProducts.filter(product =>
       product.name.toLowerCase().includes(term.toLowerCase()) ||
       product.pharmacy.toLowerCase().includes(term.toLowerCase())
     );
-    
     setSearchResults(results);
   };
+
+  // ✅ Only show Navbar & Footer when not in any dashboard
+  const isDashboard =
+    currentPage === "admin-dashboard" ||
+    currentPage === "ahad-dashboard" ||
+    currentPage === "akhtar-dashboard" ||
+    currentPage === "hassan-dashboard";
 
   return (
     <CartProvider>
       <div>
-        {currentPage !== 'admin-dashboard' && (
-          <Navbar 
-            showCart={showCart} 
+        {!isDashboard && (
+          <Navbar
+            showCart={showCart}
             setShowCart={setShowCart}
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
@@ -221,35 +223,31 @@ function App() {
           <Checkout setShowCart={setShowCart} setShowCheckout={setShowCheckout} />
         ) : showCart ? (
           <SimpleCart setShowCheckout={setShowCheckout} />
-        ) : currentPage === 'pharmacies' ? (
+        ) : currentPage === "pharmacies" ? (
           <PharmaciesPage setCurrentPage={setCurrentPage} />
-        ) : currentPage === 'products' ? (
+        ) : currentPage === "products" ? (
           <AllProductsPage />
-        ) : currentPage === 'store' ? (
+        ) : currentPage === "store" ? (
           <PharmacyStore />
-        ) : currentPage === 'admin' ? (
+        ) : currentPage === "admin" ? (
           <AdminLogin setCurrentPage={setCurrentPage} />
-        ) : currentPage === 'admin-dashboard' ? (
+        ) : currentPage === "admin-dashboard" ? (
           <SuperAdminDashboard />
-        ) : currentPage === 'ahad-dashboard' ? (        // ✅ New route added
+        ) : currentPage === "ahad-dashboard" ? (
           <AhadPharmacyDashboard />
-        ) : currentPage === 'akhtar-dashboard' ? (
+        ) : currentPage === "akhtar-dashboard" ? (
           <AkhtarPharmacyDashboard />
-        ) : currentPage === 'hassan-dashboard' ? (
+        ) : currentPage === "hassan-dashboard" ? (
           <HassanPharmacyDashboard />
         ) : (
           <>
-            <Home 
-              onSearch={handleSearch}
-              searchResults={searchResults}
-              searchTerm={searchTerm}
-            />
+            <Home onSearch={handleSearch} searchResults={searchResults} searchTerm={searchTerm} />
             <TopSellingMedicines setCurrentPage={setCurrentPage} />
             <Reviews />
           </>
         )}
-        
-        {currentPage !== 'admin-dashboard' && <Footer />}
+
+        {!isDashboard && <Footer />}
 
         <Chatbot />
       </div>

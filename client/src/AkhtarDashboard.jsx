@@ -27,7 +27,6 @@ const AkhtarPharmacyDashboard = () => {
 
   const productsRef = collection(db, "pharmacies", "akhtarPharmacy", "products");
 
-  // Fetch products
   const fetchProducts = async () => {
     const snapshot = await getDocs(productsRef);
     setProducts(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
@@ -37,12 +36,10 @@ const AkhtarPharmacyDashboard = () => {
     fetchProducts();
   }, []);
 
-  // Handle input change
   const handleChange = (e) => {
     setProductData({ ...productData, [e.target.name]: e.target.value });
   };
 
-  // Handle image upload
   const handleImageUpload = async (file) => {
     const imageRef = ref(storage, `productImages/${file.name}`);
     await uploadBytes(imageRef, file);
@@ -50,7 +47,6 @@ const AkhtarPharmacyDashboard = () => {
     return url;
   };
 
-  // Add or Update Product
   const handleSubmit = async (e) => {
     e.preventDefault();
     let imageUrl = productData.image;
@@ -84,14 +80,12 @@ const AkhtarPharmacyDashboard = () => {
     fetchProducts();
   };
 
-  // Edit Product
   const handleEdit = (product) => {
     setEditProduct(product);
     setProductData(product);
     setFormVisible(true);
   };
 
-  // Delete Product
   const handleDelete = async (id) => {
     await deleteDoc(doc(db, "pharmacies", "akhtarPharmacy", "products", id));
     alert("Product deleted!");
@@ -99,215 +93,239 @@ const AkhtarPharmacyDashboard = () => {
   };
 
   return (
-    <div style={{ padding: "30px" }}>
-      <h2 style={{ color: "green", textAlign: "center", marginBottom: "20px" }}>
-        Akhtar Pharmacy Dashboard
-      </h2>
+    <div style={{ display: "flex", height: "100vh", backgroundColor: "#f4f6f8" }}>
+      {/* Sidebar */}
+      <div style={sidebarStyle}>
+        <h2 style={{ color: "white", textAlign: "center", marginBottom: "30px" }}>Akhtar Pharmacy</h2>
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          <li style={sidebarItemStyle}>🏠 Dashboard</li>
+          <li style={sidebarItemStyle}>💊 Medicines</li>
+          <li style={sidebarItemStyle}>📦 Orders</li>
+          <li style={sidebarItemStyle}>👤 Profile</li>
+        </ul>
+      </div>
 
-      <button
-        onClick={() => {
-          setFormVisible(!formVisible);
-          setEditProduct(null);
-          setProductData({
-            productName: "",
-            category: "Tablet",
-            description: "",
-            price: "",
-            stock: "",
-            expiryDate: "",
-            status: "Active",
-            image: "",
-          });
-        }}
-        style={{
-          backgroundColor: "green",
-          color: "white",
-          padding: "10px 20px",
-          border: "none",
-          borderRadius: "5px",
-          marginBottom: "20px",
-        }}
-      >
-        {formVisible ? "Close Form" : "Add Medicine"}
-      </button>
+      {/* Main Content */}
+      <div style={{ flex: 1, padding: "30px", overflowY: "auto" }}>
+        <h2 style={{ color: "#1a7f45", marginBottom: "20px" }}>Medicine Management</h2>
 
-      {formVisible && (
-        <form
-          onSubmit={handleSubmit}
+        <button
+          onClick={() => {
+            setFormVisible(!formVisible);
+            setEditProduct(null);
+            setProductData({
+              productName: "",
+              category: "Tablet",
+              description: "",
+              price: "",
+              stock: "",
+              expiryDate: "",
+              status: "Active",
+              image: "",
+            });
+          }}
           style={{
-            backgroundColor: "#e8f5e9",
-            padding: "20px",
-            borderRadius: "10px",
+            backgroundColor: "#1a7f45",
+            color: "white",
+            padding: "10px 20px",
+            border: "none",
+            borderRadius: "8px",
             marginBottom: "20px",
+            cursor: "pointer",
           }}
         >
-          <h3 style={{ color: "green" }}>
-            {editProduct ? "Edit Product" : "Add New Product"}
-          </h3>
+          {formVisible ? "Close Form" : "Add Medicine"}
+        </button>
 
-          <input
-            type="text"
-            name="productName"
-            placeholder="Enter product name"
-            value={productData.productName}
-            onChange={handleChange}
-            required
-            style={inputStyle}
-          />
-
-          <select
-            name="category"
-            value={productData.category}
-            onChange={handleChange}
-            style={inputStyle}
-          >
-            <option>Tablet</option>
-            <option>Syrup</option>
-            <option>Capsule</option>
-            <option>Injection</option>
-          </select>
-
-          <textarea
-            name="description"
-            placeholder="Enter description"
-            value={productData.description}
-            onChange={handleChange}
-            style={inputStyle}
-          />
-
-          <input
-            type="number"
-            name="price"
-            placeholder="Enter price"
-            value={productData.price}
-            onChange={handleChange}
-            required
-            style={inputStyle}
-          />
-
-          <input
-            type="number"
-            name="stock"
-            placeholder="Enter stock quantity"
-            value={productData.stock}
-            onChange={handleChange}
-            required
-            style={inputStyle}
-          />
-
-          <input
-            type="date"
-            name="expiryDate"
-            value={productData.expiryDate}
-            onChange={handleChange}
-            required
-            style={inputStyle}
-          />
-
-          <select
-            name="status"
-            value={productData.status}
-            onChange={handleChange}
-            style={inputStyle}
-          >
-            <option>Active</option>
-            <option>Inactive</option>
-          </select>
-
-          <input type="file" name="image" style={inputStyle} />
-
-          <button
-            type="submit"
+        {formVisible && (
+          <form
+            onSubmit={handleSubmit}
             style={{
-              backgroundColor: "green",
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "5px",
-              marginRight: "10px",
+              backgroundColor: "white",
+              padding: "25px",
+              borderRadius: "12px",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+              marginBottom: "30px",
             }}
           >
-            {editProduct ? "Update" : "Save"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setFormVisible(false)}
-            style={{
-              backgroundColor: "gray",
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "5px",
-            }}
-          >
-            Cancel
-          </button>
-        </form>
-      )}
+            <h3 style={{ color: "#1a7f45", marginBottom: "20px" }}>
+              {editProduct ? "Edit Product" : "Add New Product"}
+            </h3>
 
-      {/* Product Table */}
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          backgroundColor: "#f9fff9",
-        }}
-      >
-        <thead>
-          <tr style={{ backgroundColor: "#c8f7c5" }}>
-            <th style={thStyle}>Product Name</th>
-            <th style={thStyle}>Category</th>
-            <th style={thStyle}>Stock</th>
-            <th style={thStyle}>Price</th>
-            <th style={thStyle}>Status</th>
-            <th style={thStyle}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((product) => (
-            <tr key={product.id} style={{ borderBottom: "1px solid #ddd" }}>
-              <td style={tdStyle}>{product.productName}</td>
-              <td style={tdStyle}>{product.category}</td>
-              <td style={tdStyle}>{product.stock}</td>
-              <td style={tdStyle}>${product.price}</td>
-              <td style={tdStyle}>
-                <span
-                  style={{
-                    color: product.status === "Active" ? "green" : "red",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {product.status}
-                </span>
-              </td>
-              <td style={tdStyle}>
-                <button
-                  onClick={() => handleEdit(product)}
-                  style={editBtnStyle}
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(product.id)}
-                  style={removeBtnStyle}
-                >
-                  Remove
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            <input
+              type="text"
+              name="productName"
+              placeholder="Enter product name"
+              value={productData.productName}
+              onChange={handleChange}
+              required
+              style={inputStyle}
+            />
+
+            <select name="category" value={productData.category} onChange={handleChange} style={inputStyle}>
+              <option>Tablet</option>
+              <option>Syrup</option>
+              <option>Capsule</option>
+              <option>Injection</option>
+            </select>
+
+            <textarea
+              name="description"
+              placeholder="Enter description"
+              value={productData.description}
+              onChange={handleChange}
+              style={inputStyle}
+            />
+
+            <input
+              type="number"
+              name="price"
+              placeholder="Enter price"
+              value={productData.price}
+              onChange={handleChange}
+              required
+              style={inputStyle}
+            />
+
+            <input
+              type="number"
+              name="stock"
+              placeholder="Enter stock quantity"
+              value={productData.stock}
+              onChange={handleChange}
+              required
+              style={inputStyle}
+            />
+
+            <input
+              type="date"
+              name="expiryDate"
+              value={productData.expiryDate}
+              onChange={handleChange}
+              required
+              style={inputStyle}
+            />
+
+            <select name="status" value={productData.status} onChange={handleChange} style={inputStyle}>
+              <option>Active</option>
+              <option>Inactive</option>
+            </select>
+
+            <input type="file" name="image" style={inputStyle} />
+
+            <div style={{ marginTop: "10px" }}>
+              <button
+                type="submit"
+                style={{
+                  backgroundColor: "#1a7f45",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "5px",
+                  marginRight: "10px",
+                  cursor: "pointer",
+                }}
+              >
+                {editProduct ? "Update" : "Save"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormVisible(false)}
+                style={{
+                  backgroundColor: "gray",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Product Table */}
+        <div
+          style={{
+            backgroundColor: "white",
+            borderRadius: "12px",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+            padding: "20px",
+          }}
+        >
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ backgroundColor: "#1a7f45", color: "white" }}>
+                <th style={thStyle}>Product Name</th>
+                <th style={thStyle}>Category</th>
+                <th style={thStyle}>Stock</th>
+                <th style={thStyle}>Price</th>
+                <th style={thStyle}>Status</th>
+                <th style={thStyle}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr key={product.id} style={{ borderBottom: "1px solid #ddd" }}>
+                  <td style={tdStyle}>{product.productName}</td>
+                  <td style={tdStyle}>{product.category}</td>
+                  <td style={tdStyle}>{product.stock}</td>
+                  <td style={tdStyle}>${product.price}</td>
+                  <td style={tdStyle}>
+                    <span
+                      style={{
+                        color: product.status === "Active" ? "green" : "red",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {product.status}
+                    </span>
+                  </td>
+                  <td style={tdStyle}>
+                    <button onClick={() => handleEdit(product)} style={editBtnStyle}>
+                      Edit
+                    </button>
+                    <button onClick={() => handleDelete(product.id)} style={removeBtnStyle}>
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
 
-// Styles
+// Dashboard Styles
+const sidebarStyle = {
+  width: "230px",
+  backgroundColor: "#1a7f45",
+  color: "white",
+  padding: "25px 15px",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "flex-start",
+};
+
+const sidebarItemStyle = {
+  padding: "12px 20px",
+  borderRadius: "8px",
+  marginBottom: "10px",
+  cursor: "pointer",
+  backgroundColor: "rgba(255,255,255,0.1)",
+  transition: "0.3s",
+};
+
 const inputStyle = {
   width: "100%",
-  padding: "8px",
-  margin: "8px 0",
-  borderRadius: "5px",
+  padding: "10px",
+  margin: "10px 0",
+  borderRadius: "6px",
   border: "1px solid #ccc",
 };
 
@@ -321,6 +339,7 @@ const editBtnStyle = {
   padding: "5px 10px",
   borderRadius: "4px",
   marginRight: "5px",
+  cursor: "pointer",
 };
 
 const removeBtnStyle = {
@@ -329,6 +348,7 @@ const removeBtnStyle = {
   border: "none",
   padding: "5px 10px",
   borderRadius: "4px",
+  cursor: "pointer",
 };
 
 export default AkhtarPharmacyDashboard;
