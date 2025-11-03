@@ -1,0 +1,90 @@
+.reviews-section {
+  background-color: #f9f9f9;
+  padding: 40px 0; /* Reduced overall padding */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.section-heading {
+  font-size: 28px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.reviews-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.review-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+  max-width: 650px;
+  padding: 50px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.review-text {
+  font-size: 20px;
+  line-height: 1.7;
+  color: #333;
+  margin-bottom: 30px; /* gap to rating */
+}
+
+.review-rating {
+  font-size: 26px;
+  color: #fbc02d;
+  margin-bottom: 30px; /* gap to picture */
+}
+
+.review-image {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #007bff;
+  display: block;
+  margin: 0 auto 30px auto; /* center and add gap to name */
+}
+
+.review-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 30px;
+}
+
+.review-role {
+  font-size: 16px;
+  color: #777;
+  margin-bottom: 30px;
+}
+
+.review-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #ddd;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dot.active {
+  background-color: #007bff;
+}
+
+.dot:hover {
+  background-color: #999;
+}

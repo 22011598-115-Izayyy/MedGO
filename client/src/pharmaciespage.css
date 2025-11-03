@@ -1,0 +1,268 @@
+.pharmacies-section {
+  padding: 80px 0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
+}
+
+.pharmacies-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 50px;
+}
+
+.pharmacies-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.pharmacies-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #1a7f45;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pharmacies-subtitle {
+  font-size: 1.3rem;
+  color: #666;
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.pharmacies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 40px;
+  justify-items: center;
+}
+
+.pharmacy-card {
+  background: white;
+  border-radius: 25px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 420px;
+  border: 1px solid #f0f0f0;
+}
+
+.pharmacy-card:hover {
+  transform: translateY(-15px);
+  box-shadow: 0 25px 60px rgba(26, 127, 69, 0.15);
+  border-color: #1a7f45;
+}
+
+.pharmacy-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.pharmacy-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.pharmacy-card:hover .pharmacy-image img {
+  transform: scale(1.1);
+}
+
+.pharmacy-rating {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(26, 127, 69, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  backdrop-filter: blur(10px);
+}
+
+.rating-star {
+  color: #ffd700;
+  font-size: 1rem;
+}
+
+.pharmacy-content {
+  padding: 30px;
+}
+
+.pharmacy-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 20px 0;
+  line-height: 1.3;
+}
+
+.pharmacy-location,
+.pharmacy-delivery,
+.pharmacy-contact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  color: #666;
+  font-weight: 500;
+}
+
+.location-icon,
+.delivery-icon,
+.contact-icon {
+  font-size: 1.1rem;
+}
+
+.pharmacy-specialties {
+  margin: 20px 0;
+}
+
+.pharmacy-specialties h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 10px 0;
+}
+
+.specialties-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.specialty-tag {
+  background: linear-gradient(135deg, rgba(26, 127, 69, 0.1) 0%, rgba(26, 127, 69, 0.05) 100%);
+  color: #1a7f45;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid rgba(26, 127, 69, 0.2);
+}
+
+.pharmacy-visit-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #1a7f45 0%, #2d9c5a 100%);
+  color: white;
+  border: none;
+  padding: 15px 25px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+  box-shadow: 0 4px 15px rgba(26, 127, 69, 0.3);
+}
+
+.pharmacy-visit-btn:hover {
+  background: linear-gradient(135deg, #136c39 0%, #258a4d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(26, 127, 69, 0.4);
+}
+
+.visit-arrow {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.pharmacy-visit-btn:hover .visit-arrow {
+  transform: translateX(5px);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .pharmacies-container {
+    padding: 0 40px;
+  }
+  
+  .pharmacies-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+  }
+}
+
+@media (max-width: 968px) {
+  .pharmacies-section {
+    padding: 60px 0;
+  }
+  
+  .pharmacies-container {
+    padding: 0 30px;
+  }
+  
+  .pharmacies-title {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+  }
+  
+  .pharmacies-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .pharmacies-header {
+    margin-bottom: 40px;
+  }
+  
+  .pharmacies-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pharmacies-container {
+    padding: 0 20px;
+  }
+  
+  .pharmacies-title {
+    font-size: 2.2rem;
+  }
+  
+  .pharmacy-content {
+    padding: 25px;
+  }
+  
+  .pharmacy-name {
+    font-size: 1.3rem;
+  }
+  
+  .pharmacies-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .pharmacies-section {
+    padding: 40px 0;
+  }
+  
+  .pharmacies-title {
+    font-size: 1.8rem;
+  }
+  
+  .pharmacies-subtitle {
+    font-size: 1rem;
+  }
+  
+  .pharmacy-content {
+    padding: 20px;
+  }
+  
+  .pharmacy-image {
+    height: 180px;
+  }
+}

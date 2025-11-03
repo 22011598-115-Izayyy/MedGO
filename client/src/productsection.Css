@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.product-section {
+  padding: 40px 20px;
+  background-color: #ffffff;
+  font-family: 'Inter', sans-serif;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.product-card {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.product-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.product-info {
+  flex: 1;
+}
+
+.product-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111111;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.pharmacy-name {
+  font-size: 0.75rem;
+  color: #666666;
+  margin: 0;
+  font-weight: 400;
+}
+
+.heart-icon {
+  font-size: 1.1rem;
+  color: #999999;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.heart-icon:hover {
+  color: #ff4444;
+}
+
+.product-image {
+  text-align: center;
+  margin-bottom: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-image img {
+  max-width: 100%;
+  max-height: 140px;
+  object-fit: contain;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111111;
+}
+
+.shop-now-btn {
+  background: #ffffff;
+  border: 1px solid #d1d1d1;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #333333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shop-now-btn:hover {
+  background: #f5f5f5;
+  border-color: #999999;
+}
+
+.shop-icon {
+  font-size: 0.75rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .product-section {
+    padding: 20px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
