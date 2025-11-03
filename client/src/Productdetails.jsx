@@ -59,7 +59,7 @@ const ProductDetails = () => {
             </div>
 
             <button 
-              className={`add-to-cart-button ${isAddedToCart ? 'added' : ''}`}
+              className={`add-to-cart-button${isAddedToCart ? ' added' : ''}`}
               onClick={handleAddToCart}
             >
               {isAddedToCart ? '✓ Added' : 'Add to Cart'}

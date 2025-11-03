@@ -33,33 +33,18 @@ const AdminLogin = ({ setCurrentPage }) => {
 
       const userData = userSnap.data();
       const role = userData.role?.toLowerCase();
-      const pharmacyId = userData.pharmacyId?.toLowerCase();
-if (role === "super_admin") {
-  setCurrentPage("admin-dashboard");
-} 
-else if (role === "pharmacy_manager") {
-  switch (pharmacyId) {
-    case "ahad_pharmacy":
-      setCurrentPage("ahad-dashboard");
-      break;
-    case "akhtar_pharmacy":
-      setCurrentPage("akhtar-dashboard");
-      break;
-    case "hassan_pharmacy":
-      setCurrentPage("hassan-dashboard");
-      break;
-    default:
-      setError("Pharmacy ID not recognized.");
-      break;
-  }
-} 
-else {
-  setError("Unauthorized role or user type.");
-}
 
-
-
-      
+      // ✅ Step 3: Redirect based on role
+      if (role === "super_admin") {
+        setCurrentPage("admin-dashboard"); // Super Admin Dashboard
+      } 
+      else if (role === "pharmacy_manager") {
+        // ✅ Redirect to unified pharmacy dashboard
+        setCurrentPage("pharmacy-dashboard");
+      } 
+      else {
+        setError("Unauthorized role or user type.");
+      }
 
     } catch (err) {
       console.error("Login failed:", err);
