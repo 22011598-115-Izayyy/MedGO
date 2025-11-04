@@ -2,27 +2,27 @@ import React, { useEffect, useState } from "react";
 import { db } from "./firebase/config";
 import { collection, getDocs } from "firebase/firestore";
 import { useCart } from "./CartContext";
-import "./ahadstore.css"; // ✅ same CSS for styling
+import "./ahadstore.css";
 
-const PharmacyStore = ({ setCurrentPage, selectedPharmacy }) => {
+function PharmacyStore({ setCurrentPage, selectedPharmacy }) {
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch products dynamically based on selected pharmacy ID
   useEffect(() => {
     if (!selectedPharmacy?.id) return;
 
     const fetchProducts = async () => {
       try {
-        const productsRef = collection(db, `Pharmacies/${selectedPharmacy.id}/products`);
+        const productsRef = collection(
+          db,
+          `Pharmacies/${selectedPharmacy.id}/products`
+        );
         const querySnapshot = await getDocs(productsRef);
-
         const fetchedProducts = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-
         console.log("Fetched Products:", fetchedProducts);
         setProducts(fetchedProducts);
       } catch (error) {
@@ -50,14 +50,12 @@ const PharmacyStore = ({ setCurrentPage, selectedPharmacy }) => {
 
   return (
     <div className="ahadstore-container">
-      {/* ✅ Back Button */}
       <div className="back-btn-container">
         <button className="back-btn" onClick={() => setCurrentPage("pharmacies")}>
           ← Back to Pharmacies
         </button>
       </div>
 
-      {/* ✅ Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
           <h1>{selectedPharmacy.name}</h1>
@@ -83,7 +81,6 @@ const PharmacyStore = ({ setCurrentPage, selectedPharmacy }) => {
         </div>
       </section>
 
-      {/* ✅ About Section */}
       <section className="about-section">
         <h2>About {selectedPharmacy.name}</h2>
         <p>
@@ -100,9 +97,8 @@ const PharmacyStore = ({ setCurrentPage, selectedPharmacy }) => {
         </div>
       </section>
 
-      {/* ✅ Products Section */}
       <section className="products-section">
-        <h2>Our Products</h2>
+        <h2>Our Top Products</h2>
 
         {loading ? (
           <p className="loading-text">Loading medicines...</p>
@@ -112,12 +108,24 @@ const PharmacyStore = ({ setCurrentPage, selectedPharmacy }) => {
           <div className="products-grid">
             {products.map((p) => (
               <div key={p.id} className="product-card">
-                <img
-                  src={`https://placehold.co/300x200/1a7f45/ffffff?text=${encodeURIComponent(
-                    p.productName || "Medicine"
-                  )}`}
-                  alt={p.productName || "Medicine"}
-                />
+                <div
+                  className="product-placeholder"
+                  style={{
+                    width: "100%",
+                    height: "180px",
+                    backgroundColor: "#f1f1f1",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "8px",
+                    color: "#1a7f45",
+                    fontWeight: "600",
+                    fontSize: "1.2rem",
+                  }}
+                >
+                  {p.productName || "Medicine"}
+                </div>
+
                 <h3>{p.productName || "Unnamed Product"}</h3>
                 <p>{p.description || "No description available."}</p>
                 <p className="price">Rs. {p.price ?? "N/A"}</p>
@@ -135,6 +143,6 @@ const PharmacyStore = ({ setCurrentPage, selectedPharmacy }) => {
       </section>
     </div>
   );
-};
+}
 
 export default PharmacyStore;

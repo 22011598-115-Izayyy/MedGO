@@ -133,7 +133,7 @@ const TopSellingMedicines = ({ setCurrentPage }) => {
                 <div className="product-sales">{product.sales}</div>
                 
                 <div className="product-footer">
-                  <div className="product-price">${product.price.toFixed(2)}</div>
+                  <div className="product-price">PKR {product.price.toFixed(2)}</div>
                   <button 
                     className="add-to-cart-btn"
                     onClick={() => handleAddToCart(product)}

@@ -10,8 +10,10 @@ import {
   doc,
   query,
   where,
+  setDoc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import "./PharmacyDashboard.css";
 
 const PharmacyDashboard = ({ setCurrentPage }) => {
   const [products, setProducts] = useState([]);
@@ -21,10 +23,14 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   const [userId, setUserId] = useState(null);
   const [pharmacyId, setPharmacyId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [masterMedicines, setMasterMedicines] = useState([]);
+  const [selectedMedicines, setSelectedMedicines] = useState([]);
+  const [showSelectModal, setShowSelectModal] = useState(false);
 
   const [productData, setProductData] = useState({
     productName: "",
-    category: "Tablet",
+    category: "Pain Killer",
+    type: "Tablet",
     description: "",
     price: "",
     stock: "",
@@ -48,7 +54,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     return () => unsubscribe();
   }, []);
 
-  // ✅ Step 1: Get user's pharmacyId from users collection
+  // ✅ Get user's pharmacyId from users collection
   const fetchUserPharmacyInfo = async (uid) => {
     try {
       const userDocRef = doc(db, "users", uid);
@@ -69,12 +75,11 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     }
   };
 
-  // ✅ Step 2: Fetch pharmacy name and its products
+  // ✅ Fetch pharmacy name and its products
   const fetchPharmacyInfo = async (pharmacyId) => {
     try {
       if (!pharmacyId) return;
 
-      // Find pharmacy by its pharmacyId field (not document ID)
       const pharmacyQuery = query(
         collection(db, "Pharmacies"),
         where("pharmacyId", "==", pharmacyId)
@@ -86,7 +91,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
         const pharmacyDocId = snapshot.docs[0].id;
         setPharmacyName(pharmacyData.name || "Pharmacy Dashboard");
 
-        // Fetch that pharmacy's products
         const productsSnap = await getDocs(
           collection(db, "Pharmacies", pharmacyDocId, "products")
         );
@@ -96,6 +100,87 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
       }
     } catch (error) {
       console.error("Error fetching pharmacy data:", error);
+    }
+  };
+
+  // ✅ Fetch master medicines when modal opens
+  const fetchMasterMedicines = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "masterMedicines"));
+      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setMasterMedicines(data);
+    } catch (error) {
+      console.error("Error fetching master medicines:", error);
+    }
+  };
+
+  // ✅ Toggle selection
+  const toggleMedicine = (id) => {
+    setSelectedMedicines((prev) =>
+      prev.includes(id) ? prev.filter((med) => med !== id) : [...prev, id]
+    );
+  };
+
+  // ✅ Add selected medicines to this pharmacy’s products (No Duplicates)
+  const handleAddSelected = async () => {
+    try {
+      const pharmacyQuery = query(
+        collection(db, "Pharmacies"),
+        where("pharmacyId", "==", pharmacyId)
+      );
+      const snapshot = await getDocs(pharmacyQuery);
+
+      if (snapshot.empty) return alert("Pharmacy not found in Firestore!");
+
+      const pharmacyDocId = snapshot.docs[0].id;
+      const pharmacyProductsRef = collection(db, "Pharmacies", pharmacyDocId, "products");
+
+      const existingProductsSnap = await getDocs(pharmacyProductsRef);
+      const existingProductNames = existingProductsSnap.docs.map(
+        (doc) => doc.data().productName?.toLowerCase()
+      );
+
+      let addedCount = 0;
+      for (const medId of selectedMedicines) {
+        const medicine = masterMedicines.find((m) => m.id === medId);
+        const productName =
+          (medicine.name || medicine.productName || "").toLowerCase();
+
+        // 🛑 Skip duplicates
+        if (existingProductNames.includes(productName)) {
+          console.log(`Skipped duplicate: ${productName}`);
+          continue;
+        }
+
+        const expiry =
+          medicine["expiry date"] || medicine.expiryDate || "N/A";
+
+        const productData = {
+          productName: medicine.name || medicine.productName || "",
+          category: medicine.category || "Pain Killer",
+          type: medicine.type || "Tablet",
+          price: medicine.price || 0,
+          stock: medicine.stock || 0,
+          expiryDate: expiry,
+          status: "Active",
+          description: medicine.description || "",
+        };
+
+        await setDoc(doc(pharmacyProductsRef, medId), productData);
+        addedCount++;
+      }
+
+      if (addedCount === 0) {
+        alert("No new medicines were added (duplicates skipped).");
+      } else {
+        alert(`${addedCount} medicines added successfully!`);
+      }
+
+      setShowSelectModal(false);
+      setSelectedMedicines([]);
+      fetchPharmacyInfo(pharmacyId);
+    } catch (error) {
+      console.error("Error adding selected medicines:", error);
     }
   };
 
@@ -110,7 +195,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     if (!pharmacyId) return alert("Pharmacy not found!");
 
     try {
-      // Get correct pharmacy document ID using pharmacyId
       const pharmacyQuery = query(
         collection(db, "Pharmacies"),
         where("pharmacyId", "==", pharmacyId)
@@ -133,16 +217,14 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
         await updateDoc(productRef, newProduct);
         alert("Product updated successfully!");
       } else {
-        await addDoc(
-          collection(db, "Pharmacies", pharmacyDocId, "products"),
-          newProduct
-        );
+        await addDoc(collection(db, "Pharmacies", pharmacyDocId, "products"), newProduct);
         alert("Product added successfully!");
       }
 
       setProductData({
         productName: "",
-        category: "Tablet",
+        category: "Pain Killer",
+        type: "Tablet",
         description: "",
         price: "",
         stock: "",
@@ -198,114 +280,66 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     return <p style={{ textAlign: "center", marginTop: "100px" }}>Loading...</p>;
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#f4f6f8" }}>
+    <div className="dashboard-container">
       {/* Sidebar */}
-      <div
-        style={{
-          width: "240px",
-          backgroundColor: "#1a7f45",
-          color: "white",
-          padding: "20px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-        }}
-      >
+      <div className="sidebar">
         <div>
-          <h2 style={{ textAlign: "center", marginBottom: "30px" }}>
-            {pharmacyName || "Pharmacy Dashboard"}
-          </h2>
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            <li style={{ marginBottom: "20px", cursor: "pointer", fontWeight: "bold" }}>
-              Dashboard
-            </li>
-            <li style={{ marginBottom: "20px", cursor: "pointer" }}>Medicines</li>
-            <li style={{ marginBottom: "20px", cursor: "pointer" }}>Orders</li>
+          <h2 className="sidebar-title">{pharmacyName || "Pharmacy Dashboard"}</h2>
+          <ul className="sidebar-menu">
+            <li>Dashboard</li>
+            <li>Medicines</li>
+            <li>Orders</li>
           </ul>
         </div>
-
-        <button
-          onClick={handleLogout}
-          style={{
-            backgroundColor: "#d32f2f",
-            color: "white",
-            border: "none",
-            padding: "12px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
-        >
+        <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
       </div>
 
       {/* Main Area */}
-      <div style={{ flex: 1, padding: "0px", display: "flex", flexDirection: "column" }}>
-        {/* Top Header */}
-        <div
-          style={{
-            backgroundColor: "#1a7f45",
-            color: "white",
-            padding: "20px 30px",
-            fontSize: "1.5rem",
-            fontWeight: "bold",
-            borderBottom: "3px solid #146f38",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-          }}
-        >
-          Welcome, {pharmacyName || "Pharmacy"} 👋
-        </div>
+      <div className="main-area">
+        <div className="header">Welcome, {pharmacyName || "Pharmacy"} 👋</div>
 
-        <div style={{ padding: "30px", flex: 1 }}>
-          <h2
-            style={{
-              color: "#1a7f45",
-              textAlign: "center",
-              marginBottom: "20px",
-              fontSize: "1.8rem",
-            }}
-          >
+        <div className="content-area">
+          <h2 className="dashboard-heading">
             {pharmacyName ? `${pharmacyName} Dashboard` : "Pharmacy Dashboard"}
           </h2>
 
-          <button
-            onClick={() => {
-              setFormVisible(!formVisible);
-              setEditProduct(null);
-              setProductData({
-                productName: "",
-                category: "Tablet",
-                description: "",
-                price: "",
-                stock: "",
-                expiryDate: "",
-                status: "Active",
-              });
-            }}
-            style={{
-              backgroundColor: "#1a7f45",
-              color: "white",
-              padding: "10px 20px",
-              border: "none",
-              borderRadius: "5px",
-              marginBottom: "20px",
-            }}
-          >
-            {formVisible ? "Close Form" : "Add Medicine"}
-          </button>
-
-          {formVisible && (
-            <form
-              onSubmit={handleSubmit}
-              style={{
-                backgroundColor: "white",
-                padding: "20px",
-                borderRadius: "10px",
-                marginBottom: "20px",
-                boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+          <div className="action-buttons">
+            <button
+              className="add-btn"
+              onClick={() => {
+                setFormVisible(!formVisible);
+                setEditProduct(null);
+                setProductData({
+                  productName: "",
+                  category: "Pain Killer",
+                  type: "Tablet",
+                  description: "",
+                  price: "",
+                  stock: "",
+                  expiryDate: "",
+                  status: "Active",
+                });
               }}
             >
+              {formVisible ? "Close Form" : "Add Medicine"}
+            </button>
+
+            <button
+              className="common-btn"
+              onClick={() => {
+                fetchMasterMedicines();
+                setShowSelectModal(true);
+              }}
+            >
+              Select Common Medicines
+            </button>
+          </div>
+
+          {/* Medicine Form */}
+          {formVisible && (
+            <form className="form" onSubmit={handleSubmit}>
               <input
                 type="text"
                 name="productName"
@@ -313,14 +347,31 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 value={productData.productName}
                 onChange={handleChange}
                 required
-                style={inputStyle}
+                className="input"
               />
 
+              {/* ✅ Category Dropdown */}
               <select
                 name="category"
                 value={productData.category}
                 onChange={handleChange}
-                style={inputStyle}
+                className="input"
+              >
+                <option>Pain Killer</option>
+                <option>Antibiotic</option>
+                <option>Fever Relief</option>
+                <option>Allergy</option>
+                <option>Digestive</option>
+                <option>Respiratory</option>
+                <option>Vitamin</option>
+              </select>
+
+              {/* ✅ Type Dropdown */}
+              <select
+                name="type"
+                value={productData.type}
+                onChange={handleChange}
+                className="input"
               >
                 <option>Tablet</option>
                 <option>Syrup</option>
@@ -333,7 +384,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 placeholder="Enter description"
                 value={productData.description}
                 onChange={handleChange}
-                style={inputStyle}
+                className="input"
               />
 
               <input
@@ -343,7 +394,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 value={productData.price}
                 onChange={handleChange}
                 required
-                style={inputStyle}
+                className="input"
               />
 
               <input
@@ -353,7 +404,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 value={productData.stock}
                 onChange={handleChange}
                 required
-                style={inputStyle}
+                className="input"
               />
 
               <input
@@ -362,86 +413,54 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 value={productData.expiryDate}
                 onChange={handleChange}
                 required
-                style={inputStyle}
+                className="input"
               />
 
-              <select
-                name="status"
-                value={productData.status}
-                onChange={handleChange}
-                style={inputStyle}
-              >
-                <option>Active</option>
-                <option>Inactive</option>
-              </select>
-
-              <button
-                type="submit"
-                style={{
-                  backgroundColor: "#1a7f45",
-                  color: "white",
-                  border: "none",
-                  padding: "10px 20px",
-                  borderRadius: "5px",
-                }}
-              >
+              <button type="submit" className="save-btn">
                 {editProduct ? "Update" : "Save"}
               </button>
             </form>
           )}
 
           {/* Product Table */}
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              backgroundColor: "white",
-              boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-            }}
-          >
+          <table className="product-table">
             <thead>
-              <tr style={{ backgroundColor: "#1a7f45", color: "white" }}>
-                <th style={thStyle}>Product</th>
-                <th style={thStyle}>Category</th>
-                <th style={thStyle}>Stock</th>
-                <th style={thStyle}>Price</th>
-                <th style={thStyle}>Status</th>
-                <th style={thStyle}>Actions</th>
+              <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th>Stock</th>
+                <th>Price</th>
+                <th>Expiry Date</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {products.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan="6"
-                    style={{ textAlign: "center", padding: "20px", color: "#777" }}
-                  >
+                  <td colSpan="7" className="no-products">
                     No products added yet.
                   </td>
                 </tr>
               ) : (
                 products.map((product) => (
-                  <tr key={product.id} style={{ borderBottom: "1px solid #ddd" }}>
-                    <td style={tdStyle}>{product.productName}</td>
-                    <td style={tdStyle}>{product.category}</td>
-                    <td style={tdStyle}>{product.stock}</td>
-                    <td style={tdStyle}>Rs. {product.price}</td>
-                    <td style={tdStyle}>
-                      <span
-                        style={{
-                          color: product.status === "Active" ? "green" : "red",
-                        }}
+                  <tr key={product.id}>
+                    <td>{product.productName}</td>
+                    <td>{product.category}</td>
+                    <td>{product.type}</td>
+                    <td>{product.stock}</td>
+                    <td>Rs. {product.price}</td>
+                    <td>{product.expiryDate || "N/A"}</td>
+                    <td>
+                      <button
+                        className="edit-btn"
+                        onClick={() => handleEdit(product)}
                       >
-                        {product.status}
-                      </span>
-                    </td>
-                    <td style={tdStyle}>
-                      <button onClick={() => handleEdit(product)} style={editBtnStyle}>
                         Edit
                       </button>
                       <button
+                        className="remove-btn"
                         onClick={() => handleDelete(product.id)}
-                        style={removeBtnStyle}
                       >
                         Remove
                       </button>
@@ -451,39 +470,42 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
               )}
             </tbody>
           </table>
+
+          {/* ✅ Select Common Medicines Modal */}
+          {showSelectModal && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <h2>Select Common Medicines</h2>
+                <div className="medicine-list">
+                  {masterMedicines.map((med) => (
+                    <label key={med.id}>
+                      <input
+                        type="checkbox"
+                        checked={selectedMedicines.includes(med.id)}
+                        onChange={() => toggleMedicine(med.id)}
+                      />{" "}
+                      {med.name || med.productName} — Rs. {med.price}
+                    </label>
+                  ))}
+                </div>
+                <div className="modal-actions">
+                  <button className="save-btn" onClick={handleAddSelected}>
+                    Add Selected
+                  </button>
+                  <button
+                    className="remove-btn"
+                    onClick={() => setShowSelectModal(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
-};
-
-// ✅ Styles
-const inputStyle = {
-  width: "100%",
-  padding: "8px",
-  margin: "8px 0",
-  borderRadius: "5px",
-  border: "1px solid #ccc",
-};
-
-const thStyle = { padding: "10px", textAlign: "left" };
-const tdStyle = { padding: "10px", textAlign: "left" };
-const editBtnStyle = {
-  backgroundColor: "#4CAF50",
-  color: "white",
-  border: "none",
-  padding: "5px 10px",
-  borderRadius: "4px",
-  marginRight: "5px",
-  cursor: "pointer",
-};
-const removeBtnStyle = {
-  backgroundColor: "#f44336",
-  color: "white",
-  border: "none",
-  padding: "5px 10px",
-  borderRadius: "4px",
-  cursor: "pointer",
 };
 
 export default PharmacyDashboard;

@@ -67,6 +67,30 @@ function Home({ onSearch, searchResults, searchTerm }) {
             )}
           </div>
         )}
+
+        {/* Show product cards if there are results */}
+        {searchResults.length > 0 && (
+          <div className="products-grid">
+            {searchResults.map((product) => (
+              <div className="product-card" key={product.id + product.pharmacyName}>
+                <img
+                  src={
+                    product.image ||
+                    `https://placehold.co/300x200/1a7f45/ffffff?text=${encodeURIComponent(
+                      product.productName || product.name || "Medicine"
+                    )}`
+                  }
+                  alt={product.productName || product.name || "Medicine"}
+                />
+                <div className="product-info">
+                  <h3>{product.productName || product.name || "Unnamed Product"}</h3>
+                  <p>{product.pharmacyName}</p>
+                  <p>PKR {product.price ?? "N/A"}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="image-section">
