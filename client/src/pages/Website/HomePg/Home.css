@@ -1,0 +1,157 @@
+/* MAIN HERO SECTION */
+.home-container {
+  width: 100%;
+  min-height: 80vh;
+
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+
+  padding: 70px 80px;
+
+  background-position: right center;
+  background-repeat: no-repeat;
+  background-size: 50% auto;
+  background-color: #144530;
+
+  position: relative;
+  overflow: hidden;
+}
+
+/* LEFT TEXT AREA */
+.left-content {
+  width: 50%;
+  max-width: 600px;
+  z-index: 10;
+  color: white;
+}
+
+/* HEADLINE */
+.main-heading {
+  font-size: 3.2rem;
+  font-weight: 900;
+  line-height: 1.1;
+  color: white;
+  margin-bottom: 20px;
+}
+
+/* SUB TEXT */
+.sub-heading {
+  font-size: 1.2rem;
+  color: #e4f7ec;
+  margin-bottom: 30px;
+}
+
+/* SEARCH BAR */
+.search-bar {
+  display: flex;
+  background: #fff;
+  padding: 10px;
+  border-radius: 50px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  max-width: 480px;
+  height: 60px;
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 14px 18px;
+  font-size: 1rem;
+  border-radius: 50px;
+  color: #144530;
+}
+
+.search-bar button {
+  background: #1a7f45;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+/* SEARCH INFO BOX */
+.search-results-info {
+  margin-top: 20px;
+  padding: 15px 20px;
+  background: #e9f7ef;
+  border-left: 4px solid #1a7f45;
+  border-radius: 10px;
+  max-width: 480px;
+  color: black;
+}
+
+/* PRODUCT GRID */
+.products-grid {
+  width: 100%;
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.product-card {
+  background: white;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.product-card img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.product-info {
+  padding: 10px 0;
+}
+
+/* FLOATING PILLS */
+.floating-pill {
+  position: absolute;
+  font-size: 2.2rem;
+  opacity: 0.8;
+  animation: floatUpDown 6s infinite ease-in-out;
+  z-index: 1;
+}
+
+/* INDIVIDUAL PILL POSITIONS */
+.pill1 { top: 10%; left: 60%; animation-delay: 0s; }
+.pill2 { top: 25%; left: 70%; animation-delay: 1s; }
+.pill3 { top: 40%; left: 55%; animation-delay: 1.5s; }
+.pill4 { top: 60%; left: 68%; animation-delay: 2s; }
+.pill5 { top: 75%; left: 58%; animation-delay: 2.5s; }
+.pill6 { top: 50%; left: 80%; animation-delay: 3s; }
+
+/* FLOAT ANIMATION */
+@keyframes floatUpDown {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(10deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .home-container {
+    flex-direction: column;
+    padding: 40px 20px;
+    background-position: center top;
+    background-size: cover;
+  }
+
+  .left-content {
+    width: 100%;
+    text-align: center;
+  }
+
+  .main-heading {
+    font-size: 2.5rem;
+  }
+
+  .floating-pill {
+    display: none;
+  }
+}

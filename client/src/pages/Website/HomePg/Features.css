@@ -1,0 +1,103 @@
+.features-section {
+  padding: 60px 0;
+  background: #f8ffff; /* light medical feel */
+  text-align: center;
+}
+
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #144530;
+  margin-bottom: 40px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  width: 80%;
+  margin: 0 auto;
+}
+
+.features-grid .item {
+  padding: 30px;
+  border-radius: 18px;
+
+  /* ⭐ Glassmorphism Effect */
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.687);
+  transition: 0.35s ease;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.features-grid .item:hover {
+  transform: translateY(-10px);
+
+  /* ⭐ Stronger Glass on Hover */
+  background:  #bbcfc6;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  box-shadow: 0 10px 30px rgba(10, 66, 31, 0.79);
+}
+
+
+
+.features-grid .icon {
+  font-size: 40px;
+  color: #144530;
+  margin-bottom: 15px;
+  transition: 0.3s;
+}
+
+.features-grid .item:hover .icon {
+  color: #0b7850;
+}
+
+.features-grid h4 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #144530;
+  font-weight: bold;
+}
+
+.features-grid p {
+  font-size: 15px;
+  color: #555;
+}
+
+.item {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.8s forwards;
+}
+
+.item:nth-child(1) { animation-delay: 0.1s; }
+.item:nth-child(2) { animation-delay: 0.2s; }
+.item:nth-child(3) { animation-delay: 0.3s; }
+.item:nth-child(4) { animation-delay: 0.4s; }
+.item:nth-child(5) { animation-delay: 0.5s; }
+.item:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,130 @@
+.reviews-section {
+  padding: 90px 0;
+  background: #f8ffff; /* light medical feel */
+  text-align: center;
+}
+
+/* Heading */
+.section-heading {
+  font-size: 38px;
+  color: #1A7F45;
+  font-weight: 800;
+  margin-bottom: 40px;
+  letter-spacing: -0.5px;
+  font-family: "Poppins", sans-serif;
+  padding-bottom: 5rem;
+}
+
+/* Carousel */
+.carousel-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 35px;
+}
+
+/* Shared card styles */
+.review-card {
+  width: 350px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  padding: 40px 30px;
+  border-radius: 22px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+  transition: 0.3s ease;
+  text-align: center;
+}
+
+/* Center card (big) */
+.big-card {
+  transform: scale(1.1);
+  z-index: 3;
+}
+
+/* Side cards */
+.small-card {
+  opacity: 0.85;
+  transform: scale(0.9);
+}
+
+/* Images */
+.review-img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid #144530;
+  margin-top: -80px;
+}
+
+/* Smaller side images */
+.small-img {
+  width: 90px;
+  height: 90px;
+  margin-top: -60px;
+}
+
+/* Text styling */
+.review-name {
+  font-size: 22px;
+  color: #144530;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+.review-role {
+  font-size: 15px;
+  color: #0b7850;
+  margin-bottom: 10px;
+}
+
+.review-rating {
+  font-size: 20px;
+  color: #f7b500;
+  margin-bottom: 20px;
+}
+
+.review-text {
+  font-size: 15px;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Arrows */
+.arrow-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 25px;
+  gap: 20px;
+}
+
+.arrow-btn {
+  font-size: 26px;
+  background: #144530;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.arrow-btn:hover {
+  background: #0b7850;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .carousel-container {
+    flex-direction: column;
+  }
+
+  .big-card {
+    transform: scale(1);
+  }
+
+  .small-card {
+    display: none;
+  }
+}

@@ -1,22 +1,22 @@
 import { useState } from "react";
 import "./App.css";
-import Navbar from "./navbar";
-import Home from "./Home";
-import Reviews from "./Reviews";
-import TopSellingMedicines from "./TopSellingMedicines";
-import HomeProduct, { allProducts } from "./homeproduct";
-import Footer from "./Footer";
-import PharmaciesPage from "./pharmaciespage";
-import PharmacyStore from "./ahadstore"; // ✅ Dynamic version (replaces AhadStore)
-import Checkout from "./Checkout";
-import Chatbot from "./Chatbot";
-import { CartProvider, useCart } from "./CartContext";
-import AdminLogin from "./adminlogin";
-import SuperAdminDashboard from "./SuperAdminDashboard";
-import PharmacyDashboard from "./PharmacyDashboard";
-import AllProductsPage from "./AllProductsPage"; // ✅ Import AllProductsPage
+import Navbar from "./Components/navbar";
+import Home from "./pages/Website/HomePg/Home";
+import Reviews from "./pages/Website/HomePg/Reviews";
+import TopSellingMedicines from "./pages/Website/HomePg/TopSellingMedicines";
+import HomeProduct, { allProducts } from "./pages/Website/HomePg/homeproduct";
+import Footer from "./Components/Footer";
+import PharmaciesPage from "./pages/Website/PharmaciesPg/pharmaciespage";
+import PharmacyStore from "./pages/Website/PharmaciesPg/StoreDetails"; 
+import Checkout from "./pages/Order/Checkout";
+import Chatbot from "./Components/Chatbot";
+import { CartProvider, useCart } from "./Components/CartContext";
+import AdminLogin from "./pages/Admin/adminlogin";
+import SuperAdminDashboard from "./pages/Admin/SuperAdminDashboard";
+import PharmacyDashboard from "./pages/Admin/PharmacyDashboard";
+import AllProductsPage from "./pages/Website/ProductPg/AllProductsPage"; 
 
-// ✅ Simplified Cart Component
+// Simple Cart Component
 const SimpleCart = ({ setShowCheckout }) => {
   const { cart, removeFromCart, getCartTotal } = useCart();
 
@@ -109,7 +109,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState("home");
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [selectedPharmacy, setSelectedPharmacy] = useState(null); // ✅ Dynamic pharmacy selection
+  const [selectedPharmacy, setSelectedPharmacy] = useState(null);
 
   const handleSearch = (term) => {
     setSearchTerm(term);
@@ -128,10 +128,13 @@ function App() {
   const isDashboard =
     currentPage === "admin-dashboard" || currentPage === "pharmacy-dashboard";
 
+  // ✅ Hide Navbar & Footer only on LOGIN page
+  const isLoginPage = currentPage === "admin";
+
   return (
     <CartProvider>
       <div>
-        {!isDashboard && (
+        {!isDashboard && !isLoginPage && (
           <Navbar
             showCart={showCart}
             setShowCart={setShowCart}
@@ -140,7 +143,7 @@ function App() {
           />
         )}
 
-        {/* ✅ Page Routing */}
+        {/* Page Routing */}
         {showCheckout ? (
           <Checkout
             setShowCart={setShowCart}
@@ -151,12 +154,12 @@ function App() {
         ) : currentPage === "pharmacies" ? (
           <PharmaciesPage
             setCurrentPage={setCurrentPage}
-            setSelectedPharmacy={setSelectedPharmacy} // ✅ Pass selected pharmacy setter
+            setSelectedPharmacy={setSelectedPharmacy}
           />
         ) : currentPage === "store" ? (
           <PharmacyStore
             setCurrentPage={setCurrentPage}
-            selectedPharmacy={selectedPharmacy} // ✅ Pass selected pharmacy data
+            selectedPharmacy={selectedPharmacy}
           />
         ) : currentPage === "products" ? (
           <AllProductsPage />
@@ -178,7 +181,8 @@ function App() {
           </>
         )}
 
-        {!isDashboard && <Footer />}
+        {!isDashboard && !isLoginPage && <Footer />}
+
         <Chatbot />
       </div>
     </CartProvider>
