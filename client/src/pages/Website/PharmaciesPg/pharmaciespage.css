@@ -1,39 +1,72 @@
-/* ---------- FULL PAGE ---------- */
+/* ---------- FULL PAGE BACKGROUND ---------- */
 .pharmacies-section {
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background-color: #F8FAFC;
+  /* subtle pattern for premium feel */
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(26, 127, 69, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(11, 40, 30, 0.05) 0px, transparent 50%);
   min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  padding-bottom: 80px;
 }
 
-/* ---------- FULL-WIDTH GREEN HERO ---------- */
+/* ---------- HERO SECTION ---------- */
 .pharmacies-hero {
   width: 100%;
-  background: #144530;
-  padding: 70px 0;
+  /* Deep Luxury Green Gradient */
+  background: linear-gradient(170deg, #0B281E 0%, #103F2D 50%, #1A5D42 100%);
+  padding: 100px 0 160px; /* Extra padding bottom for card overlap */
   text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+/* Abstract shapes in hero background */
+.pharmacies-hero::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -10%;
+  width: 50%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%);
+  transform: rotate(-15deg);
+  pointer-events: none;
 }
 
 .pharmacies-title {
-  font-size: 3rem;
+  font-size: 3.5rem;
   font-weight: 800;
   color: #ffffff;
-  margin-bottom: 10px;
-  font-family: "Poppins", sans-serif;
+  margin-bottom: 16px;
+  letter-spacing: -1px;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .pharmacies-subtitle {
-  font-size: 1.25rem;
-  font-weight: 400;
-  color: #e0f5e9;
-}
-
-/* ---------- CONTENT CONTAINER ---------- */
-.pharmacies-container {
-  max-width: 1400px;
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: #D1FAE5;
+  max-width: 600px;
   margin: 0 auto;
-  padding: 60px 50px;
+  position: relative;
+  z-index: 2;
+  opacity: 0.9;
 }
 
-/* ---------- GRID ---------- */
+/* ---------- CONTAINER (Floating Effect) ---------- */
+.pharmacies-container {
+  max-width: 1280px;
+  /* Pulls the cards up to overlap the hero */
+  margin: -80px auto 0;
+  padding: 0 30px;
+  position: relative;
+  z-index: 10;
+}
+
 .pharmacies-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
@@ -41,73 +74,157 @@
   justify-items: center;
 }
 
-/* ---------- PHARMACY CARD ---------- */
+/* ---------- PREMIUM CARD DESIGN ---------- */
 .pharmacy-card {
-  background: #fff;
-  border-radius: 25px;
+  background: #ffffff;
+  border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  max-width: 420px;
-  border: 1px solid #eee;
+  width: 100%;
+  max-width: 400px;
+  /* Multi-layer shadow for depth */
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0,0,0,0.02);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
+/* Hover Lift Effect */
 .pharmacy-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 25px 60px rgba(26, 127, 69, 0.15);
-  border-color: #1a7f45;
+  transform: translateY(-12px);
+  box-shadow: 0 30px 60px -12px rgba(20, 69, 48, 0.25);
+  border-color: rgba(26, 127, 69, 0.1);
 }
 
-/* ---------- IMAGE ---------- */
+/* ---------- CARD HEADER / IMAGE AREA ---------- */
 .pharmacy-image {
   position: relative;
-  height: 220px;
+  height: 220px; /* Reduced slightly for balance */
   overflow: hidden;
+  /* Fallback gradient if no image is present - Stylish Cover Art */
+  background: linear-gradient(135deg, #1A7F45 0%, #14532d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Add a pattern overlay to the green block to make it less "dull" */
+.pharmacy-image::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.5;
 }
 
 .pharmacy-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
+  transition: transform 0.6s ease;
+  position: relative;
+  z-index: 1;
 }
 
 .pharmacy-card:hover .pharmacy-image img {
-  transform: scale(1.08);
+  transform: scale(1.1);
 }
 
-/* ---------- CONTENT ---------- */
+/* ---------- CONTENT AREA ---------- */
 .pharmacy-content {
-  padding: 25px 30px 35px;
+  padding: 30px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  position: relative;
 }
 
+/* If you have the name in the header, you might want to hide this or make it smaller.
+   Currently styling it as a primary title. */
 .pharmacy-name {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #222;
-  margin: 0 0 15px 0;
+  color: #111827;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.5px;
+}
+
+/* Styling the Contact Details (Address, Phone, Email) */
+/* Assuming these are in <p> tags or similar inside content */
+.pharmacy-content p, 
+.pharmacy-meta {
+  font-size: 0.95rem;
+  color: #4B5563;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.5;
+}
+
+/* Icons/Emoji styling if used */
+.pharmacy-content p svg,
+.pharmacy-content i {
+  color: #1A7F45; /* Green icons */
+  font-size: 1.1rem;
+  flex-shrink: 0;
 }
 
 /* ---------- BUTTON ---------- */
 .pharmacy-visit-btn {
   width: 100%;
-  background: linear-gradient(135deg, #1a7f45 0%, #2d9c5a 100%);
+  background: linear-gradient(135deg, #1A7F45 0%, #166534 100%);
   color: white;
   border: none;
-  padding: 14px 25px;
-  border-radius: 40px;
+  padding: 16px;
+  border-radius: 14px;
   cursor: pointer;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin-top: 25px;
-  box-shadow: 0 4px 15px rgba(26, 127, 69, 0.3);
+  margin-top: 25px; /* Push to bottom */
+  box-shadow: 0 4px 15px rgba(22, 101, 52, 0.3);
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .pharmacy-visit-btn:hover {
-  background: linear-gradient(135deg, #136c39 0%, #258a4d 100%);
+  background: linear-gradient(135deg, #166534 0%, #14532d 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(26, 127, 69, 0.4);
+  box-shadow: 0 8px 25px rgba(22, 101, 52, 0.45);
+}
+
+/* Shiny effect on button hover */
+.pharmacy-visit-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+  transform: skewX(-25deg);
+  transition: 0.5s;
+}
+
+.pharmacy-visit-btn:hover::after {
+  left: 150%;
+  transition: 0.7s ease-in-out;
 }
 
 /* ---------- RESPONSIVE ---------- */
@@ -116,6 +233,7 @@
     font-size: 2.5rem;
   }
   .pharmacies-container {
-    padding: 40px 20px;
+    margin-top: -40px; /* Less overlap on mobile */
+    padding: 0 20px;
   }
 }
