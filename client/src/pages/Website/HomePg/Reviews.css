@@ -1,130 +1,204 @@
+/* =========================================
+   MEDGO REVIEWS SECTION (PREMIUM REDESIGN)
+   ========================================= */
+
 .reviews-section {
-  padding: 90px 0;
-  background: #f8ffff; /* light medical feel */
+  padding: 100px 0;
+  /* Seamless transition: MedGo Light Mint -> White */
+  background: linear-gradient(180deg, #f8ffff 0%, #ffffff 100%);
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative background blur (Green Tint) */
+.reviews-section::after {
+  content: '';
+  position: absolute;
+  bottom: -50px;
+  left: -50px;
+  width: 300px;
+  height: 300px;
+  background: rgba(11, 120, 80, 0.08); /* Brand Green Tint */
+  border-radius: 50%;
+  filter: blur(60px);
+  z-index: 0;
 }
 
 /* Heading */
 .section-heading {
+  position: relative;
+  z-index: 1;
   font-size: 38px;
-  color: #1A7F45;
+  color: #144530; /* Brand Dark Green */
   font-weight: 800;
-  margin-bottom: 40px;
+  margin-bottom: 80px;
   letter-spacing: -0.5px;
   font-family: "Poppins", sans-serif;
-  padding-bottom: 5rem;
 }
 
-/* Carousel */
+/* Carousel Container */
 .carousel-container {
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 35px;
+  gap: 40px;
+  padding: 0 20px;
 }
 
-/* Shared card styles */
+/* --- SHARED CARD STYLES --- */
 .review-card {
-  width: 350px;
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  padding: 40px 30px;
-  border-radius: 22px;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
-  transition: 0.3s ease;
+  width: 380px;
+  background: rgba(255, 255, 255, 0.65); /* Glassy background */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 0 30px 40px 30px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 6px -1px rgba(20, 69, 48, 0.05); /* Subtle green shadow */
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: center;
+  position: relative;
+  margin-top: 0; 
 }
 
-/* Center card (big) */
+/* --- ACTIVE (CENTER) CARD --- */
 .big-card {
   transform: scale(1.1);
-  z-index: 3;
+  background: #ffffff;
+  border-color: #0b7850; /* Brand Green Border */
+  /* The "MedGo Glow" - Green Variation */
+  box-shadow: 0 20px 40px -5px rgba(11, 120, 80, 0.15), 
+              0 8px 10px -6px rgba(11, 120, 80, 0.1);
+  z-index: 10;
+  opacity: 1;
 }
 
-/* Side cards */
+/* --- SIDE CARDS (INACTIVE) --- */
 .small-card {
-  opacity: 0.85;
+  opacity: 0.6;
   transform: scale(0.9);
+  filter: blur(1px);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.5);
 }
 
-/* Images */
+.small-card:hover {
+  opacity: 0.9;
+  filter: blur(0px);
+  transform: scale(0.95);
+}
+
+/* --- AVATAR IMAGES --- */
 .review-img {
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   object-fit: cover;
   border-radius: 50%;
-  border: 4px solid #144530;
-  margin-top: -80px;
+  background: #fff;
+  
+  /* Pop-out effect */
+  margin-top: -50px; 
+  margin-bottom: 15px;
+  
+  /* White ring to separate from background */
+  border: 4px solid #ffffff; 
+  box-shadow: 0 4px 10px rgba(20, 69, 48, 0.15);
+  transition: transform 0.3s ease;
 }
 
-/* Smaller side images */
-.small-img {
-  width: 90px;
-  height: 90px;
+.big-card .review-img {
+  width: 120px;
+  height: 120px;
   margin-top: -60px;
+  border-color: #e6fcf5; /* Very light mint ring */
 }
 
-/* Text styling */
+/* --- TEXT STYLING --- */
 .review-name {
   font-size: 22px;
-  color: #144530;
+  color: #144530; /* Brand Dark Green */
   font-weight: 700;
-  margin-top: 10px;
+  margin-bottom: 4px;
 }
 
 .review-role {
-  font-size: 15px;
-  color: #0b7850;
-  margin-bottom: 10px;
+  font-size: 13px;
+  color: #0b7850; /* Brand Bright Green */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 15px;
 }
 
 .review-rating {
-  font-size: 20px;
-  color: #f7b500;
-  margin-bottom: 20px;
+  font-size: 16px;
+  color: #f7b500; /* Original Gold */
+  margin-bottom: 15px;
+  letter-spacing: 2px;
 }
 
 .review-text {
   font-size: 15px;
-  color: #333;
-  line-height: 1.6;
+  color: #334155; /* Slate 700 for better readability than pure black */
+  line-height: 1.7;
+  font-style: italic;
 }
 
-/* Arrows */
+/* --- NAVIGATION ARROWS --- */
 .arrow-buttons {
   display: flex;
   justify-content: center;
-  margin-top: 25px;
+  margin-top: 50px;
   gap: 20px;
+  position: relative;
+  z-index: 2;
 }
 
 .arrow-btn {
-  font-size: 26px;
-  background: #144530;
-  color: white;
-  border: none;
-  padding: 12px 20px;
+  width: 50px;
+  height: 50px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #144530; /* Dark Green Text */
+  border: 1px solid #e2e8f0;
   border-radius: 50%;
   cursor: pointer;
-  transition: 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .arrow-btn:hover {
-  background: #0b7850;
+  background: #0b7850; /* Bright Green Hover */
+  color: white;
+  border-color: #0b7850;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 15px -3px rgba(11, 120, 80, 0.3);
 }
 
-/* Responsive */
+/* --- RESPONSIVE --- */
 @media (max-width: 900px) {
   .carousel-container {
     flex-direction: column;
+    gap: 20px;
+  }
+
+  .review-card {
+    width: 90%;
+    margin-top: 60px;
   }
 
   .big-card {
     transform: scale(1);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
   }
 
   .small-card {
-    display: none;
+    display: none; 
   }
 }
