@@ -1,0 +1,232 @@
+/* ==========================================
+   GLOBAL FONT
+========================================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+
+.section-container {
+  max-width: 1300px; /* ⭐ increased so 4 cards fit perfectly */
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ==========================================
+   QUALITY SECTION
+========================================== */
+.quality-section {
+  padding: 120px 0;
+  background: #ffffff;
+  text-align: center;
+}
+
+.quality-header h2 {
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: #144530;
+}
+
+.quality-header p {
+  font-size: 1.1rem;
+  opacity: 0.8;
+  color: #355d45;
+}
+
+.quality-grid {
+  margin-top: 50px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: nowrap; /* prevents wrapping */
+}
+
+
+/* ==========================================
+   GLASS CARD STYLE
+========================================== */
+.quality-step {
+  width: 270px;   /* ↓ smaller width so 4 fit in 1 row */
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: blur(15px);
+  padding: 30px 22px;
+  border-radius: 26px;
+  border: 1px solid rgba(255,255,255,0.35);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+  transition: 0.3s ease;
+  text-align: left;
+}
+
+
+.quality-step:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 25px 45px rgba(34,197,94,0.18);
+  background: rgba(255,255,255,0.65);
+}
+
+/* ==========================================
+   IMAGE INSIDE CARD
+========================================== */
+.quality-icon {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 18px;
+  margin-bottom: 18px;
+}
+
+
+/* Text */
+.quality-step h3 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #15803d;
+  margin-bottom: 8px;
+}
+
+.quality-step p {
+  color: #264b39;
+  opacity: 0.85;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+/* ==========================================
+   DIVIDER CURVE
+========================================== */
+.section-divider {
+  width: 100%;
+  height: 80px;
+  background: #e8f7ef;
+  margin-top: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.section-divider::after {
+  content: "";
+  position: absolute;
+  top: -50px;
+  width: 100%;
+  height: 120px;
+  background: white;
+  border-bottom-left-radius: 50% 40%;
+  border-bottom-right-radius: 50% 40%;
+}
+
+/* ==========================================
+   HEALTHCARE GAP SECTION
+========================================== */
+.gap-section {
+  padding: 100px 0;
+  background: #fff;
+}
+
+.gap-container {
+  max-width: 1300px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;  /* ⭐ keeps left & right balanced */
+  align-items: center;
+  gap: 60px;
+  padding: 0 20px;
+  flex-wrap: nowrap; 
+}
+/* LEFT TEXT SECTION */
+.gap-content {
+  flex: 1;
+  min-width: 320px;
+  max-width: 520px;   /* ⭐ reduce text width */
+}
+
+
+
+.story-badge {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.gap-title {
+  font-size: 3rem;
+  font-weight: 900;
+  color: #144530;
+  margin-bottom: 25px;
+ 
+}
+
+.story-block p {
+  color: #2b5d47;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 20px;
+  text-align: justify;
+}
+
+.highlight-p {
+  font-size: 1.3rem;
+  color: #1e293b;
+}
+
+.red-text {
+  color: #ef4444;
+  font-weight: 800;
+}
+
+/* RIGHT IMAGE SECTION */
+/* RIGHT IMAGE SECTION */
+.gap-image-wrapper {
+  flex: 1.2;
+  min-width: 380px;
+  height: 460px;
+  position: relative;             /* ⭐ required for circles + card */
+  display: flex;                  /* ⭐ centers the glass card */
+  align-items: center;
+  justify-content: center;
+  border-radius: 40px;
+  background: linear-gradient(135deg, #e0f2fe, #f0fdf4); /* ⭐ brings image area back */
+  overflow: hidden;               /* prevents overflow issues */
+}
+
+
+.abstract-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: #144530;
+}
+
+.c1 { width: 300px; height: 300px; opacity: 0.03; top: -50px; right: -50px; }
+.c2 { width: 150px; height: 150px; opacity: 0.05; bottom: 50px; left: 50px; }
+
+.glass-card {
+  background: rgba(255,255,255,0.85);
+  padding: 20px 30px;
+  border-radius: 20px;
+  position: absolute;
+  bottom: 40px;
+  display: flex;
+  gap: 15px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+}
+
+.check-icon {
+  background: #22c55e;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+}
+@media (max-width: 1100px) {
+  .gap-container {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .gap-image-wrapper {
+    margin-top: 40px;
+  }
+}

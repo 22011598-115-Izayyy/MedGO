@@ -42,24 +42,28 @@
   margin-bottom: 60px;
   position: relative;
   z-index: 2;
+  color: #144530;
 }
 
 .section-title {
   font-size: 2.8rem;
   font-weight: 800;
-  color: #1a7f45;
+  color: #144530;
   margin-bottom: 20px;
   text-shadow: 0 2px 4px rgba(26, 127, 69, 0.1);
 }
 
 .section-subtitle {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   color: #666;
-  margin: 0;
   line-height: 1.6;
-  
-  margin: 0 auto;
+
+  /* FULL WIDTH */
+  max-width: 100%;
+  text-align: center;  
 }
+
+
 
 .products-grid {
   display: grid;
@@ -287,6 +291,18 @@
   animation: float 8s ease-in-out infinite reverse;
   z-index: 1;
 }
+
+/* ----- TOP SELLING SECTION OVERRIDES ----- */
+
+.top-selling-section .section-title {
+  color: #144530 !important;   /* Deep MedGo Green */
+}
+
+.top-selling-section .section-subtitle {
+  color: #444 !important;       /* Dark gray, or choose white if you want */
+}
+
+
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }

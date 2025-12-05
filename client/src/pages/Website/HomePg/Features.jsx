@@ -6,7 +6,11 @@ function Features() {
   return (
     <div className="features-section">
       <h2 className="section-title">Why Med-Go Is Your Smarter Healthcare Partner?</h2>
-
+<p className="section-subtitle">
+            Healthcare is complex; we make it invisible. MedGo doesn't just deliver medicine;
+            we orchestrate a sophisticated,<br></br> hyper-local network that connects your needs 
+            to trusted inventories in milliseconds.
+          </p>
       <div className="features-grid">
         <div className="item">
           <FaBriefcaseMedical className="icon" />

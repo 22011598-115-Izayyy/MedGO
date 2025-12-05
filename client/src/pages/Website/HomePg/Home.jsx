@@ -7,6 +7,7 @@ import hero from "../../../assets/hero.png";
 // COMPONENTS
 import Features from "./Features";
 import CategoriesSection from "./CategoriesSection";
+import Ecosystem from "./Ecosystem";   // ✅ Added
 
 // FIREBASE
 import { db } from "../../../firebase/config";
@@ -153,9 +154,12 @@ function Home({ onSearch, searchResults, searchTerm }) {
 
       {/* ---------------- CATEGORY SECTION ---------------- */}
       <CategoriesSection />
-
-      {/* ---------------- FEATURES SECTION ---------------- */}
+{/* ---------------- FEATURES SECTION ---------------- */}
       <Features />
+      {/* ---------------- ECOSYSTEM SECTION (Added) ---------------- */}
+      <Ecosystem />   {/* ✅ Added */}
+
+      
     </>
   );
 }

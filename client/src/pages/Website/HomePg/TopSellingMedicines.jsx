@@ -66,8 +66,7 @@ const TopSellingMedicines = ({ setCurrentPage }) => {
           <h2 className="section-title">Most Ordered Medicines on Med-Go</h2>
           <p className="section-subtitle">
             Shop our most popular medicines, chosen by customers for their
-            effectiveness and trusted results. <br />
-            Every product is authentic, pharmacy-verified, and delivered
+            effectiveness and trusted results. Every product is authentic, pharmacy-verified, and delivered
             quickly to your home.
           </p>
         </div>

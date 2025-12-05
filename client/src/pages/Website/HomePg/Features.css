@@ -5,7 +5,7 @@
 .features-section {
   padding: 100px 0; /* More breathing room = Premium feel */
   /* Subtle gradient from Slate to Light Teal */
-  background: linear-gradient(180deg, #f8fafc 0%, #e0f2fe 100%);
+  background: linear-gradient(180deg, #bdcec8 0%, #1a2c21 100%);
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -23,6 +23,7 @@
   border-radius: 50%;
   filter: blur(80px);
   z-index: 0;
+  
 }
 
 .section-title {
@@ -30,18 +31,19 @@
   z-index: 1;
   font-size: 36px; /* Slightly larger */
   font-weight: 800;
-  /* Dark Slate for text, not pure black */
-  color: #1e293b; 
+  color: #144530;
+
   margin-bottom: 15px;
   letter-spacing: -0.5px;
 }
+
 
 .section-subtitle {
   position: relative;
   z-index: 1;
   font-size: 16px;
-  color: #64748b; /* Muted text */
-  margin-bottom: 60px;
+  color: #ffffff;
+  margin-bottom: 90px;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
@@ -124,6 +126,14 @@
   font-size: 15px;
   color: #64748b; /* Slate 500 */
   line-height: 1.6;
+}
+/* Force correct colors ONLY inside Features Section */
+.features-section .section-title {
+  color: #144530 !important;   /* Deep MedGo Green */
+}
+
+.features-section .section-subtitle {
+  color: #444 !important;   /* White Subtitle */
 }
 
 /* --- ANIMATIONS --- */
