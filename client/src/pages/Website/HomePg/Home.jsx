@@ -8,12 +8,56 @@ import hero from "../../../assets/hero.png";
 import Features from "./Features";
 import CategoriesSection from "./CategoriesSection";
 
+// FIREBASE
+import { db } from "../../../firebase/config";
+import { collection, getDocs } from "firebase/firestore";
+
 function Home({ onSearch, searchResults, searchTerm }) {
   const [localSearchTerm, setLocalSearchTerm] = useState("");
+  const [localResults, setLocalResults] = useState([]);
 
+  // 🔥 NEW: Home-page Firebase search (App.jsx remains unchanged)
+  const performFirebaseSearch = async (query) => {
+    if (!query.trim()) {
+      setLocalResults([]);
+      return;
+    }
+
+    let allProducts = [];
+
+    const pharmaciesSnap = await getDocs(collection(db, "Pharmacies"));
+
+    for (const pharmacyDoc of pharmaciesSnap.docs) {
+      const pharmacyId = pharmacyDoc.id;
+      const pharmacy = pharmacyDoc.data();
+
+      const productsSnap = await getDocs(
+        collection(db, `Pharmacies/${pharmacyId}/products`)
+      );
+
+      productsSnap.forEach((prodDoc) => {
+        allProducts.push({
+          id: prodDoc.id,
+          ...prodDoc.data(),
+          pharmacyName: pharmacy.name,
+        });
+      });
+    }
+
+    // Filter
+    const filtered = allProducts.filter((product) =>
+      (product.productName || "")
+        .toLowerCase()
+        .includes(query.toLowerCase())
+    );
+
+    setLocalResults(filtered);
+  };
+
+  // Search handler for Home page only
   const handleSearch = (e) => {
     e.preventDefault();
-    if (localSearchTerm.trim()) onSearch(localSearchTerm.trim());
+    performFirebaseSearch(localSearchTerm);
   };
 
   return (
@@ -51,27 +95,27 @@ function Home({ onSearch, searchResults, searchTerm }) {
               value={localSearchTerm}
               onChange={(e) => {
                 setLocalSearchTerm(e.target.value);
-                onSearch(e.target.value);
+                performFirebaseSearch(e.target.value);
               }}
             />
             <button type="submit">🔍</button>
           </form>
 
           {/* SEARCH RESULTS INFO */}
-          {searchTerm && (
+          {localSearchTerm && (
             <div className="search-results-info">
               <p>
-                {searchResults.length > 0
-                  ? `Found ${searchResults.length} result(s) for "${searchTerm}"`
-                  : `No results found for "${searchTerm}"`}
+                {localResults.length > 0
+                  ? `Found ${localResults.length} result(s) for "${localSearchTerm}"`
+                  : `No results found for "${localSearchTerm}"`}
               </p>
 
-              {searchResults.length === 0 && (
+              {localResults.length === 0 && (
                 <button
                   className="clear-search-btn"
                   onClick={() => {
                     setLocalSearchTerm("");
-                    onSearch("");
+                    setLocalResults([]);
                   }}
                 >
                   Show All Products
@@ -82,17 +126,23 @@ function Home({ onSearch, searchResults, searchTerm }) {
         </div>
       </div>
 
-      {/* -------------------------------------------------------- */}
-      {/* 🔥 FIX: SEARCH RESULTS MOVED OUT OF HERO (CLUTTER SOLVED) */}
-      {/* -------------------------------------------------------- */}
-
-      {searchResults.length > 0 && (
+      {/* ---------------- SEARCH RESULTS BELOW HERO ---------------- */}
+      {localResults.length > 0 && (
         <div className="products-grid">
-          {searchResults.map((product, index) => (
-            <div className="product-card" key={index}>
-              <img src={product.image} alt={product.name} />
+          {localResults.map((product) => (
+            <div className="product-card" key={product.id}>
+              <img
+                src={
+                  product.image ||
+                  `https://placehold.co/300x200/1a7f45/ffffff?text=${encodeURIComponent(
+                    product.productName
+                  )}`
+                }
+                alt={product.productName}
+              />
+
               <div className="product-info">
-                <h3>{product.name}</h3>
+                <h3>{product.productName}</h3>
                 <p>{product.pharmacyName}</p>
                 <p>PKR {product.price}</p>
               </div>

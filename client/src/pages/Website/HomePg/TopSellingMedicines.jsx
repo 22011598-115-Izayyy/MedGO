@@ -1,93 +1,62 @@
-import React from 'react';
-import { useCart } from '../../../Components/CartContext';
-import './TopSellingMedicines.css';
+import React, { useEffect, useState } from "react";
+import { useCart } from "../../../Components/CartContext";
+import { db } from "../../../firebase/config";
+import { collection, getDocs } from "firebase/firestore";
+import "./TopSellingMedicines.css";
 
 const TopSellingMedicines = ({ setCurrentPage }) => {
   const { addToCart } = useCart();
+  const [topSellingProducts, setTopSellingProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const topSellingProducts = [
-    {
-      id: 201,
-      name: "Paracetamol 500mg",
-      price: 8.99,
-      pharmacy: "City Central Pharmacy",
-      image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=200&fit=crop",
-      rating: 4.8,
-      sales: "2,340 sold"
-    },
-    
-    {
-      id: 203,
-      name: "Ibuprofen 400mg",
-      price: 10.75,
-      pharmacy: "MediCure Store",
-      image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=200&fit=crop",
-      rating: 4.6,
-      sales: "1,675 sold"
-    },
-    {
-      id: 204,
-      name: "Cough Syrup",
-      price: 15.25,
-      pharmacy: "City Central Pharmacy",
-      image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=300&h=200&fit=crop",
-      rating: 4.5,
-      sales: "1,532 sold"
-    },
-    {
-      id: 205,
-      name: "Multivitamin Tablets",
-      price: 18.99,
-      pharmacy: "HealthCare Plus",
-      image: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=300&h=200&fit=crop",
-      rating: 4.9,
-      sales: "1,423 sold"
-    },
-    {
-      id: 206,
-      name: "Aspirin 100mg",
-      price: 7.50,
-      pharmacy: "MediCure Store",
-      image: "https://images.unsplash.com/photo-1585435557343-3b092031d8fe?w=300&h=200&fit=crop",
-      rating: 4.4,
-      sales: "1,298 sold"
-    },
-    {
-      id: 207,
-      name: "Antibiotic Cream",
-      price: 22.99,
-      pharmacy: "City Central Pharmacy",
-      image: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=300&h=200&fit=crop",
-      rating: 4.6,
-      sales: "1,156 sold"
-    },
-    {
-      id: 208,
-      name: "Calcium Tablets",
-      price: 14.75,
-      pharmacy: "HealthCare Plus",
-      image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=300&h=200&fit=crop",
-      rating: 4.3,
-      sales: "1,087 sold"
-    },
-    {
-      id: 209,
-      name: "Iron Supplements",
-      price: 16.50,
-      pharmacy: "MediCure Store",
-      image: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=300&h=200&fit=crop",
-      rating: 4.5,
-      sales: "945 sold"
-    }
-  ];
+  // 🔥 Fetch all medicines from all pharmacies
+  useEffect(() => {
+    const fetchAllMedicines = async () => {
+      try {
+        const pharmaciesSnapshot = await getDocs(collection(db, "Pharmacies"));
+
+        let allMedicines = [];
+
+        for (const pharmacyDoc of pharmaciesSnapshot.docs) {
+          const pharmacyId = pharmacyDoc.id;
+
+          // path: Pharmacies/{id}/products
+          const productsRef = collection(
+            db,
+            "Pharmacies",
+            pharmacyId,
+            "products"
+          );
+
+          const productsSnapshot = await getDocs(productsRef);
+
+          const products = productsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            pharmacyName: pharmacyDoc.data().name,
+            ...doc.data(),
+          }));
+
+          allMedicines = [...allMedicines, ...products];
+        }
+
+        setTopSellingProducts(allMedicines);
+      } catch (error) {
+        console.error("Error fetching medicines:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllMedicines();
+  }, []);
 
   const handleAddToCart = (product) => {
     addToCart(product);
-    alert(`${product.name} added to cart!`);
+    alert(`${product.productName} added to cart!`);
   };
 
   const handleViewAllProducts = () => {
-    setCurrentPage('products');
+    setCurrentPage("products");
   };
 
   return (
@@ -95,48 +64,77 @@ const TopSellingMedicines = ({ setCurrentPage }) => {
       <div className="top-selling-container">
         <div className="section-header">
           <h2 className="section-title">Most Ordered Medicines on Med-Go</h2>
-          <p className="section-subtitle">Shop our most popular medicines, chosen by customers for their effectiveness and trusted results.<br></br>Every product is authentic, pharmacy-verified, and delivered quickly to your home.</p>
+          <p className="section-subtitle">
+            Shop our most popular medicines, chosen by customers for their
+            effectiveness and trusted results. <br />
+            Every product is authentic, pharmacy-verified, and delivered
+            quickly to your home.
+          </p>
         </div>
 
         <div className="products-grid">
-          {topSellingProducts.map(product => (
-            <div key={product.id} className="product-card">
-              <div className="product-image">
-                <img 
-                  src={product.image} 
-                  alt={product.name}
-                  onError={(e) => {
-                    e.target.src = `https://via.placeholder.com/300x200/1a7f45/white?text=${encodeURIComponent(product.name)}`;
-                  }}
-                />
-                <div className="bestseller-badge">
-                  <span className="badge-icon">🏆</span>
-                  <span className="badge-text">Bestseller</span>
+          {loading ? (
+            <p
+              style={{ textAlign: "center", fontSize: "1.2rem", color: "#666" }}
+            >
+              Loading medicines...
+            </p>
+          ) : topSellingProducts.length === 0 ? (
+            <p
+              style={{ textAlign: "center", fontSize: "1.2rem", color: "#666" }}
+            >
+              No medicines found.
+            </p>
+          ) : (
+            topSellingProducts.map((product) => (
+              <div key={product.id} className="product-card">
+                <div className="product-image">
+                  <img
+                    src={`https://placehold.co/400x200/1a7f45/ffffff?text=${encodeURIComponent(
+                      product.productName
+                    )}`}
+                    alt={product.productName}
+                  />
+
+                  <div className="bestseller-badge">
+                    <span className="badge-icon">🏆</span>
+                    <span className="badge-text">Bestseller</span>
+                  </div>
+
+                  <div className="product-rating">
+                    <span className="stars">★★★★★</span>
+                    <span className="rating-number">(4.5)</span>
+                  </div>
                 </div>
-                <div className="product-rating">
-                  <span className="stars">★★★★★</span>
-                  <span className="rating-number">({product.rating})</span>
+
+                <div className="product-info">
+                  <h3 className="product-name">{product.productName}</h3>
+
+                  <p className="product-pharmacy">
+                    By {product.pharmacyName || "Unknown Pharmacy"}
+                  </p>
+
+                  <div className="product-sales">
+                    {product.category || "General Medicine"}
+                  </div>
+
+                  <div className="product-footer">
+                    <div className="product-price">
+                      PKR {Number(product.price).toFixed(2)}
+                    </div>
+
+                    <button
+                      className="add-to-cart-btn"
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      <span className="cart-icon">🛒</span>
+                      <span>Add to Cart</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-              
-              <div className="product-info">
-                <h3 className="product-name">{product.name}</h3>
-                <p className="product-pharmacy">By {product.pharmacy}</p>
-                <div className="product-sales">{product.sales}</div>
-                
-                <div className="product-footer">
-                  <div className="product-price">PKR {product.price.toFixed(2)}</div>
-                  <button 
-                    className="add-to-cart-btn"
-                    onClick={() => handleAddToCart(product)}
-                  >
-                    <span className="cart-icon">🛒</span>
-                    <span>Add to Cart</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         <div className="view-all-section">
