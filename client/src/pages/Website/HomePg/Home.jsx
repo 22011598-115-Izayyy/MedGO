@@ -66,7 +66,6 @@ function Home({ onSearch, searchResults, searchTerm }) {
                   : `No results found for "${searchTerm}"`}
               </p>
 
-              {/* CLEAR BUTTON IF NO RESULTS */}
               {searchResults.length === 0 && (
                 <button
                   className="clear-search-btn"
@@ -81,25 +80,28 @@ function Home({ onSearch, searchResults, searchTerm }) {
             </div>
           )}
         </div>
-
-        {/* SEARCH RESULTS GRID */}
-        {searchResults.length > 0 && (
-          <div className="products-grid">
-            {searchResults.map((product, index) => (
-              <div className="product-card" key={index}>
-                <img src={product.image} alt={product.name} />
-                <div className="product-info">
-                  <h3>{product.name}</h3>
-                  <p>{product.pharmacyName}</p>
-                  <p>PKR {product.price}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* ---------------- CATEGORY SECTION BELOW HERO ---------------- */}
+      {/* -------------------------------------------------------- */}
+      {/* 🔥 FIX: SEARCH RESULTS MOVED OUT OF HERO (CLUTTER SOLVED) */}
+      {/* -------------------------------------------------------- */}
+
+      {searchResults.length > 0 && (
+        <div className="products-grid">
+          {searchResults.map((product, index) => (
+            <div className="product-card" key={index}>
+              <img src={product.image} alt={product.name} />
+              <div className="product-info">
+                <h3>{product.name}</h3>
+                <p>{product.pharmacyName}</p>
+                <p>PKR {product.price}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ---------------- CATEGORY SECTION ---------------- */}
       <CategoriesSection />
 
       {/* ---------------- FEATURES SECTION ---------------- */}
