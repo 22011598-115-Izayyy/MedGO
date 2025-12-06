@@ -4,6 +4,7 @@ import { AiOutlinePlus } from "react-icons/ai";
 import { FaPills } from "react-icons/fa";
 import { TbClipboardList } from "react-icons/tb";
 import PharmacyRiders from "./PharmacyRiders";
+import MedGoLOGO from "../../assets/MedGo LOGO.png";
 import React, { useState, useEffect } from "react";
 import { auth, db } from "../../firebase/config";
 import {
@@ -54,13 +55,10 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     status: "Active",
   });
 
-  // Page selection: dashboard / add / medicines / orders
+  // Page selection
   const [activePage, setActivePage] = useState("dashboard");
 
-  // Dashboard tab (only on dashboard)
-  const [dashboardTab, setDashboardTab] = useState("all"); // all, expired, outofstock, lowstock
-
-  // Orders count for dashboard stats
+  const [dashboardTab, setDashboardTab] = useState("all");
   const [ordersCount, setOrdersCount] = useState(0);
 
   // ==========================
@@ -81,7 +79,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   }, []);
 
   // ==========================
-  // Fetch user's pharmacyId from users collection
+  // Fetch user's pharmacyId
   // ==========================
   const fetchUserPharmacyInfo = async (uid) => {
     try {
@@ -97,23 +95,26 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
         setPharmacyName("Pharmacy Dashboard");
       }
     } catch (err) {
-      console.error("Error fetching user pharmacy info:", err);
+      console.error("Error fetching user info:", err);
     }
   };
 
   // ==========================
-  // Fetch pharmacy details + products
+  // Fetch pharmacy + products
   // ==========================
   const fetchPharmacyInfo = async (phId) => {
     try {
       if (!phId) return;
       const q = query(collection(db, "Pharmacies"), where("pharmacyId", "==", phId));
       const snap = await getDocs(q);
+
       if (!snap.empty) {
         const pharmacyDoc = snap.docs[0];
         setPharmacyName(pharmacyDoc.data().name || "Pharmacy Dashboard");
 
-        const productsSnap = await getDocs(collection(db, "Pharmacies", pharmacyDoc.id, "products"));
+        const productsSnap = await getDocs(
+          collection(db, "Pharmacies", pharmacyDoc.id, "products")
+        );
         setProducts(productsSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
       } else {
         setPharmacyName("Pharmacy Dashboard");
@@ -131,27 +132,24 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     try {
       if (!phId) return setOrdersCount(0);
 
-      // Try top-level "orders" collection
-      try {
-        const q1 = query(collection(db, "orders"), where("pharmacyId", "==", phId));
-        const snap1 = await getDocs(q1);
-        if (!snap1.empty) {
-          setOrdersCount(snap1.size);
-          return;
-        }
-      } catch (e) { /* ignore */ }
+      const q1 = query(collection(db, "orders"), where("pharmacyId", "==", phId));
+      const snap1 = await getDocs(q1);
+      if (!snap1.empty) {
+        setOrdersCount(snap1.size);
+        return;
+      }
 
-      // Try subcollection under Pharmacies
-      try {
-        const q2 = query(collection(db, "Pharmacies"), where("pharmacyId", "==", phId));
-        const snap = await getDocs(q2);
-        if (!snap.empty) {
-          const pharmacyDocId = snap.docs[0].id;
-          const ordersSnap = await getDocs(collection(db, "Pharmacies", pharmacyDocId, "orders"));
-          setOrdersCount(ordersSnap.size || 0);
-          return;
-        }
-      } catch (e) { /* ignore */ }
+      const q2 = query(collection(db, "Pharmacies"), where("pharmacyId", "==", phId));
+      const snap = await getDocs(q2);
+
+      if (!snap.empty) {
+        const pharmacyDocId = snap.docs[0].id;
+        const ordersSnap = await getDocs(
+          collection(db, "Pharmacies", pharmacyDocId, "orders")
+        );
+        setOrdersCount(ordersSnap.size || 0);
+        return;
+      }
 
       setOrdersCount(0);
     } catch (err) {
@@ -161,14 +159,14 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   };
 
   // ==========================
-  // Fetch master medicines
+  // Toggle Common Medicines
   // ==========================
   const fetchMasterMedicines = async () => {
     try {
       const snapshot = await getDocs(collection(db, "masterMedicines"));
       setMasterMedicines(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
     } catch (err) {
-      console.error("Error fetching master medicines:", err);
+      console.error("Error fetching master meds:", err);
     }
   };
 
@@ -179,21 +177,22 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   };
 
   // ==========================
-  // Add selected master medicines
+  // Add selected medicines
   // ==========================
   const handleAddSelected = async () => {
     try {
-      const q = query(collection(db, "Pharmacies"), where("pharmacyId", "==", pharmacyId));
+      const q = query(
+        collection(db, "Pharmacies"),
+        where("pharmacyId", "==", pharmacyId)
+      );
       const snap = await getDocs(q);
-      if (snap.empty) {
-        alert("Pharmacy not found!");
-        return;
-      }
-      const pharmacyDocId = snap.docs[0].id;
-      const pharmacyProductsRef = collection(db, "Pharmacies", pharmacyDocId, "products");
+      if (snap.empty) return alert("Pharmacy not found!");
 
-      const existingSnap = await getDocs(pharmacyProductsRef);
-      const existingNames = existingSnap.docs.map((d) =>
+      const pharmacyDocId = snap.docs[0].id;
+      const ref = collection(db, "Pharmacies", pharmacyDocId, "products");
+
+      const existingSnap = await getDocs(ref);
+      const existing = existingSnap.docs.map((d) =>
         (d.data().productName || "").toLowerCase()
       );
 
@@ -203,9 +202,9 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
         if (!med) continue;
 
         const name = (med.name || med.productName || "").toLowerCase();
-        if (existingNames.includes(name)) continue;
+        if (existing.includes(name)) continue;
 
-        const newMed = {
+        await setDoc(doc(ref, medId), {
           productName: med.name || med.productName || "",
           formula: med.formula || "",
           manufacturer: med.manufacturer || med.brand || "",
@@ -217,18 +216,17 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
           expiryDate: med.expiryDate || "N/A",
           description: med.description || "",
           status: "Active",
-        };
+        });
 
-        await setDoc(doc(pharmacyProductsRef, medId), newMed);
         added++;
       }
 
-      alert(`${added} medicine(s) added successfully.`);
+      alert(`${added} medicine(s) added.`);
       setShowSelectModal(false);
       setSelectedMedicines([]);
       fetchPharmacyInfo(pharmacyId);
     } catch (err) {
-      console.error("Error adding selected:", err);
+      console.error("Error adding:", err);
     }
   };
 
@@ -251,13 +249,12 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   };
 
   // ==========================
-  // Submit (Add or Update)
+  // Submit form
   // ==========================
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!pharmacyId) return alert("Pharmacy not found!");
 
-    // expiry validation: cannot be today or past
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -266,42 +263,40 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
       exp.setHours(0, 0, 0, 0);
 
       if (exp <= today) {
-        alert("Expiry date cannot be today or a past date.");
-        return;
+        return alert("Expiry date must be in future.");
       }
     } catch (err) {
-      console.error("Invalid expiry:", err);
       return alert("Invalid expiry date.");
     }
 
     try {
-      const q = query(collection(db, "Pharmacies"), where("pharmacyId", "==", pharmacyId));
+      const q = query(
+        collection(db, "Pharmacies"),
+        where("pharmacyId", "==", pharmacyId)
+      );
       const snap = await getDocs(q);
       if (snap.empty) return;
 
       const pharmacyDocId = snap.docs[0].id;
-      const productsRef = collection(db, "Pharmacies", pharmacyDocId, "products");
+      const ref = collection(db, "Pharmacies", pharmacyDocId, "products");
 
-      // duplicate check when adding new product
       if (!editProduct) {
-        const existingProductsSnap = await getDocs(productsRef);
-        const existingNames = existingProductsSnap.docs.map((d) =>
+        const existingSnap = await getDocs(ref);
+        const existing = existingSnap.docs.map((d) =>
           (d.data().productName || "").toLowerCase()
         );
 
-        if (existingNames.includes((productData.productName || "").toLowerCase())) {
-          alert("This medicine already exists in your inventory.");
-          return;
+        if (existing.includes(productData.productName.toLowerCase())) {
+          return alert("This medicine already exists.");
         }
 
-        await addDoc(productsRef, productData);
-        alert("Product added!");
+        await addDoc(ref, productData);
       } else {
-        await updateDoc(doc(productsRef, editProduct.id), productData);
-        alert("Product updated!");
+        await updateDoc(doc(ref, editProduct.id), productData);
       }
 
-      // reset form
+      alert(editProduct ? "Updated!" : "Added!");
+
       setProductData({
         productName: "",
         formula: "",
@@ -318,6 +313,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
 
       setDoseMode("dropdown");
       setEditProduct(null);
+
       fetchPharmacyInfo(pharmacyId);
       fetchOrdersCount(pharmacyId);
     } catch (err) {
@@ -330,7 +326,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   // ==========================
   const handleEdit = (product) => {
     setEditProduct(product);
-    // ensure manufacturer exists in product object for controlled inputs
     setProductData({
       productName: product.productName || "",
       formula: product.formula || "",
@@ -349,21 +344,23 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   };
 
   // ==========================
-  // Delete Product
+  // Delete product
   // ==========================
   const handleDelete = async (id) => {
     if (!pharmacyId) return;
-
     if (!window.confirm("Are you sure?")) return;
 
     try {
-      const q = query(collection(db, "Pharmacies"), where("pharmacyId", "==", pharmacyId));
+      const q = query(
+        collection(db, "Pharmacies"),
+        where("pharmacyId", "==", pharmacyId)
+      );
       const snap = await getDocs(q);
       if (snap.empty) return;
-      const pharmacyDocId = snap.docs[0].id;
 
+      const pharmacyDocId = snap.docs[0].id;
       await deleteDoc(doc(db, "Pharmacies", pharmacyDocId, "products", id));
-      alert("Deleted");
+      alert("Deleted!");
       fetchPharmacyInfo(pharmacyId);
     } catch (err) {
       console.error("Delete error:", err);
@@ -379,21 +376,18 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   };
 
   // ==========================
-  // Dashboard Filters / helpers
+  // Dashboard calculations
   // ==========================
   const computeOutOfStock = () =>
-    products.filter((p) => {
-      const s = Number(p.stock);
-      return !isNaN(s) && s <= 0;
-    }).length;
+    products.filter((p) => Number(p.stock) <= 0).length;
 
   const computeExpired = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
     return products.filter((p) => {
-      if (!p.expiryDate) return false;
       const d = new Date(p.expiryDate);
-      if (isNaN(d.getTime())) return false;
+      if (isNaN(d)) return false;
       d.setHours(0, 0, 0, 0);
       return d < today;
     }).length;
@@ -405,28 +399,15 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
 
     if (dashboardTab === "all") return products;
     if (dashboardTab === "expired")
-      return products.filter((p) => {
-        if (!p.expiryDate) return false;
-        const d = new Date(p.expiryDate);
-        if (isNaN(d.getTime())) return false;
-        d.setHours(0, 0, 0, 0);
-        return d < today;
-      });
+      return products.filter((p) => new Date(p.expiryDate) < today);
     if (dashboardTab === "outofstock")
-      return products.filter((p) => {
-        const s = Number(p.stock);
-        return !isNaN(s) && s <= 0;
-      });
+      return products.filter((p) => Number(p.stock) <= 0);
     if (dashboardTab === "lowstock")
-      return products.filter((p) => {
-        const s = Number(p.stock);
-        return !isNaN(s) && s > 0 && s <= 10;
-      });
+      return products.filter((p) => Number(p.stock) > 0 && Number(p.stock) <= 10);
 
     return products;
   };
 
-  
   // ==========================
   // RENDER
   // ==========================
@@ -434,83 +415,93 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     <div className="dashboard-container">
 
       {/* Sidebar */}
-<div className="sidebar">
-  
+      <div className="sidebar">
 
-  <ul className="sidebar-menu">
+        {/* Logo Circle */}
+        <div className="pharmacy-logo-circle">
+          <img src={MedGoLOGO} alt="MedGO Logo" />
+        </div>
 
-    <li
-      className={activePage === "dashboard" ? "active" : ""}
-      onClick={() => {
-        setActivePage("dashboard");
-        setEditProduct(null);
-      }}
-    >
-      <MdDashboard className="menu-icon" />
-      Dashboard
-    </li>
+        {/* Pharmacy Name */}
+        <h2 className="sidebar-title">
+          {pharmacyName || "Pharmacy"}
+        </h2>
 
-    <li
-      className={activePage === "add" ? "active" : ""}
-      onClick={() => {
-        setActivePage("add");
-        setEditProduct(null);
-        setProductData({
-          productName: "",
-          formula: "",
-          manufacturer: "",
-          dose: "",
-          category: "",
-          type: "",
-          description: "",
-          price: "",
-          stock: "",
-          expiryDate: "",
-          status: "Active",
-        });
-        setDoseMode("dropdown");
-      }}
-    >
-      <AiOutlinePlus className="menu-icon" />
-      Add Medicine
-    </li>
+        {/* Menu Buttons */}
+        <ul className="sidebar-menu">
 
-    <li
-      className={activePage === "medicines" ? "active" : ""}
-      onClick={() => {
-        setActivePage("medicines");
-        setEditProduct(null);
-      }}
-    >
-      <FaPills className="menu-icon" />
-      Medicines
-    </li>
+          <li
+            className={activePage === "dashboard" ? "active" : ""}
+            onClick={() => {
+              setActivePage("dashboard");
+              setEditProduct(null);
+            }}
+          >
+            <MdDashboard className="menu-icon" />
+            Dashboard
+          </li>
 
-    <li
-      className={activePage === "orders" ? "active" : ""}
-      onClick={() => {
-        setActivePage("orders");
-        setEditProduct(null);
-      }}
-    >
-      <TbClipboardList className="menu-icon" />
-      Orders
-    </li>
-    <li
-  className={activePage === "riders" ? "active" : ""}
-  onClick={() => setActivePage("riders")}
->
-  🚴 Riders
-</li>
+          <li
+            className={activePage === "add" ? "active" : ""}
+            onClick={() => {
+              setActivePage("add");
+              setEditProduct(null);
+              setProductData({
+                productName: "",
+                formula: "",
+                manufacturer: "",
+                dose: "",
+                category: "",
+                type: "",
+                description: "",
+                price: "",
+                stock: "",
+                expiryDate: "",
+                status: "Active",
+              });
+              setDoseMode("dropdown");
+            }}
+          >
+            <AiOutlinePlus className="menu-icon" />
+            Add Medicine
+          </li>
 
+          <li
+            className={activePage === "medicines" ? "active" : ""}
+            onClick={() => {
+              setActivePage("medicines");
+              setEditProduct(null);
+            }}
+          >
+            <FaPills className="menu-icon" />
+            Medicines
+          </li>
 
-  </ul>
+          <li
+            className={activePage === "orders" ? "active" : ""}
+            onClick={() => {
+              setActivePage("orders");
+              setEditProduct(null);
+            }}
+          >
+            <TbClipboardList className="menu-icon" />
+            Orders
+          </li>
 
-  <button className="logout-btn" onClick={handleLogout}>
-    Logout
-  </button>
-</div>
+          <li
+            className={activePage === "riders" ? "active" : ""}
+            onClick={() => setActivePage("riders")}
+          >
+            🚴 Riders
+          </li>
 
+        </ul>
+
+        {/* Logout at Bottom */}
+        <button className="logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
 
       {/* MAIN AREA */}
       <div className="main-area">
@@ -527,7 +518,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 {pharmacyName} Dashboard
               </h2>
 
-              {/* SUMMARY TABLE */}
               <table className="summary-table">
                 <thead>
                   <tr>
@@ -761,7 +751,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 </button>
               </div>
 
-              {/* PRODUCTS TABLE */}
               <table className="product-table">
                 <thead>
                   <tr>
@@ -812,7 +801,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 </tbody>
               </table>
 
-              {/* EDIT FORM BELOW TABLE */}
+              {/* EDIT FORM */}
               {editProduct && (
                 <div style={{ marginTop: 20 }}>
                   <h3>Edit Medicine</h3>
@@ -964,10 +953,11 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
               )}
             </div>
           )}
-{/* RIDERS PAGE */}
-{activePage === "riders" && (
-  <PharmacyRiders pharmacyId={pharmacyId} />
-)}
+
+          {/* RIDERS PAGE */}
+          {activePage === "riders" && (
+            <PharmacyRiders pharmacyId={pharmacyId} />
+          )}
 
           {/* ORDERS PAGE */}
           {activePage === "orders" && (
@@ -993,7 +983,8 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                         checked={selectedMedicines.includes(med.id)}
                         onChange={() => toggleMedicine(med.id)}
                       />
-                      {" "}{med.name || med.productName} — Rs. {med.price}
+                      {" "}
+                      {med.name || med.productName} — Rs. {med.price}
                     </label>
                   ))}
                 </div>
@@ -1035,8 +1026,9 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
             </div>
           )}
 
-                </div>
+        </div>
       </div>
+
     </div>
   );
 };

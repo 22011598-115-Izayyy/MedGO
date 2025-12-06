@@ -31,9 +31,20 @@ const AdminLogin = ({ setCurrentPage }) => {
 
       const role = snap.data().role?.toLowerCase();
 
-      if (role === "super_admin") setCurrentPage("admin-dashboard");
-      else if (role === "pharmacy_manager") setCurrentPage("pharmacy-dashboard");
-      else setError("Unauthorized role.");
+      // ⭐ ROLE-BASED REDIRECTS
+      if (role === "super_admin") {
+        setCurrentPage("admin-dashboard");
+      }
+      else if (role === "pharmacy_manager") {
+        setCurrentPage("pharmacy-dashboard");
+      }
+      else if (role === "rider") {
+        setCurrentPage("rider-dashboard");   // ⭐ NEWLY ADDED
+      }
+      else {
+        setError("Unauthorized role.");
+      }
+
     } catch {
       setError("Invalid email or password.");
     } finally {
@@ -48,18 +59,16 @@ const AdminLogin = ({ setCurrentPage }) => {
     >
       <div className="bg-overlay"></div>
 
-      {/* Pills */}
       <div className="bg-pill pill-top-left"></div>
       <div className="bg-pill pill-top-right"></div>
       <div className="bg-pill pill-bottom-left"></div>
       <div className="bg-pill pill-bottom-right"></div>
 
       <div className="glass-login-card">
-        <h2 className="admin-login-title">Admin Login</h2>
-        <p className="admin-login-subtitle">Access your pharmacy dashboard</p>
+        <h2 className="admin-login-title">Login</h2>
+        <p className="admin-login-subtitle">Access Your Dashboard</p>
 
         <form onSubmit={handleLogin}>
-          {/* EMAIL */}
           <div className="input-group">
             <label className="admin-form-label">Email Address</label>
             <input
@@ -72,7 +81,6 @@ const AdminLogin = ({ setCurrentPage }) => {
             />
           </div>
 
-          {/* PASSWORD */}
           <div className="input-group">
             <label className="admin-form-label">Password</label>
 
@@ -86,7 +94,6 @@ const AdminLogin = ({ setCurrentPage }) => {
                 required
               />
 
-              {/* Eye Icon */}
               <span
                 className="toggle-password"
                 onClick={() => setShowPassword(!showPassword)}

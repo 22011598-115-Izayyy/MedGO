@@ -7,14 +7,17 @@ import TopSellingMedicines from "./pages/Website/HomePg/TopSellingMedicines";
 import HomeProduct, { allProducts } from "./pages/Website/HomePg/homeproduct";
 import Footer from "./Components/Footer";
 import PharmaciesPage from "./pages/Website/PharmaciesPg/pharmaciespage";
-import PharmacyStore from "./pages/Website/PharmaciesPg/StoreDetails"; 
+import PharmacyStore from "./pages/Website/PharmaciesPg/StoreDetails";
 import Checkout from "./pages/Order/Checkout";
 import Chatbot from "./Components/Chatbot";
 import { CartProvider, useCart } from "./Components/CartContext";
 import AdminLogin from "./pages/Admin/adminlogin";
 import SuperAdminDashboard from "./pages/Admin/SuperAdminDashboard";
-import PharmacyDashboard from "./pages/Admin/PharmacyDashboard";
-import AllProductsPage from "./pages/Website/ProductPg/AllProductsPage"; 
+import PharmacyDashboard from "./pages/Pharmacy/PharmacyDashboard";
+import AllProductsPage from "./pages/Website/ProductPg/AllProductsPage";
+
+// ⭐ NEW IMPORT (only this is added)
+import RiderDashboard from "./pages/Rider/RiderDashboard";
 
 // Simple Cart Component
 const SimpleCart = ({ setShowCheckout }) => {
@@ -126,9 +129,10 @@ function App() {
   };
 
   const isDashboard =
-    currentPage === "admin-dashboard" || currentPage === "pharmacy-dashboard";
+    currentPage === "admin-dashboard" ||
+    currentPage === "pharmacy-dashboard" ||
+    currentPage === "rider-dashboard"; // ⭐ added here
 
-  // ✅ Hide Navbar & Footer only on LOGIN page
   const isLoginPage = currentPage === "admin";
 
   return (
@@ -169,6 +173,11 @@ function App() {
           <SuperAdminDashboard setCurrentPage={setCurrentPage} />
         ) : currentPage === "pharmacy-dashboard" ? (
           <PharmacyDashboard setCurrentPage={setCurrentPage} />
+
+        // ⭐ YOUR NEW RIDER ROUTE — Only this is added
+        ) : currentPage === "rider-dashboard" ? (
+          <RiderDashboard setCurrentPage={setCurrentPage} />
+
         ) : (
           <>
             <Home
