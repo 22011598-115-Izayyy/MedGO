@@ -1,23 +1,30 @@
+/* ===========================
+   MAIN LAYOUT
+=========================== */
 .dashboard-container {
   display: flex;
   min-height: 100vh;
   background-color: #f4f6f8;
 }
 
-/* Sidebar */
+/* ===========================
+   SIDEBAR
+=========================== */
 .sidebar {
   width: 240px;
-  background-color: #1a7f45;
+  background-color: #144530;
   color: white;
-  padding: 20px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
 .sidebar-title {
+  font-size: 1.4rem;
   text-align: center;
   margin-bottom: 30px;
+  font-weight: 700;
 }
 
 .sidebar-menu {
@@ -26,11 +33,22 @@
 }
 
 .sidebar-menu li {
-  margin-bottom: 20px;
+  padding: 12px 10px;
   cursor: pointer;
   font-weight: bold;
+  border-radius: 6px;
+  transition: 0.25s;
 }
 
+.sidebar-menu li:hover {
+  background-color: #166c39;
+}
+
+.sidebar-menu li.active {
+  background-color: #145e32;
+}
+
+/* Logout Button */
 .logout-btn {
   background-color: #d32f2f;
   color: white;
@@ -39,24 +57,34 @@
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
+  transition: 0.25s;
 }
 
-/* Main Area */
+.logout-btn:hover {
+  background-color: #b71c1c;
+}
+
+/* ===========================
+   MAIN AREA
+=========================== */
 .main-area {
   flex: 1;
-  padding: 0;
   display: flex;
   flex-direction: column;
+  margin-left: 240px; /* FIX: pushes content away from sidebar */
 }
 
+
+/* Header */
 .header {
-  background-color: #1a7f45;
+  background-color: #144530;
   color: white;
   padding: 20px 30px;
   font-size: 1.5rem;
   font-weight: bold;
   border-bottom: 3px solid #146f38;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  text-align: center;
 }
 
 .content-area {
@@ -64,72 +92,116 @@
   flex: 1;
 }
 
-.dashboard-heading {
-  color: #1a7f45;
+/* ===========================
+   SUMMARY TABLE (Dashboard)
+=========================== */
+.summary-table {
+  width: 85%;
+  max-width: 900px;
+  margin-top: 20px;
+  border-collapse: collapse;
+  background: transparent;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+
+.summary-table th {
+  padding: 12px 18px;
+  font-weight: 600;
+  text-align: left;
+  color: #c0392b;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.summary-table td {
+  padding: 16px 18px;
   text-align: center;
-  margin-bottom: 20px;
-  font-size: 1.8rem;
+  font-size: 20px;
+  color: #e84393;
 }
 
-/* Buttons */
-.action-buttons {
+/* ===========================
+   DASHBOARD TABS (RED BUTTONS)
+=========================== */
+.dashboard-tabs {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 14px;
+  margin-top: 22px;
+  margin-bottom: 14px;
 }
 
-.add-btn,
-.common-btn {
-  color: white;
+.tab-btn {
   padding: 10px 20px;
+  background-color: #d9534f;
   border: none;
-  border-radius: 5px;
+  color: white;
   cursor: pointer;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: 0.2s;
 }
 
-.add-btn {
-  background-color: #1a7f45;
+.tab-btn:hover {
+  background-color: #c9302c;
 }
 
-.common-btn {
-  background-color: #388e3c;
+.tab-btn.active {
+  background-color: #b52b27;
+  transform: scale(1.05);
 }
 
-/* Form */
+/* ===========================
+   FORM
+=========================== */
 .form {
   background-color: white;
-  padding: 20px;
+  padding: 22px;
   border-radius: 10px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 14px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.10);
 }
 
 .input {
   width: 100%;
-  padding: 8px;
-  margin: 8px 0;
-  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
   border: 1px solid #ccc;
+  font-size: 0.95rem;
 }
 
 .save-btn {
   background-color: #1a7f45;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 12px 20px;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: 600;
+  transition: 0.25s;
 }
 
-/* Table */
+.save-btn:hover {
+  background-color: #166c39;
+}
+
+/* ===========================
+   PRODUCT TABLES
+=========================== */
 .product-table {
   width: 100%;
   border-collapse: collapse;
   background-color: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
 }
 
-/* ✅ Table Header Styling (Green BG + White Text) */
+/* Table Header */
 .product-table thead tr {
   background-color: #1a7f45;
   color: white;
@@ -137,9 +209,9 @@
 
 .product-table th,
 .product-table td {
-  padding: 10px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+  padding: 12px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 0.92rem;
 }
 
 .no-products {
@@ -148,34 +220,46 @@
   color: #777;
 }
 
-/* Buttons inside table */
+/* Action Buttons */
 .edit-btn {
   background-color: #4caf50;
   color: white;
   border: none;
-  padding: 5px 10px;
+  padding: 6px 10px;
   border-radius: 4px;
-  margin-right: 5px;
   cursor: pointer;
+  font-size: 0.85rem;
+  margin-right: 6px;
+}
+
+.edit-btn:hover {
+  background-color: #3e8e41;
 }
 
 .remove-btn {
   background-color: #f44336;
   color: white;
   border: none;
-  padding: 5px 10px;
+  padding: 6px 10px;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 0.85rem;
 }
 
-/* Modal */
+.remove-btn:hover {
+  background-color: #d32f2f;
+}
+
+/* ===========================
+   MODAL
+=========================== */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0,0,0,0.50);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -183,11 +267,12 @@
 
 .modal-content {
   background: white;
-  padding: 20px;
+  padding: 22px;
   width: 500px;
   max-height: 80vh;
   overflow-y: auto;
-  border-radius: 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
 }
 
 .medicine-list {
@@ -206,3 +291,61 @@
   justify-content: space-between;
   margin-top: 20px;
 }
+
+.add-btn {
+  background-color: #1a7f45;
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.add-btn:hover {
+  background-color: #166c39;
+}
+
+/* ===========================
+   COMMON BUTTON
+=========================== */
+.common-btn {
+  background-color: #388e3c;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.common-btn:hover {
+  background-color: #2e7d32;
+}
+.menu-icon {
+  font-size: 1.2rem;
+  margin-right: 10px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Sidebar List Styling */
+.sidebar-menu li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: 0.25s;
+}
+
+.sidebar-menu li:hover {
+  background-color: #166c39;
+}
+
+.sidebar-menu li.active {
+  background-color: #145e32;
+}
+ 

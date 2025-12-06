@@ -7,23 +7,23 @@
 
 /* Sidebar */
 .sidebar {
-  width: 240px;
-  background-color: #1a7f45;
+  width: 260px;
+  background-color: #144530;
   color: white;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 28px 22px;
   position: fixed;
   height: 100vh;
   top: 0;
   left: 0;
-  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.25);
 }
 
 .sidebar-title {
-  font-size: 1.4rem;
+  font-size: 1.7rem;
   font-weight: 700;
-  margin-bottom: 25px;
+  margin-bottom: 40px;
   text-align: center;
 }
 
@@ -33,36 +33,82 @@
 }
 
 .sidebar li {
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 10px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.05rem;
+}
+
+.sidebar-icon {
+  font-size: 1.3rem;
 }
 
 .sidebar li:hover,
 .sidebar li.active {
-  background-color: #166b38;
+  background-color: #0f3624;
+  transform: translateX(6px);
+}
+
+/* Logout button */
+.logout-btn {
+  margin-top: auto;
+  background-color: #c62828;
+  color: white;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logout-btn:hover {
+  background-color: #a31919;
+  transform: translateX(6px);
 }
 
 /* Main content */
 .dashboard-content {
   flex: 1;
-  margin-left: 240px;
+  margin-left: 260px;
   padding: 40px;
 }
 
-h1 {
+.dashboard-header {
+  background-color: #144530;
+  color: white;
+  padding: 18px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 700;
   margin-bottom: 25px;
-  color: #1a7f45;
 }
 
-h2 {
-  color: #333;
-  margin-bottom: 15px;
+/* Add/Edit buttons */
+.add-btn {
+  background-color: #1a7f45;
+  color: white;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  font-weight: 600;
 }
 
-/* Table styles */
+.add-btn:hover {
+  background-color: #166534;
+}
+
+/* Table */
 .pharmacy-table {
   width: 100%;
   border-collapse: collapse;
@@ -90,7 +136,6 @@ h2 {
   border-radius: 8px;
   color: white;
   font-size: 0.9rem;
-  text-transform: capitalize;
 }
 
 .status-badge.active {
@@ -101,30 +146,29 @@ h2 {
   background-color: #ef4444;
 }
 
-/* Buttons */
+/* Action Buttons */
 .action-buttons {
   display: flex;
   align-items: center;
   gap: 8px;
-  white-space: nowrap;
 }
 
 .edit-btn,
 .toggle-btn,
 .delete-btn {
   border: none;
-  padding: 8px 12px;
+  padding: 7px 12px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
   color: white;
-  transition: transform 0.1s ease-in-out;
+  transition: transform 0.15s ease-in-out;
 }
 
 .edit-btn:hover,
 .toggle-btn:hover,
 .delete-btn:hover {
-  transform: scale(1.05);
+  transform: scale(1.06);
 }
 
 .edit-btn {
@@ -139,26 +183,20 @@ h2 {
   background-color: #ef4444;
 }
 
-/* Loading */
-.loading {
-  text-align: center;
-  font-size: 1.2rem;
-  color: #1a7f45;
-  margin-top: 100px;
-}
-/* Edit Form Section */
+/* Form Section */
 .edit-form {
   margin-top: 30px;
   background-color: #f0fdf4;
   border: 1px solid #d1fae5;
-  border-radius: 10px;
-  padding: 20px;
+  border-radius: 12px;
+  padding: 22px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .edit-form h3 {
   color: #1a7f45;
   margin-bottom: 15px;
+  font-weight: 700;
 }
 
 .form-group {
@@ -169,39 +207,22 @@ h2 {
 
 .form-group label {
   font-weight: 600;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   color: #333;
 }
 
-.form-group input,
-.form-group select {
+.form-group input {
   padding: 10px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 1rem;
 }
 
-.edit-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-
 .save-btn {
   background-color: #1a7f45;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.cancel-btn {
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  padding: 10px 20px;
+  padding: 12px 20px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
@@ -209,8 +230,4 @@ h2 {
 
 .save-btn:hover {
   background-color: #166534;
-}
-
-.cancel-btn:hover {
-  background-color: #b91c1c;
 }

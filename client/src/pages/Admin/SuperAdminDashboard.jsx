@@ -16,6 +16,10 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 
+import { FaUserShield, FaHospitalAlt, FaSignOutAlt } from "react-icons/fa";
+
+import "./SuperAdminDashboard.css";
+
 const SuperAdminDashboard = ({ setCurrentPage }) => {
   const [pharmacies, setPharmacies] = useState([]);
   const [users, setUsers] = useState([]);
@@ -44,22 +48,6 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
   const usersRef = collection(db, "users");
   const auth = getAuth();
 
-  // ✅ Fetch Pharmacies
-  const fetchPharmacies = async () => {
-    try {
-      const snapshot = await getDocs(pharmaciesRef);
-      setPharmacies(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-      );
-    } catch (err) {
-      console.error("Error fetching pharmacies:", err);
-    }
-  };
-
-  // ✅ Realtime Fetch Users
   useEffect(() => {
     const unsubscribe = onSnapshot(usersRef, (snapshot) => {
       const fetchedUsers = snapshot.docs.map((doc) => ({
@@ -73,7 +61,11 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
     return () => unsubscribe();
   }, []);
 
-  // ✅ Handle Input Changes
+  const fetchPharmacies = async () => {
+    const snapshot = await getDocs(pharmaciesRef);
+    setPharmacies(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+  };
+
   const handleChange = (e) => {
     setPharmacyData({ ...pharmacyData, [e.target.name]: e.target.value });
   };
@@ -82,202 +74,118 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
     setNewUser({ ...newUser, [e.target.name]: e.target.value });
   };
 
-  // ✅ Add or Edit Pharmacy
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      if (editPharmacy) {
-        const pharmacyRef = doc(db, "Pharmacies", editPharmacy.id);
-        await updateDoc(pharmacyRef, pharmacyData);
-        alert("Pharmacy updated successfully!");
-      } else {
-        await addDoc(pharmaciesRef, pharmacyData);
-        alert("Pharmacy added successfully!");
-      }
-
-      setPharmacyData({
-        pharmacyId: "",
-        name: "",
-        address: "",
-        email: "",
-        phone: "",
-        status: "Active",
-      });
-      setFormVisible(false);
-      setEditPharmacy(null);
-      fetchPharmacies();
-    } catch (err) {
-      console.error("Error saving pharmacy:", err);
+    if (editPharmacy) {
+      await updateDoc(doc(db, "Pharmacies", editPharmacy.id), pharmacyData);
+    } else {
+      await addDoc(pharmaciesRef, pharmacyData);
     }
+
+    setFormVisible(false);
+    setEditPharmacy(null);
+    fetchPharmacies();
   };
 
-  // ✅ Edit Pharmacy
   const handleEdit = (pharmacy) => {
     setEditPharmacy(pharmacy);
     setPharmacyData(pharmacy);
     setFormVisible(true);
   };
 
-  // ✅ Delete Pharmacy with Confirmation
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this pharmacy?"
-    );
-    if (!confirmDelete) return;
-
-    try {
-      await deleteDoc(doc(db, "Pharmacies", id));
-      alert("Pharmacy deleted!");
-      fetchPharmacies();
-    } catch (err) {
-      console.error("Error deleting pharmacy:", err);
-    }
+    if (!window.confirm("Delete this pharmacy?")) return;
+    await deleteDoc(doc(db, "Pharmacies", id));
+    fetchPharmacies();
   };
 
-  // ✅ Toggle Active/Inactive
   const handleToggleStatus = async (id, currentStatus) => {
-    try {
-      const pharmacyRef = doc(db, "Pharmacies", id);
-      const newStatus = currentStatus === "Active" ? "Inactive" : "Active";
-      await updateDoc(pharmacyRef, { status: newStatus });
-      fetchPharmacies();
-    } catch (err) {
-      console.error("Error toggling status:", err);
-    }
+    await updateDoc(doc(db, "Pharmacies", id), {
+      status: currentStatus === "Active" ? "Inactive" : "Active",
+    });
+    fetchPharmacies();
   };
 
-  // ✅ Add or Edit User
   const handleCreateUser = async (e) => {
     e.preventDefault();
-    const superAdminEmail = "medgo@gmail.com";
-    const superAdminPassword = "admin123";
 
-    try {
-      if (editUser) {
-        const userRef = doc(db, "users", editUser.id);
-        await updateDoc(userRef, newUser);
-        alert("User updated successfully!");
-      } else {
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          newUser.email,
-          newUser.password
-        );
-        const user = userCredential.user;
-        await setDoc(doc(db, "users", user.uid), {
-          email: newUser.email,
-          role: newUser.role,
-          pharmacyId: newUser.pharmacyId,
-        });
-        alert("✅ New pharmacy user created successfully!");
-        await signInWithEmailAndPassword(auth, superAdminEmail, superAdminPassword);
-      }
+    const adminEmail = "medgo@gmail.com";
+    const adminPass = "admin123";
 
-      setNewUser({ email: "", password: "", pharmacyId: "", role: "pharmacy_manager" });
-      setFormVisible(false);
-      setEditUser(null);
-    } catch (error) {
-      console.error("Error creating/updating user:", error);
-      alert("❌ " + error.message);
+    if (editUser) {
+      await updateDoc(doc(db, "users", editUser.id), newUser);
+    } else {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        newUser.email,
+        newUser.password
+      );
+
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        email: newUser.email,
+        pharmacyId: newUser.pharmacyId,
+        role: newUser.role,
+      });
+
+      await signInWithEmailAndPassword(auth, adminEmail, adminPass);
     }
+
+    setFormVisible(false);
+    setEditUser(null);
   };
 
-  // ✅ Edit User
   const handleEditUser = (user) => {
     setEditUser(user);
     setNewUser(user);
     setFormVisible(true);
   };
 
-  // ✅ Delete User
   const handleDeleteUser = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this user?");
-    if (!confirmDelete) return;
-
-    try {
-      await deleteDoc(doc(db, "users", id));
-      alert("User deleted!");
-    } catch (err) {
-      console.error("Error deleting user:", err);
-    }
+    if (!window.confirm("Delete this user?")) return;
+    await deleteDoc(doc(db, "users", id));
   };
 
-  // ✅ Logout
   const handleLogout = () => {
     setCurrentPage("admin");
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#f4f6f8" }}>
+    <div className="superadmin-dashboard">
       {/* Sidebar */}
-      <div
-        style={{
-          width: "240px",
-          backgroundColor: "#1a7f45",
-          color: "white",
-          padding: "20px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-        }}
-      >
-        <div>
-          <h2 style={{ textAlign: "center", marginBottom: "30px" }}>Super Admin</h2>
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            <li
-              style={menuItemStyle(selectedSection === "auth")}
-              onClick={() => setSelectedSection("auth")}
-            >
-              Authentication
-            </li>
-            <li
-              style={menuItemStyle(selectedSection === "pharmacies")}
-              onClick={() => setSelectedSection("pharmacies")}
-            >
-              Pharmacies
-            </li>
-            <li
-              style={menuItemStyle(selectedSection === "orders")}
-              onClick={() => setSelectedSection("orders")}
-            >
-              Orders
-            </li>
-            <li
-              style={menuItemStyle(selectedSection === "riders")}
-              onClick={() => setSelectedSection("riders")}
-            >
-              Riders
-            </li>
-          </ul>
-        </div>
+      <div className="sidebar">
+        
 
-        <button
-          onClick={handleLogout}
-          style={{
-            backgroundColor: "#d32f2f",
-            color: "white",
-            border: "none",
-            padding: "12px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
-        >
-          Logout
+        <ul>
+          <li
+            className={selectedSection === "auth" ? "active" : ""}
+            onClick={() => setSelectedSection("auth")}
+          >
+            <FaUserShield className="sidebar-icon" /> Authentication
+          </li>
+
+          <li
+            className={selectedSection === "pharmacies" ? "active" : ""}
+            onClick={() => setSelectedSection("pharmacies")}
+          >
+            <FaHospitalAlt className="sidebar-icon" /> Pharmacies
+          </li>
+        </ul>
+
+        <button onClick={handleLogout} className="logout-btn">
+          <FaSignOutAlt className="sidebar-icon" /> Logout
         </button>
       </div>
 
       {/* Main Content */}
-      <div style={{ flex: 1, padding: "30px" }}>
-        <h2 style={{ color: "green", textAlign: "center", marginBottom: "20px" }}>
-          Super Admin Dashboard
-        </h2>
+      <div className="dashboard-content">
+        <h1 className="dashboard-header">Super Admin Dashboard</h1>
 
-        {/* 🟢 Authentication Section */}
+        {/* AUTH SECTION */}
         {selectedSection === "auth" && (
           <>
             <button
+              className="add-btn"
               onClick={() => {
                 setFormVisible(!formVisible);
                 setEditUser(null);
@@ -288,75 +196,54 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
                   role: "pharmacy_manager",
                 });
               }}
-              style={addBtnStyle}
             >
               {formVisible ? "Close Form" : "Add User"}
             </button>
 
             {formVisible && (
-              <form onSubmit={handleCreateUser} style={formStyle}>
-                <h3 style={{ color: "green" }}>
-                  {editUser ? "Edit User" : "Add New User"}
-                </h3>
+              <form onSubmit={handleCreateUser} className="edit-form">
+                <h3>{editUser ? "Edit User" : "Add New User"}</h3>
 
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={newUser.email}
-                  onChange={handleUserChange}
-                  style={inputStyle}
-                  required
-                />
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  value={newUser.password}
-                  onChange={handleUserChange}
-                  style={inputStyle}
-                  required={!editUser}
-                />
-                <input
-                  type="text"
-                  name="pharmacyId"
-                  placeholder="Pharmacy ID (e.g., ahad_pharmacy)"
-                  value={newUser.pharmacyId}
-                  onChange={handleUserChange}
-                  style={inputStyle}
-                  required
-                />
-                <button type="submit" style={saveBtnStyle}>
-                  {editUser ? "Update User" : "Create User"}
-                </button>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input type="email" name="email" value={newUser.email} onChange={handleUserChange} required />
+                </div>
+
+                {!editUser && (
+                  <div className="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" value={newUser.password} onChange={handleUserChange} required />
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label>Pharmacy ID</label>
+                  <input type="text" name="pharmacyId" value={newUser.pharmacyId} onChange={handleUserChange} required />
+                </div>
+
+                <button className="save-btn" type="submit">Save</button>
               </form>
             )}
 
-            <table style={tableStyle}>
+            <table className="pharmacy-table">
               <thead>
-                <tr style={{ backgroundColor: "#c8f7c5" }}>
-                  <th style={thStyle}>Email</th>
-                  <th style={thStyle}>Role</th>
-                  <th style={thStyle}>Pharmacy ID</th>
-                  <th style={thStyle}>Actions</th>
+                <tr>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Pharmacy ID</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {users.map((u) => (
-                  <tr key={u.id} style={{ borderBottom: "1px solid #ddd" }}>
-                    <td style={tdStyle}>{u.email}</td>
-                    <td style={tdStyle}>{u.role}</td>
-                    <td style={tdStyle}>{u.pharmacyId}</td>
-                    <td style={tdStyle}>
-                      <button onClick={() => handleEditUser(u)} style={editBtnStyle}>
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteUser(u.id)}
-                        style={removeBtnStyle}
-                      >
-                        Delete
-                      </button>
+                  <tr key={u.id}>
+                    <td>{u.email}</td>
+                    <td>{u.role}</td>
+                    <td>{u.pharmacyId}</td>
+                    <td className="action-buttons">
+                      <button className="edit-btn" onClick={() => handleEditUser(u)}>Edit</button>
+                      <button className="delete-btn" onClick={() => handleDeleteUser(u.id)}>Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -365,10 +252,11 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
           </>
         )}
 
-        {/* 💊 Pharmacies Section */}
+        {/* PHARMACIES SECTION */}
         {selectedSection === "pharmacies" && (
           <>
             <button
+              className="add-btn"
               onClick={() => {
                 setFormVisible(!formVisible);
                 setEditPharmacy(null);
@@ -381,118 +269,76 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
                   status: "Active",
                 });
               }}
-              style={addBtnStyle}
             >
               {formVisible ? "Close Form" : "Add Pharmacy"}
             </button>
 
             {formVisible && (
-              <form onSubmit={handleSubmit} style={formStyle}>
-                <h3 style={{ color: "green" }}>
-                  {editPharmacy ? "Edit Pharmacy" : "Add New Pharmacy"}
-                </h3>
+              <form onSubmit={handleSubmit} className="edit-form">
+                <h3>{editPharmacy ? "Edit Pharmacy" : "Add Pharmacy"}</h3>
 
-                <input
-                  type="text"
-                  name="pharmacyId"
-                  placeholder="Pharmacy ID (e.g., ahad_pharmacy)"
-                  value={pharmacyData.pharmacyId}
-                  onChange={handleChange}
-                  style={inputStyle}
-                  required
-                />
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Pharmacy Name"
-                  value={pharmacyData.name}
-                  onChange={handleChange}
-                  style={inputStyle}
-                  required
-                />
-                <input
-                  type="text"
-                  name="address"
-                  placeholder="Address"
-                  value={pharmacyData.address}
-                  onChange={handleChange}
-                  style={inputStyle}
-                  required
-                />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={pharmacyData.email}
-                  onChange={handleChange}
-                  style={inputStyle}
-                  required
-                />
-                <input
-                  type="text"
-                  name="phone"
-                  placeholder="Phone"
-                  value={pharmacyData.phone}
-                  onChange={handleChange}
-                  style={inputStyle}
-                  required
-                />
-                <button type="submit" style={saveBtnStyle}>
-                  {editPharmacy ? "Update" : "Save"}
-                </button>
+                <div className="form-group">
+                  <label>Pharmacy ID</label>
+                  <input name="pharmacyId" value={pharmacyData.pharmacyId} onChange={handleChange} required />
+                </div>
+
+                <div className="form-group">
+                  <label>Name</label>
+                  <input name="name" value={pharmacyData.name} onChange={handleChange} required />
+                </div>
+
+                <div className="form-group">
+                  <label>Address</label>
+                  <input name="address" value={pharmacyData.address} onChange={handleChange} required />
+                </div>
+
+                <div className="form-group">
+                  <label>Email</label>
+                  <input type="email" name="email" value={pharmacyData.email} onChange={handleChange} required />
+                </div>
+
+                <div className="form-group">
+                  <label>Phone</label>
+                  <input name="phone" value={pharmacyData.phone} onChange={handleChange} required />
+                </div>
+
+                <button className="save-btn" type="submit">{editPharmacy ? "Update" : "Save"}</button>
               </form>
             )}
 
-            <table style={tableStyle}>
+            <table className="pharmacy-table">
               <thead>
-                <tr style={{ backgroundColor: "#c8f7c5" }}>
-                  <th style={thStyle}>Pharmacy ID</th>
-                  <th style={thStyle}>Name</th>
-                  <th style={thStyle}>Address</th>
-                  <th style={thStyle}>Email</th>
-                  <th style={thStyle}>Phone</th>
-                  <th style={thStyle}>Status</th>
-                  <th style={thStyle}>Actions</th>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Address</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {pharmacies.map((p) => (
-                  <tr key={p.id} style={{ borderBottom: "1px solid #ddd" }}>
-                    <td style={tdStyle}>{p.pharmacyId || p.id}</td>
-                    <td style={tdStyle}>{p.name}</td>
-                    <td style={tdStyle}>{p.address}</td>
-                    <td style={tdStyle}>{p.email}</td>
-                    <td style={tdStyle}>{p.phone}</td>
-                    <td style={tdStyle}>
-                      <span
-                        style={{
-                          color: p.status === "Active" ? "green" : "red",
-                          fontWeight: "bold",
-                        }}
-                      >
+                  <tr key={p.id}>
+                    <td>{p.pharmacyId || p.id}</td>
+                    <td>{p.name}</td>
+                    <td>{p.address}</td>
+                    <td>{p.email}</td>
+                    <td>{p.phone}</td>
+                    <td>
+                      <span className={`status-badge ${p.status === "Active" ? "active" : "inactive"}`}>
                         {p.status}
                       </span>
                     </td>
-                    <td style={tdStyle}>
-                      <button onClick={() => handleEdit(p)} style={editBtnStyle}>
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleToggleStatus(p.id, p.status)}
-                        style={{
-                          ...toggleBtnStyle,
-                          backgroundColor:
-                            p.status === "Active" ? "orange" : "green",
-                        }}
-                      >
+
+                    <td className="action-buttons">
+                      <button className="edit-btn" onClick={() => handleEdit(p)}>Edit</button>
+                      <button className="toggle-btn" onClick={() => handleToggleStatus(p.id, p.status)}>
                         {p.status === "Active" ? "Deactivate" : "Activate"}
                       </button>
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        style={removeBtnStyle}
-                      >
-                        Delete
-                      </button>
+                      <button className="delete-btn" onClick={() => handleDelete(p.id)}>Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -504,72 +350,5 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
     </div>
   );
 };
-
-// ✅ Styles
-const inputStyle = {
-  width: "100%",
-  padding: "8px",
-  margin: "8px 0",
-  borderRadius: "5px",
-  border: "1px solid #ccc",
-};
-const thStyle = { padding: "10px", textAlign: "left" };
-const tdStyle = { padding: "10px", textAlign: "left" };
-const tableStyle = {
-  width: "100%",
-  borderCollapse: "collapse",
-  backgroundColor: "#fff",
-};
-const formStyle = {
-  backgroundColor: "#e8f5e9",
-  padding: "20px",
-  borderRadius: "10px",
-  marginBottom: "20px",
-};
-const addBtnStyle = {
-  backgroundColor: "green",
-  color: "white",
-  padding: "10px 20px",
-  border: "none",
-  borderRadius: "5px",
-  marginBottom: "20px",
-};
-const saveBtnStyle = {
-  backgroundColor: "green",
-  color: "white",
-  border: "none",
-  padding: "10px 20px",
-  borderRadius: "5px",
-};
-const editBtnStyle = {
-  backgroundColor: "#4CAF50",
-  color: "white",
-  border: "none",
-  padding: "5px 10px",
-  borderRadius: "4px",
-  marginRight: "5px",
-};
-const toggleBtnStyle = {
-  color: "white",
-  border: "none",
-  padding: "5px 10px",
-  borderRadius: "4px",
-  marginRight: "5px",
-};
-const removeBtnStyle = {
-  backgroundColor: "#f44336",
-  color: "white",
-  border: "none",
-  padding: "5px 10px",
-  borderRadius: "4px",
-};
-const menuItemStyle = (active) => ({
-  marginBottom: "15px",
-  padding: "10px",
-  borderRadius: "8px",
-  backgroundColor: active ? "#145c32" : "transparent",
-  cursor: "pointer",
-  fontWeight: active ? "bold" : "normal",
-});
 
 export default SuperAdminDashboard;
