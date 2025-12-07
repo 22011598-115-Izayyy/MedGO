@@ -368,3 +368,137 @@
   background-color: #145e32;
 }
  
+/* ==========================
+   UPLOAD BUTTON
+   ========================== */
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #144530; /* pharmacy green */
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 10px;
+  transition: 0.18s ease-in-out;
+  width: fit-content;
+  border: 1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.upload-btn span {
+  pointer-events: none;
+}
+.upload-btn:hover {
+  background: #0f3b28;
+  transform: translateY(-2px);
+}
+.upload-btn:active {
+  transform: scale(0.99);
+}
+
+/* ==========================
+   IMAGE PREVIEW WITH REMOVE (X)
+   ========================== */
+.image-preview-container {
+  position: relative;
+  display: inline-block;
+  margin-top: 10px;
+  margin-left: 8px;
+}
+
+.img-preview {
+  width: 130px;
+  height: 130px;
+  border-radius: 10px;
+  border: 2px solid #e6e6e6;
+  object-fit: cover;
+  display: block;
+  transition: 0.18s ease-in-out;
+  background: #fff;
+  align-items: left;
+  justify-content: left;
+}
+
+/* Remove (X) button positioned inside image */
+.remove-image-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff3b3b;
+  border: none;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  transition: 0.12s ease-in-out;
+}
+
+.remove-image-btn:hover {
+  background: #cc2626;
+  transform: scale(1.06);
+}
+
+/* ==========================
+   SAVE BUTTON RIGHT ALIGN
+   ========================== */
+.save-container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+/* Keep existing .save-btn styles if present; otherwise minimal baseline */
+.save-btn {
+  background: #1e7f3e;
+  color: #fff;
+  padding: 10px 50px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  transition: 0.12s ease-in-out;
+
+}
+.save-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* If you have .remove-btn used elsewhere, keep its style consistent */
+.remove-btn {
+  background: #ef4444;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+.remove-btn:hover {
+  opacity: 0.95;
+}
+
+/* Small responsive adjustments */
+@media (max-width: 640px) {
+  .img-preview {
+    width: 110px;
+    height: 110px;
+  }
+  .upload-btn {
+    padding: 8px 12px;
+  }
+  .save-btn {
+    padding: 10px 12px;
+  }
+}

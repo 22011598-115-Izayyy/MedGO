@@ -53,9 +53,10 @@ function PharmacyStore({ setCurrentPage, selectedPharmacy }) {
     );
   }
 
+  const heroBackground = PharmImage;
+
   return (
     <div className="ahadstore-container">
-      
       {/* Back Button */}
       <div className="back-btn-container">
         <button className="back-btn" onClick={() => setCurrentPage("pharmacies")}>
@@ -63,14 +64,13 @@ function PharmacyStore({ setCurrentPage, selectedPharmacy }) {
         </button>
       </div>
 
-      {/* HERO SECTION */}
+      {/* HERO */}
       <section
         className="hero-section"
-        style={{ backgroundImage: `url(${PharmImage})` }}
+        style={{ backgroundImage: `url(${heroBackground})` }}
       >
         <div className="hero-inner">
           <div className="hero-overlay"></div>
-
           <div className="hero-content">
             <h1>{selectedPharmacy.name}</h1>
             <p>
@@ -78,62 +78,24 @@ function PharmacyStore({ setCurrentPage, selectedPharmacy }) {
                 ? `Serving ${selectedPharmacy.address} with quality medicines and care.`
                 : "Your trusted healthcare partner."}
             </p>
-
-            <div className="hero-stats">
-              <div>
-                <h3>25+</h3>
-                <p>Years Experience</p>
-              </div>
-              <div>
-                <h3>5000+</h3>
-                <p>Happy Customers</p>
-              </div>
-              <div>
-                <h3>24/7</h3>
-                <p>Service Available</p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* CATEGORY SECTION */}
       <CategoriesSection />
 
-{/* ABOUT SECTION */}
-{/* ABOUT SECTION */}
-<section className="about-section">
+      {/* ABOUT */}
+      <section className="about-section">
+        <div className="about-left">
+          <h2>About {selectedPharmacy.name}</h2>
+        </div>
 
-  {/* LEFT SIDE TEXT */}
-  <div className="about-left">
-    <h2>About {selectedPharmacy.name}</h2>
+        <div className="about-image">
+          <img src={Pharmacy} alt="Pharmacy Preview" />
+        </div>
+      </section>
 
-    <p>
-      {selectedPharmacy.description
-        ? selectedPharmacy.description
-        : `${selectedPharmacy.name} has been serving the people of Gujrat for years, providing trusted healthcare and timely delivery of medicines.`}
-    </p>
-
-    <div className="about-features">
-      <div className="feature">✅ Licensed Products</div>
-      <div className="feature">⚡ Fast Home Delivery</div>
-      <div className="feature">💊 Quality Assured Medicines</div>
-      <div className="feature">📦 Affordable Prices</div>
-    </div>
-  </div>
-
-  {/* RIGHT SIDE IMAGE */}
-  <div className="about-image">
-    <img src={Pharmacy} alt="Pharmacy Preview" />
-  </div>
-
-</section>
-
-
-
-
-      
-      {/* PRODUCTS SECTION */}
+      {/* PRODUCTS */}
       <section className="products-section">
         <h2>Our Top Products</h2>
 
@@ -143,25 +105,46 @@ function PharmacyStore({ setCurrentPage, selectedPharmacy }) {
           <p className="loading-text">No products found for this pharmacy.</p>
         ) : (
           <div className="products-grid">
-            {products.map((p) => (
-              <div key={p.id} className="product-card">
-                <div className="product-image-placeholder">
-                  {p.productName || "Medicine"}
+            {products.map((p) => {
+              const productImage =
+                p.imageURL ||
+                p.image ||
+                p.img ||
+                p.imgURL ||
+                p.photoURL ||
+                p.url ||
+                `https://placehold.co/300x200/1a7f45/ffffff?text=${encodeURIComponent(
+                  p.productName || "Medicine"
+                )}`;
+
+              return (
+                <div key={p.id} className="product-card">
+                  <div className="product-image">
+                    <img
+                      src={productImage}
+                      alt={p.productName}
+                      className="product-img"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src =
+                          "https://via.placeholder.com/300x200?text=No+Image";
+                      }}
+                    />
+                  </div>
+
+                  <h3>{p.productName || "Unnamed Product"}</h3>
+                  <p className="price">Rs. {p.price ?? "N/A"}</p>
+
+                  <button
+                    onClick={() => handleAddToCart(p)}
+                    className={`add-btn ${p.stock === 0 ? "disabled" : ""}`}
+                    disabled={p.stock === 0}
+                  >
+                    {p.stock === 0 ? "Out of Stock" : "🛒 Add to Cart"}
+                  </button>
                 </div>
-
-                <h3>{p.productName || "Unnamed Product"}</h3>
-                <p>{p.description || "No description available."}</p>
-                <p className="price">Rs. {p.price ?? "N/A"}</p>
-
-                <button
-                  onClick={() => handleAddToCart(p)}
-                  className={`add-btn ${p.stock === 0 ? "disabled" : ""}`}
-                  disabled={p.stock === 0}
-                >
-                  {p.stock === 0 ? "Out of Stock" : "🛒 Add to Cart"}
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

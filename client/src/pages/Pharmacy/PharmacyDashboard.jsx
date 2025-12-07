@@ -1,4 +1,7 @@
-// PART A: imports, state, hooks, functions
+// PharmacyDashboard.jsx
+// Full component with Cloudinary upload UI integrated (Add + Edit) and UI improvements.
+// No business logic changed.
+
 import { MdDashboard } from "react-icons/md";
 import { AiOutlinePlus } from "react-icons/ai";
 import { FaPills } from "react-icons/fa";
@@ -38,9 +41,18 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
 
   // Dose handling
   const [doseMode, setDoseMode] = useState("dropdown");
-  const doseOptions = ["50mg", "100mg", "250mg", "500mg", "1g", "5ml", "10ml", "Custom"];
+  const doseOptions = [
+    "50mg",
+    "100mg",
+    "250mg",
+    "500mg",
+    "1g",
+    "5ml",
+    "10ml",
+    "Custom",
+  ];
 
-  // Form data (including manufacturer)
+  // Form data
   const [productData, setProductData] = useState({
     productName: "",
     formula: "",
@@ -57,12 +69,17 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
 
   // Page selection
   const [activePage, setActivePage] = useState("dashboard");
-
   const [dashboardTab, setDashboardTab] = useState("all");
   const [ordersCount, setOrdersCount] = useState(0);
 
+  // Image upload states (Add + Edit)
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [editSelectedImage, setEditSelectedImage] = useState(null);
+  const [editImagePreview, setEditImagePreview] = useState(null);
+
   // ==========================
-  // On auth change -> fetch pharmacy info
+  // AUTH + initial fetch
   // ==========================
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -76,10 +93,29 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [setCurrentPage]);
+
+  // Clear add-image states when switching to Add page
+  useEffect(() => {
+    if (activePage === "add") {
+      setSelectedImage(null);
+      setImagePreview(null);
+    }
+  }, [activePage]);
+
+  // When editProduct changes, set edit preview
+  useEffect(() => {
+    if (!editProduct) {
+      setEditSelectedImage(null);
+      setEditImagePreview(null);
+    } else {
+      setEditSelectedImage(null);
+      setEditImagePreview(editProduct.imageURL || null);
+    }
+  }, [editProduct]);
 
   // ==========================
-  // Fetch user's pharmacyId
+  // Firestore helpers
   // ==========================
   const fetchUserPharmacyInfo = async (uid) => {
     try {
@@ -99,9 +135,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     }
   };
 
-  // ==========================
-  // Fetch pharmacy + products
-  // ==========================
   const fetchPharmacyInfo = async (phId) => {
     try {
       if (!phId) return;
@@ -125,9 +158,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     }
   };
 
-  // ==========================
-  // Fetch orders count
-  // ==========================
   const fetchOrdersCount = async (phId) => {
     try {
       if (!phId) return setOrdersCount(0);
@@ -159,7 +189,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   };
 
   // ==========================
-  // Toggle Common Medicines
+  // Master medicines and selection
   // ==========================
   const fetchMasterMedicines = async () => {
     try {
@@ -176,9 +206,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     );
   };
 
-  // ==========================
-  // Add selected medicines
-  // ==========================
   const handleAddSelected = async () => {
     try {
       const q = query(
@@ -216,6 +243,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
           expiryDate: med.expiryDate || "N/A",
           description: med.description || "",
           status: "Active",
+          imageURL: med.imageURL || med.image || med.img || "",
         });
 
         added++;
@@ -249,7 +277,50 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   };
 
   // ==========================
-  // Submit form
+  // Image handlers
+  // ==========================
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setSelectedImage(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleEditImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setEditSelectedImage(file);
+    setEditImagePreview(URL.createObjectURL(file));
+  };
+
+  // ==========================
+  // Cloudinary upload
+  // ==========================
+  const uploadToCloudinary = async (file) => {
+    if (!file) return null;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "medicines_upload"); // unsigned preset
+
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dvo9nyzgq/image/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error("Cloudinary upload failed: " + text);
+    }
+
+    const data = await res.json();
+    return data.secure_url || data.url || null;
+  };
+
+  // ==========================
+  // Submit form (Add / Edit)
   // ==========================
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -280,6 +351,30 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
       const pharmacyDocId = snap.docs[0].id;
       const ref = collection(db, "Pharmacies", pharmacyDocId, "products");
 
+
+
+
+      
+      // Handle image upload
+      let imageURL = "";
+      if (!editProduct) {
+        if (selectedImage) {
+          imageURL = await uploadToCloudinary(selectedImage);
+        }
+      } else {
+        if (editSelectedImage) {
+          imageURL = await uploadToCloudinary(editSelectedImage);
+        } else {
+          imageURL = editProduct.imageURL || "";
+        }
+      }
+
+      const finalData = {
+        ...productData,
+        imageURL: imageURL || "",
+      };
+
+      // ADD or UPDATE
       if (!editProduct) {
         const existingSnap = await getDocs(ref);
         const existing = existingSnap.docs.map((d) =>
@@ -290,13 +385,14 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
           return alert("This medicine already exists.");
         }
 
-        await addDoc(ref, productData);
+        await addDoc(ref, finalData);
       } else {
-        await updateDoc(doc(ref, editProduct.id), productData);
+        await updateDoc(doc(ref, editProduct.id), finalData);
       }
 
       alert(editProduct ? "Updated!" : "Added!");
 
+      // Reset form
       setProductData({
         productName: "",
         formula: "",
@@ -314,15 +410,22 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
       setDoseMode("dropdown");
       setEditProduct(null);
 
+      // reset images
+      setSelectedImage(null);
+      setImagePreview(null);
+      setEditSelectedImage(null);
+      setEditImagePreview(null);
+
       fetchPharmacyInfo(pharmacyId);
       fetchOrdersCount(pharmacyId);
     } catch (err) {
       console.error("Submit error:", err);
+      alert("Error while saving. See console for details.");
     }
   };
 
   // ==========================
-  // Edit Product
+  // Edit product (populate form)
   // ==========================
   const handleEdit = (product) => {
     setEditProduct(product);
@@ -413,23 +516,15 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   // ==========================
   return (
     <div className="dashboard-container">
-
       {/* Sidebar */}
       <div className="sidebar">
-
-        {/* Logo Circle */}
         <div className="pharmacy-logo-circle">
           <img src={MedGoLOGO} alt="MedGO Logo" />
         </div>
 
-        {/* Pharmacy Name */}
-        <h2 className="sidebar-title">
-          {pharmacyName || "Pharmacy"}
-        </h2>
+        <h2 className="sidebar-title">{pharmacyName || "Pharmacy"}</h2>
 
-        {/* Menu Buttons */}
         <ul className="sidebar-menu">
-
           <li
             className={activePage === "dashboard" ? "active" : ""}
             onClick={() => {
@@ -460,6 +555,8 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 status: "Active",
               });
               setDoseMode("dropdown");
+              setSelectedImage(null);
+              setImagePreview(null);
             }}
           >
             <AiOutlinePlus className="menu-icon" />
@@ -488,16 +585,11 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
             Orders
           </li>
 
-          <li
-            className={activePage === "riders" ? "active" : ""}
-            onClick={() => setActivePage("riders")}
-          >
+          <li className={activePage === "riders" ? "active" : ""} onClick={() => setActivePage("riders")}>
             🚴 Riders
           </li>
-
         </ul>
 
-        {/* Logout at Bottom */}
         <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
@@ -505,18 +597,13 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
 
       {/* MAIN AREA */}
       <div className="main-area">
-        <div className="header">
-          Welcome, {pharmacyName || "Pharmacy"} 👋
-        </div>
+        <div className="header">Welcome, {pharmacyName || "Pharmacy"} 👋</div>
 
         <div className="content-area">
-
           {/* DASHBOARD */}
           {activePage === "dashboard" && (
             <div style={{ padding: 20 }}>
-              <h2 style={{ margin: 0 }}>
-                {pharmacyName} Dashboard
-              </h2>
+              <h2 style={{ margin: 0 }}>{pharmacyName} Dashboard</h2>
 
               <table className="summary-table">
                 <thead>
@@ -537,7 +624,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 </tbody>
               </table>
 
-              {/* RED BUTTON TABS */}
               <div className="dashboard-tabs">
                 <button
                   className={`tab-btn ${dashboardTab === "all" ? "active" : ""}`}
@@ -568,7 +654,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 </button>
               </div>
 
-              {/* FILTERED RESULTS TABLE */}
               <table className="product-table">
                 <thead>
                   <tr>
@@ -646,7 +731,9 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 >
                   <option value="">Enter dose</option>
                   {doseOptions.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
                   ))}
                 </select>
 
@@ -727,9 +814,35 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                   required
                 />
 
-                <button type="submit" className="save-btn">
-                  {editProduct ? "Update" : "Save"}
-                </button>
+                {/* Upload button */}
+                <label className="upload-btn">
+                  <span>📤 Upload Image</span>
+                  <input type="file" accept="image/*" onChange={handleImageSelect} hidden />
+                </label>
+
+                {/* Preview with inside remove X (Option A) */}
+                {imagePreview && (
+                  <div className="image-preview-container">
+                    <img src={imagePreview} alt="Preview" className="img-preview" />
+                    <button
+                      type="button"
+                      className="remove-image-btn"
+                      onClick={() => {
+                        setSelectedImage(null);
+                        setImagePreview(null);
+                      }}
+                    >
+                      ✖
+                    </button>
+                  </div>
+                )}
+
+                {/* Save aligned to right */}
+                <div className="save-container">
+                  <button type="submit" className="save-btn">
+                    {editProduct ? "Update" : "Save"}
+                  </button>
+                </div>
               </form>
             </div>
           )}
@@ -841,7 +954,9 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                     >
                       <option value="">Enter dose</option>
                       {doseOptions.map((opt) => (
-                        <option key={opt} value={opt}>{opt}</option>
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
                       ))}
                     </select>
 
@@ -918,7 +1033,35 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                       required
                     />
 
-                    <div style={{ marginTop: 12 }}>
+                    {/* Upload button for edit */}
+                    <label className="upload-btn">
+                      <span>📤 Change Image</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleEditImageSelect}
+                        hidden
+                      />
+                    </label>
+
+                    {/* Edit image preview with inside X */}
+                    {editImagePreview && (
+                      <div className="image-preview-container">
+                        <img src={editImagePreview} alt="Edit Preview" className="img-preview" />
+                        <button
+                          type="button"
+                          className="remove-image-btn"
+                          onClick={() => {
+                            setEditSelectedImage(null);
+                            setEditImagePreview(null);
+                          }}
+                        >
+                          ✖
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="save-container" style={{ marginTop: 12 }}>
                       <button className="save-btn" type="submit">
                         Update
                       </button>
@@ -943,6 +1086,9 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                             status: "Active",
                           });
                           setDoseMode("dropdown");
+                          // clear edit-image preview
+                          setEditSelectedImage(null);
+                          setEditImagePreview(null);
                         }}
                       >
                         Cancel
@@ -955,17 +1101,13 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
           )}
 
           {/* RIDERS PAGE */}
-          {activePage === "riders" && (
-            <PharmacyRiders pharmacyId={pharmacyId} />
-          )}
+          {activePage === "riders" && <PharmacyRiders pharmacyId={pharmacyId} />}
 
           {/* ORDERS PAGE */}
           {activePage === "orders" && (
             <div style={{ padding: 20 }}>
               <h2>Orders</h2>
-              <p>
-                Orders layout unchanged (placeholder).
-              </p>
+              <p>Orders layout unchanged (placeholder).</p>
             </div>
           )}
 
@@ -982,8 +1124,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                         type="checkbox"
                         checked={selectedMedicines.includes(med.id)}
                         onChange={() => toggleMedicine(med.id)}
-                      />
-                      {" "}
+                      />{" "}
                       {med.name || med.productName} — Rs. {med.price}
                     </label>
                   ))}
@@ -1021,14 +1162,11 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                     Cancel
                   </button>
                 </div>
-
               </div>
             </div>
           )}
-
         </div>
       </div>
-
     </div>
   );
 };
