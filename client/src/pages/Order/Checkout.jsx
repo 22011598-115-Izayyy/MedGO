@@ -22,7 +22,6 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
       [name]: value
     }));
     
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -65,10 +64,8 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
       return;
     }
 
-    // Simulate order placement
     setOrderPlaced(true);
     
-    // Clear cart after successful order
     setTimeout(() => {
       clearCart();
       setShowCheckout(false);
@@ -86,7 +83,7 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
             <p>Thank you for your order. Your medicines will be delivered via Cash on Delivery.</p>
             <div className="order-details">
               <h3>Order Summary</h3>
-              <p><strong>Total Amount:</strong> ${getCartTotal().toFixed(2)}</p>
+              <p><strong>Total Amount:</strong> PKR {getCartTotal().toFixed(2)}</p>
               <p><strong>Payment Method:</strong> Cash on Delivery</p>
               <p><strong>Delivery Address:</strong> {formData.shippingAddress}</p>
             </div>
@@ -185,7 +182,7 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
               </div>
 
               <button type="submit" className="place-order-btn">
-                Place Order - ${getCartTotal().toFixed(2)}
+                Place Order - PKR {getCartTotal().toFixed(2)}
               </button>
             </form>
           </div>
@@ -201,7 +198,7 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
                     <span className="item-quantity">Qty: {item.quantity}</span>
                   </div>
                   <div className="item-price">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    PKR {(item.price * item.quantity).toFixed(2)}
                   </div>
                 </div>
               ))}
@@ -210,7 +207,7 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
             <div className="total-section">
               <div className="total-row">
                 <span>Subtotal:</span>
-                <span>${getCartTotal().toFixed(2)}</span>
+                <span>PKR {getCartTotal().toFixed(2)}</span>
               </div>
               <div className="total-row">
                 <span>Delivery:</span>
@@ -218,7 +215,7 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
               </div>
               <div className="total-row final-total">
                 <span>Total:</span>
-                <span>${getCartTotal().toFixed(2)}</span>
+                <span>PKR {getCartTotal().toFixed(2)}</span>
               </div>
             </div>
           </div>

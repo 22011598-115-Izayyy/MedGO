@@ -186,4 +186,19 @@
   .social-links {
     justify-content: center;
   }
+  .footer-link-button {
+  background: none;
+  border: none;
+  color: #e8f5e8;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 4px 0;
+  text-align: left;
+  width: 100%;
+}
+
+.footer-link-button:hover {
+  color: #a8e063;
+  padding-left: 8px;
+}
 }

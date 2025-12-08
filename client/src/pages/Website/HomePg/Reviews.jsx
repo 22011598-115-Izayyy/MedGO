@@ -3,21 +3,21 @@ import "./Reviews.css";
 
 const reviewsData = [
   {
-    name: "Olivia Wilson",
+    name: "Shoaib Akhtar",
     role: "Customer",
     image: "https://i.pravatar.cc/150?img=47",
     rating: 4,
     text: "Med-Go made ordering medicines so easy. Fast delivery and great service!"
   },
   {
-    name: "Shawn Garcia",
+    name: "Chaudary Aslam",
     role: "Customer",
     image: "https://i.pravatar.cc/150?img=32",
     rating: 5,
     text: "Amazing platform! I found all medicines I needed at the best prices."
   },
   {
-    name: "Pedro Fernandes",
+    name: "Rehman Baloch",
     role: "Customer",
     image: "https://i.pravatar.cc/150?img=12",
     rating: 5,
@@ -31,7 +31,7 @@ const reviewsData = [
     text: "As a busy mom, Med-Go saves me so much time. The delivery is always quick and reliable."
   },
   {
-    name: "Hamza Malik",
+    name: "Arshad Khan",
     role: "Software Engineer",
     image: "https://i.pravatar.cc/150?img=15",
     rating: 4,
@@ -45,7 +45,7 @@ const reviewsData = [
     text: "Very helpful for older people like me. No need to stand in long pharmacy lines anymore."
   },
   {
-    name: "James Carter",
+    name: "Iqbal Mansoor",
     role: "Fitness Trainer",
     image: "https://i.pravatar.cc/150?img=50",
     rating: 5,

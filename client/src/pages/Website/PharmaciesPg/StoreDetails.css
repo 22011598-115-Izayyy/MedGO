@@ -22,8 +22,9 @@
 .back-btn {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: white;
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 12px 24px;
   border-radius: 50px;
   cursor: pointer;
@@ -33,33 +34,35 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .back-btn:hover {
-  background: rgba(255,255,255,0.25);
+  background: rgba(255, 255, 255, 0.25);
   transform: translateX(-5px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 /* ------------------------------------------
-   HERO SECTION
+   HERO SECTION (UPDATED PREMIUM BG)
 --------------------------------------------*/
 .hero-section {
+  /* Premium Abstract Medical Background */
+  background-image: url('https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=2068&auto=format&fit=crop');
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  min-height: 800px;
+  min-height: 600px; /* Adjusted height for better proportions */
   width: 100%;
   position: relative;
   display: flex;
   justify-content: flex-end;
   align-items: center;
   padding-right: 100px;
-  overflow: visible;
+  overflow: hidden; /* Ensures no scrollbar issues from overlay */
 }
 
-/* DARK FADE */
+/* PREMIUM DARK FADE OVERLAY */
 .hero-section::before {
   content: "";
   position: absolute;
@@ -67,20 +70,26 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.35);
+  /* Smooth gradient from dark green to transparent */
+  background: linear-gradient(
+    90deg, 
+    rgba(11, 40, 30, 0.2) 0%, 
+    rgba(11, 40, 30, 0.6) 100%
+  );
   z-index: 1;
 }
 
+/* SIDE CONTENT OVERLAY (The smooth fade behind text) */
 .hero-overlay {
   position: absolute;
   right: 0;
   top: 0;
   height: 100%;
-  width: 30%;
+  width: 40%; /* Slightly wider for better text backing */
   background: linear-gradient(
     to left,
-    rgba(11, 40, 30, 0.9) 0%,
-    rgba(11, 40, 30, 0.7) 55%,
+    rgba(6, 28, 20, 0.95) 0%,
+    rgba(10, 45, 35, 0.8) 50%,
     transparent 100%
   );
   z-index: 2;
@@ -89,24 +98,28 @@
 .hero-content {
   position: relative;
   z-index: 3;
-  max-width: 420px;
+  max-width: 500px;
   color: white;
-  text-align: center;
+  text-align: right; /* Aligned right for this layout */
   margin-left: auto;
   margin-right: 50px;
-  transform: translateY(-80px);
+  transform: translateY(0); /* Centered vertically */
 }
 
 .hero-content h1 {
-  font-size: 4rem;
+  font-size: 4.5rem;
   font-weight: 800;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
+  line-height: 1.1;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
 .hero-content p {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   margin-bottom: 25px;
-  opacity: 0.95;
+  opacity: 0.9;
+  font-weight: 300;
+  letter-spacing: 0.5px;
 }
 
 /* ---------- ABOUT SECTION ---------- */
@@ -131,7 +144,7 @@
 }
 
 .about-left p {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   color: #144530;
   line-height: 1.6;
   margin-bottom: 20px;
@@ -169,7 +182,9 @@
 
 /* ---------- PRODUCTS SECTION ---------- */
 .products-section {
-  padding: 80px 30px 100px;
+  width: 100%;
+  max-width: 100%;
+  padding: 80px 40px 100px;
   background: #F8FAFC;
   text-align: center;
 }
@@ -180,14 +195,8 @@
   margin-bottom: 40px;
   font-weight: 800;
 }
-.products-section {
-  width: 100%;
-  max-width: 100%;
-  padding: 80px 20px;
-}
 
-/* ⭐⭐⭐ MAIN FIX — 5 CARDS PER ROW ⭐⭐⭐ */
-
+/* MAIN GRID — 5 CARDS PER ROW */
 .products-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -196,26 +205,22 @@
   max-width: 100%;
 }
 
-
 /* RESPONSIVE GRID */
 @media (max-width: 1400px) {
   .products-grid {
     grid-template-columns: repeat(4, 1fr);
   }
 }
-
 @media (max-width: 1100px) {
   .products-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
-
 @media (max-width: 800px) {
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-
 @media (max-width: 500px) {
   .products-grid {
     grid-template-columns: repeat(1, 1fr);
@@ -223,55 +228,52 @@
 }
 
 /* PRODUCT CARD */
-
-
 .product-card {
   background: white;
   border-radius: 16px;
   padding: 15px;
-  width: 100%;        /* allow card to shrink */
-  border: 1px solid rgba(0,0,0,0.08);
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
 
 .product-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 20px 45px rgba(20,69,48,0.15);
+  box-shadow: 0 20px 45px rgba(20, 69, 48, 0.15);
 }
 
-/* ⭐⭐⭐ FIX IMAGE ZOOM / FIT COMPLETELY ⭐⭐⭐ */
-/* ⭐ FIX PRODUCT IMAGE SIZE — FULL IMAGE, NOT ZOOMED ⭐ */
+/* PRODUCT IMAGE SIZE */
 .product-image {
   width: 100%;
-  height: 220px;         /* Increased height */
+  height: 220px;
   display: flex;
   justify-content: center;
   align-items: center;
   border-radius: 14px;
   overflow: hidden;
-  background: #f2f2f2;
-  padding: 10px;         /* Extra padding so image breathes */
+  background: #fff; /* Changed to white for cleaner look */
+  padding: 10px;
 }
 
 .product-image img {
   width: 100%;
   height: 100%;
-  object-fit: contain !important; /* Prevent zoom or crop */
+  object-fit: contain !important;
   object-position: center;
 }
 
-
 .product-card h3 {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #1E293B;
   margin-top: 15px;
+  min-height: 40px; /* Keeps cards aligned if titles vary */
 }
 
 .price {
   font-weight: 800;
   color: #15803d;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   margin: 10px 0 15px;
 }
 
@@ -280,7 +282,7 @@
   background: linear-gradient(135deg, #166534, #15803d);
   color: white;
   border: none;
-  padding: 14px;
+  padding: 12px;
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
@@ -299,7 +301,6 @@
   cursor: not-allowed;
 }
 
-/* LOADING TEXT */
 .loading-text {
   color: #64748B;
   font-size: 1.2rem;
@@ -310,12 +311,27 @@
 /* ---------- MOBILE HERO ---------- */
 @media (max-width: 768px) {
   .hero-section {
-    min-height: 500px;
+    min-height: 400px;
     padding-right: 20px;
+    align-items: flex-end; /* Push text to bottom on mobile */
+    padding-bottom: 40px;
+  }
+  
+  .hero-overlay {
+    width: 100%;
+    height: 60%;
+    top: auto;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(6, 28, 20, 0.95), transparent);
   }
 
   .hero-content {
-    margin-right: 20px;
-    transform: translateY(-40px);
+    margin-right: 0;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .hero-content h1 {
+    font-size: 2.5rem;
   }
 }

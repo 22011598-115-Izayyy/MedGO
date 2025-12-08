@@ -10,7 +10,7 @@
 .medicine-title {
   font-size: 38px;
   font-weight: 800;
-  text-align: left;
+  text-align: center;
   margin-bottom: 5px;
   color: #145e33;
 }
@@ -19,7 +19,7 @@
   font-size: 18px;
   color: #145e33;
   margin-bottom: 25px;
-  text-align: left;
+  text-align: center;
   padding-bottom: 30px;
 }
 
@@ -58,7 +58,7 @@
   border-radius: 18px;
   box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.06);
   border: 1px solid #efefef;
-  color: #145e33;
+  color: #000000;
 }
 
 .info-item {
@@ -76,7 +76,7 @@
   margin-top: 20px;
   line-height: 1.6;
   font-size: 15px;
-  color: #145e33;
+  color: #000000;
 }
 
 /* PRICE */

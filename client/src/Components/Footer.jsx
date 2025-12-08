@@ -1,7 +1,7 @@
 import React from 'react';
 import './Footer.css';
 
-const Footer = () => {
+const Footer = ({ setCurrentPage }) => {
   return (
     <footer className="footer">
       <div className="footer-container">
@@ -20,12 +20,29 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Company Links */}
+        {/* Company */}
         <div className="footer-section">
           <h4>Company</h4>
           <ul>
-            <li><a href="#">About MedGo</a></li>
-            <li><a href="#">Contact Us</a></li>
+
+            <li>
+              <button
+                className="footer-link-button"
+                onClick={() => setCurrentPage("about")} // If no about page, I can add one for you
+              >
+                About MedGo
+              </button>
+            </li>
+
+            <li>
+              <button
+                className="footer-link-button"
+                onClick={() => setCurrentPage("contact")}
+              >
+                Contact Us
+              </button>
+            </li>
+
           </ul>
         </div>
 
@@ -33,18 +50,60 @@ const Footer = () => {
         <div className="footer-section">
           <h4>Services</h4>
           <ul>
-            <li><a href="#">Browse Medicines</a></li>
-            <li><a href="#">Pharmacy Registration</a></li>
-            <li><a href="#">Customer Login / Signup</a></li>
+
+            <li>
+              <button
+                className="footer-link-button"
+                onClick={() => setCurrentPage("products")}
+              >
+                Browse Medicines
+              </button>
+            </li>
+
+            <li>
+              <button
+                className="footer-link-button"
+                onClick={() => setCurrentPage("pharmacies")}
+              >
+                Pharmacy Registration
+              </button>
+            </li>
+
+            <li>
+              <button
+                className="footer-link-button"
+                onClick={() => setCurrentPage("admin")} // Your login page value
+              >
+                Customer Login / Signup
+              </button>
+            </li>
+
           </ul>
         </div>
 
-        {/* Legal Section */}
+        {/* Legal */}
         <div className="footer-section">
           <h4>Legal</h4>
           <ul>
-            <li><a href="#">Terms & Conditions</a></li>
-            <li><a href="#">Privacy Policy</a></li>
+
+            <li>
+              <button
+                className="footer-link-button"
+                onClick={() => setCurrentPage("terms")}
+              >
+                Terms & Conditions
+              </button>
+            </li>
+
+            <li>
+              <button
+                className="footer-link-button"
+                onClick={() => setCurrentPage("privacy")}
+              >
+                Privacy Policy
+              </button>
+            </li>
+
           </ul>
         </div>
 
@@ -63,9 +122,17 @@ const Footer = () => {
       <div className="footer-bottom">
         <div className="footer-bottom-content">
           <p>&copy; 2025 MedGo. All rights reserved.</p>
+
           <div className="footer-bottom-links">
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
+
+            <button className="footer-link-button" onClick={() => setCurrentPage("privacy")}>
+              Privacy
+            </button>
+
+            <button className="footer-link-button" onClick={() => setCurrentPage("terms")}>
+              Terms
+            </button>
+
           </div>
         </div>
       </div>
