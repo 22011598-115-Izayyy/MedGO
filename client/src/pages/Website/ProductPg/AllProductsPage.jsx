@@ -4,7 +4,7 @@ import { db } from "../../../firebase/config";
 import { collection, getDocs } from "firebase/firestore";
 import { useCart } from "../../../Components/CartContext";
 
-function AllProductsPage() {
+function AllProductsPage({ setCurrentPage, setSelectedMedicineId }) {
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,6 +13,21 @@ function AllProductsPage() {
   const [pharmacyFilter, setPharmacyFilter] = useState("all");
   const [pharmacyOptions, setPharmacyOptions] = useState([]);
 
+  const [categoryFilter, setCategoryFilter] = useState("all");
+
+  const categories = [
+    "all",
+    "Pain Killer",
+    "Antibiotic",
+    "Fever And Pain",
+    "Cold And Flu",
+    "Allergy",
+    "Digestive",
+    "Respiratory",
+    "Vitamin",
+    "Bone And Joint Pain",
+  ];
+
   useEffect(() => {
     const fetchAllProducts = async () => {
       setLoading(true);
@@ -20,7 +35,6 @@ function AllProductsPage() {
         let allProducts = [];
         let pharmacyNames = [];
 
-        // 1️⃣ Fetch ONLY pharmacy products
         const pharmaciesSnap = await getDocs(collection(db, "Pharmacies"));
 
         for (const pharmacyDoc of pharmaciesSnap.docs) {
@@ -37,17 +51,14 @@ function AllProductsPage() {
           productsSnap.forEach((prodDoc) => {
             allProducts.push({
               id: prodDoc.id,
+              pharmacyId,        // ⭐ REQUIRED FIX
               ...prodDoc.data(),
               pharmacyName,
             });
           });
         }
 
-        // ❌ REMOVED MASTER MEDICINES (as requested)
-
-        // Update filters
         setPharmacyOptions(["all", ...new Set(pharmacyNames)]);
-
         setProducts(allProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -64,15 +75,22 @@ function AllProductsPage() {
   };
 
   const filteredProducts = products.filter((product) => {
+    const name = (product.productName || product.name || "").toLowerCase();
+    const formula = (product.formula || "").toLowerCase();
+    const category = (product.category || "").toLowerCase();
+
     const matchesSearch =
-      (product.productName || product.name || "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+      name.includes(searchTerm.toLowerCase()) ||
+      formula.includes(searchTerm.toLowerCase());
 
     const matchesPharmacy =
       pharmacyFilter === "all" || product.pharmacyName === pharmacyFilter;
 
-    return matchesSearch && matchesPharmacy;
+    const matchesCategory =
+      categoryFilter === "all" ||
+      category === categoryFilter.toLowerCase();
+
+    return matchesSearch && matchesPharmacy && matchesCategory;
   });
 
   return (
@@ -91,7 +109,7 @@ function AllProductsPage() {
           <input
             className="search-input"
             type="text"
-            placeholder="Search for a product..."
+            placeholder="Search for product or formula..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -106,6 +124,20 @@ function AllProductsPage() {
             {pharmacyOptions.map((ph) => (
               <option key={ph} value={ph}>
                 {ph}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="category-filter">
+          <select
+            className="category-select"
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+          >
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
               </option>
             ))}
           </select>
@@ -140,15 +172,22 @@ function AllProductsPage() {
 
               return (
                 <div className="product-card" key={product.id + product.pharmacyName}>
-                  <div className="product-image">
+                  
+                  {/* ⭐ CLICK TO OPEN MEDICINE PAGE */}
+                  <div
+                    className="product-image"
+                    onClick={() => {
+                      setSelectedMedicineId({
+                        productId: product.id,
+                        pharmacyId: product.pharmacyId,
+                      });
+                      setCurrentPage("medicine-details");
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
                     <img
                       src={productImage}
                       alt={product.productName || product.name}
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src =
-                          "https://via.placeholder.com/300x200/1a7f45/ffffff?text=No+Image";
-                      }}
                     />
 
                     <div className="product-rating">
@@ -158,10 +197,27 @@ function AllProductsPage() {
                   </div>
 
                   <div className="product-info">
-                    <div className="product-name">
+                    <div
+                      className="product-name"
+                      onClick={() => {
+                        setSelectedMedicineId({
+                          productId: product.id,
+                          pharmacyId: product.pharmacyId,
+                        });
+                        setCurrentPage("medicine-details");
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
                       {product.productName || product.name}
                     </div>
+
                     <div className="product-pharmacy">{product.pharmacyName}</div>
+
+                    <div className="product-extra">
+                      <p><strong>Formula:</strong> {product.formula ?? "N/A"}</p>
+                      <p><strong>Dose:</strong> {product.dose ?? "N/A"}</p>
+                      <p><strong>Quantity:</strong> {product.quantity ?? "N/A"}</p>
+                    </div>
 
                     <div className="product-footer">
                       <div className="product-price">Rs. {product.price ?? "N/A"}</div>

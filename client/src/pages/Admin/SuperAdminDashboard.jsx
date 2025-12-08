@@ -94,7 +94,8 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
   const categoryOptions = [
     "Pain Killer",
     "Antibiotic",
-    "Fever Relief",
+    "Fever And Pain",
+    "Cold And Flu",
     "Allergy",
     "Digestive",
     "Respiratory",
@@ -237,7 +238,7 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
       const payload = {
         name: masterData.name || "",
         formula: masterData.formula || "",
-        quantity: Number(masterData.quantity) || 0,
+        quantity: masterData.quantity || "",
         manufacturer: masterData.manufacturer || "",
         dose: masterData.dose || "",
         category: masterData.category || "",
@@ -794,7 +795,7 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
 <div className="form-group">
   <label>Quantity (Tablets/ml)</label>
   <input
-    type="number"
+    type="text"
     min="0"
     name="quantity"
     value={masterData.quantity}
@@ -1009,7 +1010,7 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
                   <th>Stock</th>
                   <th>Price</th>
                   <th>Expiry</th>
-                  <th>Image</th>
+                  
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -1032,13 +1033,7 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
                       <td>{m.stock != null ? m.stock : "-"}</td>
                       <td>Rs. {m.price != null ? m.price : "-"}</td>
                       <td>{m.expiryDate || "N/A"}</td>
-                      <td>
-                        {m.imageURL ? (
-                          <img src={m.imageURL} alt="img" style={{ width: 60, borderRadius: 6 }} />
-                        ) : (
-                          "-"
-                        )}
-                      </td>
+                      
                       <td className="action-buttons">
                         <button className="edit-btn" onClick={() => handleEditMaster(m)}>
                           Edit

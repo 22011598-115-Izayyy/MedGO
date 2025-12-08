@@ -4,12 +4,12 @@ import { db } from "../../../firebase/config";
 import { collection, getDocs } from "firebase/firestore";
 import "./TopSellingMedicines.css";
 
-const TopSellingMedicines = ({ setCurrentPage }) => {
+function TopSellingMedicines({ setCurrentPage, setSelectedMedicineId }) {
   const { addToCart } = useCart();
   const [topSellingProducts, setTopSellingProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch ONLY from Pharmacies collection
+  // Fetch medicines
   useEffect(() => {
     const fetchAllMedicines = async () => {
       try {
@@ -31,6 +31,7 @@ const TopSellingMedicines = ({ setCurrentPage }) => {
 
           const products = productsSnapshot.docs.map((doc) => ({
             id: doc.id,
+            pharmacyId, // ⭐ REQUIRED FOR REDIRECT
             pharmacyName: pharmacyDoc.data().name,
             ...doc.data(),
           }));
@@ -49,7 +50,8 @@ const TopSellingMedicines = ({ setCurrentPage }) => {
     fetchAllMedicines();
   }, []);
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = (product, e) => {
+    e.stopPropagation(); // prevent redirect
     addToCart(product);
     alert(`${product.productName} added to cart!`);
   };
@@ -64,9 +66,7 @@ const TopSellingMedicines = ({ setCurrentPage }) => {
         <div className="section-header">
           <h2 className="section-title">Most Ordered Medicines on Med-Go</h2>
           <p className="section-subtitle">
-            Shop our most popular medicines, chosen by customers for their
-            effectiveness and trusted results. Every product is authentic,
-            pharmacy-verified, and delivered quickly to your home.
+            Shop our most popular medicines, trusted by thousands of customers.
           </p>
         </div>
 
@@ -81,24 +81,33 @@ const TopSellingMedicines = ({ setCurrentPage }) => {
             </p>
           ) : (
             topSellingProducts.map((product) => {
-              // ⭐ UNIVERSAL IMAGE LOADER (fix for Master Medicine)
               const productImage =
                 product.imageURL ||
                 product.image ||
                 product.imgURL ||
                 product.img ||
                 product.photoURL ||
-                product.picture ||
                 (Array.isArray(product.images) ? product.images[0] : null) ||
                 product.url ||
-                product.thumbnail ||
-                product.featuredImage ||
                 `https://placehold.co/400x200/1a7f45/ffffff?text=${encodeURIComponent(
                   product.productName
                 )}`;
 
               return (
-                <div key={product.id} className="product-card">
+                <div
+                  key={product.id}
+                  className="product-card"
+                  style={{ cursor: "pointer" }}
+
+                  // ⭐ REDIRECT TO MEDICINE DETAILS PAGE
+                  onClick={() => {
+                    setSelectedMedicineId({
+                      productId: product.id,
+                      pharmacyId: product.pharmacyId,
+                    });
+                    setCurrentPage("medicine-details");
+                  }}
+                >
                   {/* PRODUCT IMAGE */}
                   <div className="product-image">
                     <img
@@ -134,6 +143,13 @@ const TopSellingMedicines = ({ setCurrentPage }) => {
                       {product.category || "General Medicine"}
                     </div>
 
+                    {/* EXTRA DETAILS */}
+                    <div className="product-extra">
+                      <p><strong>Formula:</strong> {product.formula ?? "N/A"}</p>
+                      <p><strong>Dose:</strong> {product.dose ?? "N/A"}</p>
+                      <p><strong>Quantity:</strong> {product.quantity ?? "N/A"}</p>
+                    </div>
+
                     <div className="product-footer">
                       <div className="product-price">
                         PKR {Number(product.price).toFixed(2)}
@@ -141,7 +157,7 @@ const TopSellingMedicines = ({ setCurrentPage }) => {
 
                       <button
                         className="add-to-cart-btn"
-                        onClick={() => handleAddToCart(product)}
+                        onClick={(e) => handleAddToCart(product, e)}
                       >
                         <span className="cart-icon">🛒</span>
                         <span>Add to Cart</span>
@@ -163,6 +179,6 @@ const TopSellingMedicines = ({ setCurrentPage }) => {
       </div>
     </section>
   );
-};
+}
 
 export default TopSellingMedicines;

@@ -16,7 +16,12 @@ import SuperAdminDashboard from "./pages/Admin/SuperAdminDashboard";
 import PharmacyDashboard from "./pages/Pharmacy/PharmacyDashboard";
 import AllProductsPage from "./pages/Website/ProductPg/AllProductsPage";
 
-// ⭐ NEW IMPORT (only this is added)
+// ⭐ NEW IMPORT (for dynamic medicine page)
+import MedicineDetails from "./pages/Website/MedicineDetails.jsx";
+
+
+
+// ⭐ Rider Dashboard (already added)
 import RiderDashboard from "./pages/Rider/RiderDashboard";
 
 // Simple Cart Component
@@ -114,6 +119,9 @@ function App() {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedPharmacy, setSelectedPharmacy] = useState(null);
 
+  // ⭐ NEW: selected medicine id
+  const [selectedMedicineId, setSelectedMedicineId] = useState(null);
+
   const handleSearch = (term) => {
     setSearchTerm(term);
     if (term.trim() === "") {
@@ -131,7 +139,7 @@ function App() {
   const isDashboard =
     currentPage === "admin-dashboard" ||
     currentPage === "pharmacy-dashboard" ||
-    currentPage === "rider-dashboard"; // ⭐ added here
+    currentPage === "rider-dashboard";
 
   const isLoginPage = currentPage === "admin";
 
@@ -155,28 +163,39 @@ function App() {
           />
         ) : showCart ? (
           <SimpleCart setShowCheckout={setShowCheckout} />
+
+          
         ) : currentPage === "pharmacies" ? (
           <PharmaciesPage
             setCurrentPage={setCurrentPage}
             setSelectedPharmacy={setSelectedPharmacy}
           />
-        ) : currentPage === "store" ? (
-          <PharmacyStore
-            setCurrentPage={setCurrentPage}
-            selectedPharmacy={selectedPharmacy}
-          />
+
+          ) : currentPage === "store" ? (
+  <PharmacyStore
+    setCurrentPage={setCurrentPage}
+    selectedPharmacy={selectedPharmacy}
+    setSelectedMedicineId={setSelectedMedicineId}   // ⭐ REQUIRED
+  />
+
+        
         ) : currentPage === "products" ? (
-          <AllProductsPage />
+          <AllProductsPage
+            setCurrentPage={setCurrentPage}
+            setSelectedMedicineId={setSelectedMedicineId} // ⭐ NEW
+          />
         ) : currentPage === "admin" ? (
           <AdminLogin setCurrentPage={setCurrentPage} />
         ) : currentPage === "admin-dashboard" ? (
           <SuperAdminDashboard setCurrentPage={setCurrentPage} />
         ) : currentPage === "pharmacy-dashboard" ? (
           <PharmacyDashboard setCurrentPage={setCurrentPage} />
-
-        // ⭐ YOUR NEW RIDER ROUTE — Only this is added
         ) : currentPage === "rider-dashboard" ? (
           <RiderDashboard setCurrentPage={setCurrentPage} />
+
+        // ⭐ NEW DYNAMIC MEDICINE PAGE
+        ) : currentPage === "medicine-details" ? (
+          <MedicineDetails medicineId={selectedMedicineId} />
 
         ) : (
           <>
@@ -185,7 +204,13 @@ function App() {
               searchResults={searchResults}
               searchTerm={searchTerm}
             />
-            <TopSellingMedicines setCurrentPage={setCurrentPage} />
+
+            <TopSellingMedicines
+  setCurrentPage={setCurrentPage}
+  setSelectedMedicineId={setSelectedMedicineId}
+/>
+
+           
             <Reviews />
           </>
         )}

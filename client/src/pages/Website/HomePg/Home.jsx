@@ -7,7 +7,7 @@ import hero from "../../../assets/hero.png";
 // COMPONENTS
 import Features from "./Features";
 import CategoriesSection from "./CategoriesSection";
-import Ecosystem from "./Ecosystem";   // ✅ Added
+import Ecosystem from "./Ecosystem"; // ✅ Added
 
 // FIREBASE
 import { db } from "../../../firebase/config";
@@ -17,7 +17,7 @@ function Home({ onSearch, searchResults, searchTerm }) {
   const [localSearchTerm, setLocalSearchTerm] = useState("");
   const [localResults, setLocalResults] = useState([]);
 
-  // 🔥 NEW: Home-page Firebase search (App.jsx remains unchanged)
+  // 🔥 Home-page Firebase search
   const performFirebaseSearch = async (query) => {
     if (!query.trim()) {
       setLocalResults([]);
@@ -45,17 +45,19 @@ function Home({ onSearch, searchResults, searchTerm }) {
       });
     }
 
-    // Filter
-    const filtered = allProducts.filter((product) =>
-      (product.productName || "")
-        .toLowerCase()
-        .includes(query.toLowerCase())
-    );
+    // ⭐ Search by Name or Formula
+    const filtered = allProducts.filter((product) => {
+      const name = (product.productName || "").toLowerCase();
+      const formula = (product.formula || "").toLowerCase();
+      const q = query.toLowerCase();
+
+      return name.includes(q) || formula.includes(q);
+    });
 
     setLocalResults(filtered);
   };
 
-  // Search handler for Home page only
+  // Search button
   const handleSearch = (e) => {
     e.preventDefault();
     performFirebaseSearch(localSearchTerm);
@@ -130,36 +132,61 @@ function Home({ onSearch, searchResults, searchTerm }) {
       {/* ---------------- SEARCH RESULTS BELOW HERO ---------------- */}
       {localResults.length > 0 && (
         <div className="products-grid">
-          {localResults.map((product) => (
-            <div className="product-card" key={product.id}>
-              <img
-                src={
-                  product.image ||
-                  `https://placehold.co/300x200/1a7f45/ffffff?text=${encodeURIComponent(
-                    product.productName
-                  )}`
-                }
-                alt={product.productName}
-              />
+          {localResults.map((product) => {
+            // ⭐ UNIVERSAL IMAGE HANDLER
+            const productImage =
+              product.imageURL ||
+              product.image ||
+              product.imgURL ||
+              product.img ||
+              product.photoURL ||
+              product.picture ||
+              (Array.isArray(product.images) ? product.images[0] : null) ||
+              product.url ||
+              product.thumbnail ||
+              product.featuredImage ||
+              `https://placehold.co/300x200/1a7f45/ffffff?text=${encodeURIComponent(
+                product.productName || "Medicine"
+              )}`;
 
-              <div className="product-info">
-                <h3>{product.productName}</h3>
-                <p>{product.pharmacyName}</p>
-                <p>PKR {product.price}</p>
+            return (
+              <div className="product-card" key={product.id}>
+                <img
+                  src={productImage}
+                  alt={product.productName}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src =
+                      "https://via.placeholder.com/300x200/1a7f45/ffffff?text=No+Image";
+                  }}
+                />
+
+                <div className="product-info">
+                  <h3>{product.productName}</h3>
+                  <p>{product.pharmacyName}</p>
+                  <p>PKR {product.price}</p>
+
+                  {/* ⭐ ADDED FORMULA, DOSE, QUANTITY */}
+                  <div className="product-extra">
+                    <p><strong>Formula:</strong> {product.formula ?? "N/A"}</p>
+                    <p><strong>Dose:</strong> {product.dose ?? "N/A"}</p>
+                    <p><strong>Quantity:</strong> {product.quantity ?? product.stock ?? "N/A"}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       {/* ---------------- CATEGORY SECTION ---------------- */}
       <CategoriesSection />
-{/* ---------------- FEATURES SECTION ---------------- */}
-      <Features />
-      {/* ---------------- ECOSYSTEM SECTION (Added) ---------------- */}
-      <Ecosystem />   {/* ✅ Added */}
 
-      
+      {/* ---------------- FEATURES SECTION ---------------- */}
+      <Features />
+
+      {/* ---------------- ECOSYSTEM SECTION ---------------- */}
+      <Ecosystem />
     </>
   );
 }

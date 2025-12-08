@@ -10,7 +10,7 @@ import CategoriesSection from "../HomePg/CategoriesSection";
 import PharmImage from "../../../assets/Pharm.png";
 import Pharmacy from "../../../assets/Pharmacy.png";
 
-function PharmacyStore({ setCurrentPage, selectedPharmacy }) {
+function PharmacyStore({ setCurrentPage, selectedPharmacy, setSelectedMedicineId }) {
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +27,7 @@ function PharmacyStore({ setCurrentPage, selectedPharmacy }) {
         const q = await getDocs(productsRef);
         const fetchedProducts = q.docs.map((d) => ({
           id: d.id,
+          pharmacyId: selectedPharmacy.id, // ⭐ added for redirect
           ...d.data(),
         }));
         setProducts(fetchedProducts);
@@ -88,6 +89,19 @@ function PharmacyStore({ setCurrentPage, selectedPharmacy }) {
       <section className="about-section">
         <div className="about-left">
           <h2>About {selectedPharmacy.name}</h2>
+
+          <p>
+            {selectedPharmacy.description
+              ? selectedPharmacy.description
+              : `${selectedPharmacy.name} has been serving the people of Gujrat for years, providing trusted healthcare and timely delivery of medicines.`}
+          </p>
+
+          <div className="about-features">
+            <div className="feature">✅ Licensed Products</div>
+            <div className="feature">⚡ Fast Home Delivery</div>
+            <div className="feature">💊 Quality Assured Medicines</div>
+            <div className="feature">📦 Affordable Prices</div>
+          </div>
         </div>
 
         <div className="about-image">
@@ -118,7 +132,20 @@ function PharmacyStore({ setCurrentPage, selectedPharmacy }) {
                 )}`;
 
               return (
-                <div key={p.id} className="product-card">
+                <div
+                  key={p.id}
+                  className="product-card"
+                  style={{ cursor: "pointer" }}
+
+                  // ⭐ CLICK → GO TO MEDICINE DETAILS
+                  onClick={() => {
+                    setSelectedMedicineId({
+                      productId: p.id,
+                      pharmacyId: p.pharmacyId,
+                    });
+                    setCurrentPage("medicine-details");
+                  }}
+                >
                   <div className="product-image">
                     <img
                       src={productImage}
@@ -133,10 +160,20 @@ function PharmacyStore({ setCurrentPage, selectedPharmacy }) {
                   </div>
 
                   <h3>{p.productName || "Unnamed Product"}</h3>
+
+                  <div className="product-extra">
+                    <p><strong>Formula:</strong> {p.formula ?? "N/A"}</p>
+                    <p><strong>Dose:</strong> {p.dose ?? "N/A"}</p>
+                    <p><strong>Quantity:</strong> {p.quantity ?? p.stock ?? "N/A"}</p>
+                  </div>
+
                   <p className="price">Rs. {p.price ?? "N/A"}</p>
 
                   <button
-                    onClick={() => handleAddToCart(p)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevent redirect
+                      handleAddToCart(p);
+                    }}
                     className={`add-btn ${p.stock === 0 ? "disabled" : ""}`}
                     disabled={p.stock === 0}
                   >

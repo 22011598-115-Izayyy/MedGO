@@ -65,6 +65,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     stock: "",
     expiryDate: "",
     status: "Active",
+    quantity: "", // <-- ADDED (string)
   });
 
   // Page selection
@@ -234,6 +235,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
         await setDoc(doc(ref, medId), {
           productName: med.name || med.productName || "",
           formula: med.formula || "",
+          quantity: med.quantity || 0, // master->pharmacy mapping (keeps master value)
           manufacturer: med.manufacturer || med.brand || "",
           dose: med.dose || "",
           category: med.category || "",
@@ -351,10 +353,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
       const pharmacyDocId = snap.docs[0].id;
       const ref = collection(db, "Pharmacies", pharmacyDocId, "products");
 
-
-
-
-      
       // Handle image upload
       let imageURL = "";
       if (!editProduct) {
@@ -371,6 +369,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
 
       const finalData = {
         ...productData,
+        quantity: productData.quantity || "", // <-- ADDED (string)
         imageURL: imageURL || "",
       };
 
@@ -405,6 +404,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
         stock: "",
         expiryDate: "",
         status: "Active",
+        quantity: "", // <-- RESET quantity here
       });
 
       setDoseMode("dropdown");
@@ -432,6 +432,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     setProductData({
       productName: product.productName || "",
       formula: product.formula || "",
+      quantity: product.quantity || "", // <-- LOAD quantity
       manufacturer: product.manufacturer || "",
       dose: product.dose || "",
       category: product.category || "",
@@ -553,6 +554,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 stock: "",
                 expiryDate: "",
                 status: "Active",
+                quantity: "", // <-- ensure quantity reset when opening Add
               });
               setDoseMode("dropdown");
               setSelectedImage(null);
@@ -756,12 +758,21 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 >
                   <option value="">Enter category</option>
                   <option>Pain Killer</option>
-                  <option>Antibiotic</option>
-                  <option>Fever Relief</option>
-                  <option>Allergy</option>
-                  <option>Digestive</option>
-                  <option>Respiratory</option>
-                  <option>Vitamin</option>
+                      <option>Antibiotic</option>
+                      <option>Fever And Pain</option>
+                      <option>Cold And Flu</option>
+                      <option>Allergy</option>
+                      <option>Digestive</option>
+                      <option>Respiratory</option>
+                      <option>Vitamin</option>
+                      <option>Bone And Joint Pain</option>
+                      <option>Cardiac Care</option>
+                      <option>Derma Care</option>
+                      <option>ENT Care</option>
+                      <option>Eye And Ear Care</option>
+                      <option>Mental Health</option>
+                      <option>Lung And Liver Care</option>
+                      <option>Other</option>
                 </select>
 
                 <select
@@ -803,6 +814,16 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                   value={productData.stock}
                   onChange={handleChange}
                   required
+                />
+
+                {/* quantity as string field */}
+                <input
+                  type="text"
+                  name="quantity"
+                  placeholder="Enter quantity (e.g. 20 tablets or 60 ml)"
+                  className="input"
+                  value={productData.quantity}
+                  onChange={handleChange}
                 />
 
                 <input
@@ -869,6 +890,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                   <tr>
                     <th>Name</th>
                     <th>Formula</th>
+                    <th>Quantity</th> {/* ADDED */}
                     <th>Manufacturer</th>
                     <th>Dose</th>
                     <th>Category</th>
@@ -883,7 +905,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 <tbody>
                   {products.length === 0 ? (
                     <tr>
-                      <td colSpan="10" className="no-products">
+                      <td colSpan="11" className="no-products">
                         No products added yet.
                       </td>
                     </tr>
@@ -892,6 +914,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                       <tr key={p.id}>
                         <td>{p.productName}</td>
                         <td>{p.formula || "-"}</td>
+                        <td>{p.quantity || "-"}</td> {/* ADDED */}
                         <td>{p.manufacturer || "-"}</td>
                         <td>{p.dose || "-"}</td>
                         <td>{p.category || "-"}</td>
@@ -938,6 +961,15 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                       required
                     />
 
+                    {/* Edit quantity as string field */}
+                    <input
+                      type="text"
+                      name="quantity"
+                      className="input"
+                      value={productData.quantity}
+                      onChange={handleChange}
+                    />
+
                     <input
                       type="text"
                       name="manufacturer"
@@ -979,12 +1011,21 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                       <option value="">Enter category</option>
                       <option>Pain Killer</option>
                       <option>Antibiotic</option>
-                      <option>Fever Relief</option>
+                      <option>Fever And Pain</option>
+                      <option>Cold And Flu</option>
                       <option>Allergy</option>
                       <option>Digestive</option>
                       <option>Respiratory</option>
                       <option>Vitamin</option>
-                    </select>
+                      <option>Bone And Joint Pain</option>
+                      <option>Cardiac Care</option>
+                      <option>Derma Care</option>
+                      <option>ENT Care</option>
+                      <option>Eye And Ear Care</option>
+                      <option>Mental Health</option>
+                      <option>Lung And Liver Care</option>
+                      <option>Other</option>
+                              </select>
 
                     <select
                       name="type"
@@ -1084,6 +1125,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                             stock: "",
                             expiryDate: "",
                             status: "Active",
+                            quantity: "", // reset quantity
                           });
                           setDoseMode("dropdown");
                           // clear edit-image preview
