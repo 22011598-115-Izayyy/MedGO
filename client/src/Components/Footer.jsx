@@ -65,7 +65,7 @@ const Footer = ({ setCurrentPage }) => {
                 className="footer-link-button"
                 onClick={() => setCurrentPage("pharmacies")}
               >
-                Pharmacy Registration
+                Pharmacies
               </button>
             </li>
 
@@ -74,7 +74,7 @@ const Footer = ({ setCurrentPage }) => {
                 className="footer-link-button"
                 onClick={() => setCurrentPage("admin")} // Your login page value
               >
-                Customer Login / Signup
+                Login 
               </button>
             </li>
 
@@ -91,7 +91,7 @@ const Footer = ({ setCurrentPage }) => {
                 className="footer-link-button"
                 onClick={() => setCurrentPage("terms")}
               >
-                Terms & Conditions
+              Terms of Service
               </button>
             </li>
 
@@ -100,8 +100,8 @@ const Footer = ({ setCurrentPage }) => {
                 className="footer-link-button"
                 onClick={() => setCurrentPage("privacy")}
               >
-                Privacy Policy
-              </button>
+              Privacy Policy
+              </button> 
             </li>
 
           </ul>
@@ -111,7 +111,7 @@ const Footer = ({ setCurrentPage }) => {
         <div className="footer-section">
           <h4>Connect</h4>
           <div className="contact-info">
-            <p><i className="fas fa-phone"></i> +1 (555) 123-4567</p>
+            <p><i className="fas fa-phone"></i> +92 335 1542013</p>
             <p><i className="fas fa-envelope"></i> support@medgo.com</p>
             <p><i className="fas fa-clock"></i> WhatsApp Support Available</p>
           </div>
