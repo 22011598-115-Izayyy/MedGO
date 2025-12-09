@@ -6,7 +6,7 @@ import "./StoreDetails.css";
 
 import CategoriesSection from "../HomePg/CategoriesSection";
 
-// Images + Video
+// Images
 import PharmImage from "../../../assets/Pharm.png";
 import Pharmacy from "../../../assets/Pharmacy.png";
 
@@ -27,7 +27,7 @@ function PharmacyStore({ setCurrentPage, selectedPharmacy, setSelectedMedicineId
         const q = await getDocs(productsRef);
         const fetchedProducts = q.docs.map((d) => ({
           id: d.id,
-          pharmacyId: selectedPharmacy.id, // ⭐ added for redirect
+          pharmacyId: selectedPharmacy.id,
           ...d.data(),
         }));
         setProducts(fetchedProducts);
@@ -65,24 +65,29 @@ function PharmacyStore({ setCurrentPage, selectedPharmacy, setSelectedMedicineId
         </button>
       </div>
 
-      {/* HERO */}
+      {/* ========================================= */}
+      {/* ⭐ UPDATED HERO SECTION (Same as All Products page) */}
+      {/* ========================================= */}
+
       <section
         className="hero-section"
         style={{ backgroundImage: `url(${heroBackground})` }}
       >
-        <div className="hero-inner">
-          <div className="hero-overlay"></div>
-          <div className="hero-content">
-            <h1>{selectedPharmacy.name}</h1>
-            <p>
-              {selectedPharmacy.address
-                ? `Serving ${selectedPharmacy.address} with quality medicines and care.`
-                : "Your trusted healthcare partner."}
-            </p>
-          </div>
+        <div className="hero-content">
+          <h1>
+            <span className="line">{selectedPharmacy.name},</span>
+            <span className="line">Your Trusted Pharmacy</span>
+          </h1>
+
+          <p>
+            {selectedPharmacy.address
+              ? `Serving ${selectedPharmacy.address} with quality medicines and care.`
+              : "Your trusted healthcare partner."}
+          </p>
         </div>
       </section>
 
+      {/* Categories Section */}
       <CategoriesSection />
 
       {/* ABOUT */}
@@ -99,6 +104,7 @@ function PharmacyStore({ setCurrentPage, selectedPharmacy, setSelectedMedicineId
           <div className="about-features">
             <div className="feature">✅ Licensed Products</div>
             <div className="feature">⚡ Fast Home Delivery</div>
+            <br></br>
             <div className="feature">💊 Quality Assured Medicines</div>
             <div className="feature">📦 Affordable Prices</div>
           </div>
@@ -136,8 +142,6 @@ function PharmacyStore({ setCurrentPage, selectedPharmacy, setSelectedMedicineId
                   key={p.id}
                   className="product-card"
                   style={{ cursor: "pointer" }}
-
-                  // ⭐ CLICK → GO TO MEDICINE DETAILS
                   onClick={() => {
                     setSelectedMedicineId({
                       productId: p.id,
@@ -171,7 +175,7 @@ function PharmacyStore({ setCurrentPage, selectedPharmacy, setSelectedMedicineId
 
                   <button
                     onClick={(e) => {
-                      e.stopPropagation(); // prevent redirect
+                      e.stopPropagation();
                       handleAddToCart(p);
                     }}
                     className={`add-btn ${p.stock === 0 ? "disabled" : ""}`}

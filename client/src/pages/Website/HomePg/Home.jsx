@@ -7,20 +7,28 @@ import hero from "../../../assets/hero.png";
 // COMPONENTS
 import Features from "./Features";
 import CategoriesSection from "./CategoriesSection";
-import Ecosystem from "./Ecosystem"; // ✅ Added
+import Ecosystem from "./Ecosystem";
 
 // FIREBASE
 import { db } from "../../../firebase/config";
 import { collection, getDocs } from "firebase/firestore";
 
-function Home({ onSearch, searchResults, searchTerm }) {
+function Home({
+  onSearch,
+  searchResults,
+  searchTerm,
+  setCurrentPage,
+  setSelectedMedicineId,
+}) {
   const [localSearchTerm, setLocalSearchTerm] = useState("");
   const [localResults, setLocalResults] = useState([]);
+  const [showGridResults, setShowGridResults] = useState(false);
 
-  // 🔥 Home-page Firebase search
+  // FIREBASE SEARCH
   const performFirebaseSearch = async (query) => {
     if (!query.trim()) {
       setLocalResults([]);
+      setShowGridResults(false);
       return;
     }
 
@@ -38,34 +46,58 @@ function Home({ onSearch, searchResults, searchTerm }) {
 
       productsSnap.forEach((prodDoc) => {
         allProducts.push({
-          id: prodDoc.id,
+          id: pharmacyId + "-" + prodDoc.id,  
+          productId: prodDoc.id,
+          pharmacyId: pharmacyId,
           ...prodDoc.data(),
           pharmacyName: pharmacy.name,
         });
       });
     }
 
-    // ⭐ Search by Name or Formula
-    const filtered = allProducts.filter((product) => {
-      const name = (product.productName || "").toLowerCase();
-      const formula = (product.formula || "").toLowerCase();
-      const q = query.toLowerCase();
+    // FILTER + SORT
+    const filtered = allProducts
+      .filter((product) => {
+        const name = (product.productName || "").toLowerCase();
+        const formula = (product.formula || "").toLowerCase();
+        const q = query.toLowerCase();
+        return name.includes(q) || formula.includes(q);
+      })
+      .sort((a, b) => {
+        const q = query.toLowerCase();
+        const aName = (a.productName || "").toLowerCase();
+        const bName = (b.productName || "").toLowerCase();
 
-      return name.includes(q) || formula.includes(q);
-    });
+        if (aName === q) return -1;
+        if (bName === q) return 1;
+
+        if (aName.startsWith(q) && !bName.startsWith(q)) return -1;
+        if (bName.startsWith(q) && !aName.startsWith(q)) return 1;
+
+        return aName.localeCompare(bName);
+      });
 
     setLocalResults(filtered);
   };
 
-  // Search button
   const handleSearch = (e) => {
     e.preventDefault();
+    setShowGridResults(true);
     performFirebaseSearch(localSearchTerm);
+  };
+
+  const goToDetails = (item) => {
+    setSelectedMedicineId({
+      productId: item.productId,
+      pharmacyId: item.pharmacyId,
+    });
+    setCurrentPage("medicine-details");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <>
-      {/* ---------------- HERO SECTION ---------------- */}
+      {/* HERO SECTION */}
       <div
         className="home-container"
         style={{ backgroundImage: `url(${hero})` }}
@@ -78,7 +110,6 @@ function Home({ onSearch, searchResults, searchTerm }) {
         <div className="floating-pill pill5"></div>
         <div className="floating-pill pill6"></div>
 
-        {/* LEFT CONTENT */}
         <div className="left-content">
           <h1 className="main-heading">
             MED-GO Pakistan's First Online Pharmacy
@@ -86,8 +117,7 @@ function Home({ onSearch, searchResults, searchTerm }) {
 
           <p className="sub-heading">
             Find the medicines you need instantly, compare options, and get fast
-            delivery from nearby pharmacies. Med-Go makes healthcare easy,
-            convenient, and reliable.
+            delivery from nearby pharmacies.
           </p>
 
           {/* SEARCH BAR */}
@@ -102,9 +132,29 @@ function Home({ onSearch, searchResults, searchTerm }) {
               }}
             />
             <button type="submit">🔍</button>
+
+            {/* DROPDOWN RESULTS */}
+            {localSearchTerm.trim() !== "" && (
+              <div className="search-dropdown">
+                {localResults.length === 0 ? (
+                  <div className="no-results">No results found.</div>
+                ) : (
+                  localResults.map((item) => (
+                    <div
+                      key={item.id}
+                      className="search-item"
+                      onClick={() => goToDetails(item)}
+                    >
+                      <span className="item-name">{item.productName}</span>
+                      <span className="item-pharmacy">{item.pharmacyName}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </form>
 
-          {/* SEARCH RESULTS INFO */}
+          {/* SEARCH INFO */}
           {localSearchTerm && (
             <div className="search-results-info">
               <p>
@@ -112,66 +162,37 @@ function Home({ onSearch, searchResults, searchTerm }) {
                   ? `Found ${localResults.length} result(s) for "${localSearchTerm}"`
                   : `No results found for "${localSearchTerm}"`}
               </p>
-
-              {localResults.length === 0 && (
-                <button
-                  className="clear-search-btn"
-                  onClick={() => {
-                    setLocalSearchTerm("");
-                    setLocalResults([]);
-                  }}
-                >
-                  Show All Products
-                </button>
-              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* ---------------- SEARCH RESULTS BELOW HERO ---------------- */}
-      {localResults.length > 0 && (
+      {/* GRID RESULTS */}
+      {showGridResults && localResults.length > 0 && (
         <div className="products-grid">
           {localResults.map((product) => {
-            // ⭐ UNIVERSAL IMAGE HANDLER
             const productImage =
               product.imageURL ||
               product.image ||
               product.imgURL ||
-              product.img ||
               product.photoURL ||
-              product.picture ||
               (Array.isArray(product.images) ? product.images[0] : null) ||
-              product.url ||
-              product.thumbnail ||
-              product.featuredImage ||
-              `https://placehold.co/300x200/1a7f45/ffffff?text=${encodeURIComponent(
-                product.productName || "Medicine"
+              `https://placehold.co/300x200?text=${encodeURIComponent(
+                product.productName
               )}`;
 
             return (
-              <div className="product-card" key={product.id}>
-                <img
-                  src={productImage}
-                  alt={product.productName}
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src =
-                      "https://via.placeholder.com/300x200/1a7f45/ffffff?text=No+Image";
-                  }}
-                />
+              <div
+                className="product-card"
+                key={product.id}
+                onClick={() => goToDetails(product)}
+              >
+                <img src={productImage} alt={product.productName} />
 
                 <div className="product-info">
                   <h3>{product.productName}</h3>
                   <p>{product.pharmacyName}</p>
                   <p>PKR {product.price}</p>
-
-                  {/* ⭐ ADDED FORMULA, DOSE, QUANTITY */}
-                  <div className="product-extra">
-                    <p><strong>Formula:</strong> {product.formula ?? "N/A"}</p>
-                    <p><strong>Dose:</strong> {product.dose ?? "N/A"}</p>
-                    <p><strong>Quantity:</strong> {product.quantity ?? product.stock ?? "N/A"}</p>
-                  </div>
                 </div>
               </div>
             );
@@ -179,13 +200,9 @@ function Home({ onSearch, searchResults, searchTerm }) {
         </div>
       )}
 
-      {/* ---------------- CATEGORY SECTION ---------------- */}
+      {/* SECTIONS */}
       <CategoriesSection />
-
-      {/* ---------------- FEATURES SECTION ---------------- */}
       <Features />
-
-      {/* ---------------- ECOSYSTEM SECTION ---------------- */}
       <Ecosystem />
     </>
   );

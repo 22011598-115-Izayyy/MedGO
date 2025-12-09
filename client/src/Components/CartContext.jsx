@@ -50,6 +50,23 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // Convenience helpers for components that expect increment/decrement
+  const incrementQuantity = (productId) => {
+    setCartItems(prev => 
+      prev.map(item =>
+        item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+      )
+    );
+  };
+
+  const decrementQuantity = (productId) => {
+    setCartItems(prev =>
+      prev
+        .map(item => (item.id === productId ? { ...item, quantity: item.quantity - 1 } : item))
+        .filter(item => item.quantity > 0)
+    );
+  };
+
   return (
     <CartContext.Provider value={{
       cart: cartItems,
@@ -58,7 +75,9 @@ export const CartProvider = ({ children }) => {
       removeFromCart,
       clearCart,
       getCartTotal,
-      updateQuantity
+      updateQuantity,
+      incrementQuantity,
+      decrementQuantity
     }}>
       {children}
     </CartContext.Provider>

@@ -51,7 +51,7 @@ function AllProductsPage({ setCurrentPage, setSelectedMedicineId }) {
           productsSnap.forEach((prodDoc) => {
             allProducts.push({
               id: prodDoc.id,
-              pharmacyId,        // ⭐ REQUIRED FIX
+              pharmacyId,
               ...prodDoc.data(),
               pharmacyName,
             });
@@ -95,11 +95,19 @@ function AllProductsPage({ setCurrentPage, setSelectedMedicineId }) {
 
   return (
     <div className="all-products-page">
+      {/* ⭐ HERO SECTION UPDATED ONLY */}
       <section className="products-hero">
         <div className="hero-content">
-          <h1 className="page-title">Trusted Medicines, All in One Place</h1>
+          
+<h1 className="page-title">
+  <span className="line">Trusted Medicines,</span>
+  <span className="line">All in One Place</span>
+</h1>
+
+
+      
           <p className="page-subtitle">
-            Browse and shop medicines and healthcare products from all pharmacies in one place.
+            Browse and shop healthcare products and medicines from all pharmacies in one place.
           </p>
         </div>
       </section>
@@ -171,9 +179,10 @@ function AllProductsPage({ setCurrentPage, setSelectedMedicineId }) {
                 )}`;
 
               return (
-                <div className="product-card" key={product.id + product.pharmacyName}>
-                  
-                  {/* ⭐ CLICK TO OPEN MEDICINE PAGE */}
+                <div
+                  className="product-card"
+                  key={product.id + product.pharmacyName}
+                >
                   <div
                     className="product-image"
                     onClick={() => {
@@ -214,20 +223,30 @@ function AllProductsPage({ setCurrentPage, setSelectedMedicineId }) {
                     <div className="product-pharmacy">{product.pharmacyName}</div>
 
                     <div className="product-extra">
-                      <p><strong>Formula:</strong> {product.formula ?? "N/A"}</p>
-                      <p><strong>Dose:</strong> {product.dose ?? "N/A"}</p>
-                      <p><strong>Quantity:</strong> {product.quantity ?? "N/A"}</p>
+                      <p>
+                        <strong>Formula:</strong> {product.formula ?? "N/A"}
+                      </p>
+                      <p>
+                        <strong>Dose:</strong> {product.dose ?? "N/A"}
+                      </p>
+                      <p>
+                        <strong>Quantity:</strong> {product.quantity ?? "N/A"}
+                      </p>
                     </div>
 
                     <div className="product-footer">
-                      <div className="product-price">Rs. {product.price ?? "N/A"}</div>
+                      <div className="product-price">
+                        Rs. {product.price ?? "N/A"}
+                      </div>
 
                       <button
                         className="add-to-cart-btn"
                         onClick={() => handleAddToCart(product)}
                         disabled={product.stock === 0}
                       >
-                        {product.stock === 0 ? "Out of Stock" : "🛒 Add to Cart"}
+                        {product.stock === 0
+                          ? "Out of Stock"
+                          : "🛒 Add to Cart"}
                       </button>
                     </div>
                   </div>

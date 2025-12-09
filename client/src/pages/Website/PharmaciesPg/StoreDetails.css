@@ -46,81 +46,76 @@
 /* ------------------------------------------
    HERO SECTION (UPDATED PREMIUM BG)
 --------------------------------------------*/
+
+
 .hero-section {
-  /* Premium Abstract Medical Background */
-  background-image: url('https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=2068&auto=format&fit=crop');
-  background-size: cover !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-  min-height: 600px; /* Adjusted height for better proportions */
-  width: 100%;
   position: relative;
+  color: white;
+  padding: 130px 0 150px;
+  overflow: hidden;
+
+  /* ⭐ SAME IMAGE STYLE AS ALL PRODUCTS PAGE */
+  background-image: url('../../../assets/allproducts.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: right center;
+  background-color: #144530;
+
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding-right: 100px;
-  overflow: hidden; /* Ensures no scrollbar issues from overlay */
+  align-items: center; /* vertical center */
+    padding-right: 30px;
+
 }
 
-/* PREMIUM DARK FADE OVERLAY */
+/* Accent circle */
 .hero-section::before {
-  content: "";
+  content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  /* Smooth gradient from dark green to transparent */
-  background: linear-gradient(
-    90deg, 
-    rgba(11, 40, 30, 0.2) 0%, 
-    rgba(11, 40, 30, 0.6) 100%
-  );
+  top: -20%;
+  left: -10%;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
   z-index: 1;
 }
 
-/* SIDE CONTENT OVERLAY (The smooth fade behind text) */
-.hero-overlay {
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  width: 40%; /* Slightly wider for better text backing */
-  background: linear-gradient(
-    to left,
-    rgba(6, 28, 20, 0.95) 0%,
-    rgba(10, 45, 35, 0.8) 50%,
-    transparent 100%
-  );
-  z-index: 2;
-}
-
 .hero-content {
+  max-width: 650px;
+  margin-left: 80px;
   position: relative;
   z-index: 3;
-  max-width: 500px;
-  color: white;
-  text-align: right; /* Aligned right for this layout */
-  margin-left: auto;
-  margin-right: 50px;
-  transform: translateY(0); /* Centered vertically */
+  text-align: left;
 }
 
+/* Title — same style as All Products */
 .hero-content h1 {
-  font-size: 4.5rem;
+  font-size: 3.2rem;
   font-weight: 800;
-  margin-bottom: 5px;
-  line-height: 1.1;
-  text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  line-height: 1.2;
+  margin-bottom: 20px;
+  letter-spacing: -1px;
+  white-space: pre-line; /* allow controlled breaking */
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
+/* Subtitle */
 .hero-content p {
-  font-size: 1.4rem;
-  margin-bottom: 25px;
-  opacity: 0.9;
+  font-size: 1.25rem;
   font-weight: 300;
-  letter-spacing: 0.5px;
+  line-height: 1.7;
+  max-width: 500px;
+  color: #D1FAE5;
+  opacity: 0.95;
 }
+
+/* Force lines to stay separate when using spans */
+.hero-content .line {
+  display: block;
+  white-space: nowrap;
+}
+
 
 /* ---------- ABOUT SECTION ---------- */
 .about-section {
@@ -157,7 +152,7 @@
 }
 
 .feature {
-  background: #F0FDF4;
+  background: #f0fdf4;
   border: 1px solid #DCFCE7;
   padding: 10px 22px;
   border-radius: 25px;
@@ -186,14 +181,16 @@
   max-width: 100%;
   padding: 80px 40px 100px;
   background: #F8FAFC;
-  text-align: center;
+  text-align: left;
 }
 
 .products-section h2 {
   font-size: 2.5rem;
-  color: #0B281E;
+  color: #144530;
   margin-bottom: 40px;
   font-weight: 800;
+    text-align: center;
+
 }
 
 /* MAIN GRID — 5 CARDS PER ROW */

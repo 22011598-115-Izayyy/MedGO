@@ -6,7 +6,6 @@
 .all-products-page {
   min-height: 100vh;
   background-color: #F8FAFC;
-  /* Subtle pattern for texture */
   background-image: 
     radial-gradient(at 0% 0%, rgba(26, 127, 69, 0.03) 0px, transparent 50%),
     radial-gradient(at 100% 100%, rgba(11, 40, 30, 0.03) 0px, transparent 50%);
@@ -14,61 +13,78 @@
   color: #1A202C;
 }
 
+
 /* ---------- HERO SECTION ---------- */
 .products-hero {
-  /* Deep Luxury Green Gradient matching other pages */
-  background: linear-gradient(170deg, #0B281E 0%, #103F2D 50%, #1A5D42 100%);
-  color: white;
-  padding: 120px 0 140px; /* Increased padding for overlap effect */
-  text-align: center;
   position: relative;
+  color: white;
+  padding: 130px 0 150px; 
   overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  background-image: url('../../../assets/allproducts.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: right center;
+  background-color: #144530;
+  display: flex;
+  align-items: center;     /* ⭐ Vertically center text */
 }
 
-/* Abstract background accent */
+/* Accent Circle */
 .products-hero::before {
   content: '';
   position: absolute;
-  top: -30%;
-  right: -10%;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 60%);
+  top: -20%;
+  left: -10%;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
+  z-index: 1;
 }
 
 .hero-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 30px;
+  max-width: 650px;        /* ⭐ Text area controlled */
+  margin-left: 80px;       /* ⭐ Push text more left */
+  padding: 0;
   position: relative;
   z-index: 2;
+  text-align: left; 
 }
 
+/* Title */
 .page-title {
-  font-size: 3.5rem;
+  font-size: 3.2rem;
+  line-height: 1.2;
+  margin-bottom: 20px;
   font-weight: 800;
-  margin-bottom: 15px;
+  padding-bottom: 30px;
   letter-spacing: -1px;
   text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  white-space: pre-line;   /* ⭐ Forces correct line breaks */
+}
+.page-title .line {
+  display: block;           /* Forces each line to behave like its own row */
+  white-space: nowrap;      /* Prevents any unwanted breaking */
 }
 
+
+/* Subtitle */
 .page-subtitle {
-  font-size: 1.2rem;
-  color: #D1FAE5;
-  opacity: 0.9;
-  margin: 0 auto;
-  max-width: 600px;
-  line-height: 1.6;
+  font-size: 1.25rem;
   font-weight: 300;
+  line-height: 1.7;
+  max-width: 500px;
+  color: #D1FAE5;
+  opacity: 0.95;
+  
 }
+
 
 /* ---------- MAIN CONTAINER (Floating) ---------- */
 .products-container {
   max-width: 1400px;
-  margin: -70px auto 0; /* Negative margin for overlap */
+  margin: -70px auto 0;
   padding: 0 40px 80px;
   position: relative;
   z-index: 10;
@@ -96,7 +112,7 @@
 
 .search-input {
   width: 100%;
-  padding: 16px 25px 16px 50px; /* Space for icon if you add one */
+  padding: 16px 25px 16px 50px;
   border: 2px solid #E2E8F0;
   border-radius: 50px;
   font-size: 1.05rem;
@@ -127,8 +143,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   color: #1A202C;
-  appearance: none; /* Removes default arrow */
-  /* Custom arrow can be added via background-image if needed */
+  appearance: none;
 }
 
 .category-select:focus {
@@ -147,7 +162,7 @@
 .results-info p {
   margin: 0;
   font-weight: 600;
-  color: #166534; /* Darker green for text */
+  color: #166534;
   font-size: 1.1rem;
   display: flex;
   align-items: center;
@@ -168,7 +183,6 @@
   background: white;
   border-radius: 24px;
   padding: 20px;
-  /* Premium Soft Shadow Stack */
   box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.06);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   width: 100%;
@@ -185,14 +199,13 @@
   border-color: rgba(26, 127, 69, 0.2);
 }
 
-/* Product Image Area */
 .product-image {
   position: relative;
   margin-bottom: 20px;
   border-radius: 18px;
   overflow: hidden;
   height: 220px;
-  background: #F1F5F9; /* Fallback */
+  background: #F1F5F9;
 }
 
 .product-image img {
@@ -206,7 +219,6 @@
   transform: scale(1.1);
 }
 
-/* Rating Badge */
 .product-rating {
   position: absolute;
   top: 15px;
@@ -226,10 +238,9 @@
 }
 
 .stars {
-  color: #FBBF24; /* Amber/Gold for stars */
+  color: #FBBF24;
 }
 
-/* Product Info */
 .product-info {
   display: flex;
   flex-direction: column;
@@ -255,7 +266,6 @@
   gap: 6px;
 }
 
-/* Footer (Price + Button) */
 .product-footer {
   display: flex;
   justify-content: space-between;
@@ -268,11 +278,10 @@
 .product-price {
   font-size: 1.4rem;
   font-weight: 800;
-  color: #15803D; /* Rich Green */
+  color: #15803D;
   letter-spacing: -0.5px;
 }
 
-/* Add Button with Shine Effect */
 .add-to-cart-btn {
   background: linear-gradient(135deg, #1A7F45 0%, #166534 100%);
   color: white;
@@ -291,7 +300,6 @@
   overflow: hidden;
 }
 
-/* Shine Animation */
 .add-to-cart-btn::after {
   content: '';
   position: absolute;
@@ -349,7 +357,12 @@
   .page-title {
     font-size: 2.5rem;
   }
-  
+
+  .products-hero {
+    background-size: cover;
+    background-position: center right;
+  }
+
   .products-container {
     margin-top: -50px;
     padding: 0 20px 60px;
@@ -361,7 +374,7 @@
   }
 
   .product-card:hover {
-    transform: none; /* Disable lift on mobile */
+    transform: none;
   }
 }
 
@@ -371,11 +384,11 @@
     align-items: stretch;
     gap: 15px;
   }
-  
+
   .add-to-cart-btn {
     justify-content: center;
   }
-  
+
   .product-price {
     text-align: center;
   }

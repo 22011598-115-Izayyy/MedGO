@@ -1,10 +1,13 @@
+
 /* PAGE WRAPPER */
 .medicine-wrapper {
   width: 100%;
   max-width: 1250px;
   margin: 40px auto;
   padding: 20px;
+  position: relative;   /* ⭐ REQUIRED FOR BACK BUTTON */
 }
+
 
 /* TITLE */
 .medicine-title {
@@ -103,6 +106,30 @@
 .add-btn:hover {
   background: #145e33;
 }
+
+.back-btn-medicine {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: white;
+  color: #145e33;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: 0.2s ease;
+  z-index: 50; /* ⭐ makes sure it shows above everything */
+}
+
+.back-btn-medicine:hover {
+  background: #145e33;
+  color: white;
+  transform: translateY(-2px);
+}
+
 
 /* MOBILE VIEW */
 @media (max-width: 900px) {

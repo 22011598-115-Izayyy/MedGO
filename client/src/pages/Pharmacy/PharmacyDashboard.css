@@ -256,7 +256,7 @@
 }
 
 .remove-btn {
-  background-color: #f44336;
+  background-color: #f44336 !important;
   color: white;
   border: none;
   padding: 6px 10px;
@@ -266,7 +266,8 @@
 }
 
 .remove-btn:hover {
-  background-color: #d32f2f;
+  background-color: #9a5555 !important;
+  color: white;
 }
 
 /* ===========================

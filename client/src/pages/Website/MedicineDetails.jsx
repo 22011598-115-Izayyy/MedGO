@@ -4,7 +4,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { useCart } from "../../Components/CartContext";
 import "./MedicineDetails.css";
 
-const MedicineDetails = ({ medicineId }) => {
+const MedicineDetails = ({ medicineId, setCurrentPage }) => {
   const [medicine, setMedicine] = useState(null);
   const [pharmacyName, setPharmacyName] = useState("Unknown Pharmacy");
   const [loading, setLoading] = useState(true);
@@ -45,6 +45,14 @@ const MedicineDetails = ({ medicineId }) => {
   return (
     <div className="medicine-wrapper">
 
+      {/* ⭐ BACK BUTTON — WORKS 100% (does NOT touch other logic) */}
+      <button
+        className="back-btn-medicine"
+        onClick={() => setCurrentPage("products")}
+      >
+        ← Back to Products
+      </button>
+
       {/* TITLE */}
       <h1 className="medicine-title">{medName}</h1>
       <p className="pharmacy-label">
@@ -53,7 +61,7 @@ const MedicineDetails = ({ medicineId }) => {
 
       <div className="medicine-grid">
 
-        {/* LEFT IMAGE BOX */}
+        {/* LEFT IMAGE */}
         <div className="medicine-image-card">
           <img
             className="medicine-img"
@@ -70,36 +78,17 @@ const MedicineDetails = ({ medicineId }) => {
           />
         </div>
 
-        {/* RIGHT PANEL */}
+        {/* RIGHT INFO PANEL */}
         <div className="medicine-info-panel">
 
-          <p className="info-item">
-            <b>Formula:</b> {medicine.formula}
-          </p>
+          <p className="info-item"><b>Formula:</b> {medicine.formula}</p>
+          <p className="info-item"><b>Manufacturer:</b> {medicine.manufacturer}</p>
+          <p className="info-item"><b>Dose:</b> {medicine.dose}</p>
+          <p className="info-item"><b>Quantity:</b> {medicine.quantity}</p>
+          <p className="info-item"><b>Type:</b> {medicine.type}</p>
+          <p className="info-item"><b>Expiry Date:</b> {medicine.expiryDate}</p>
 
-          <p className="info-item">
-            <b>Manufacturer:</b> {medicine.manufacturer}
-          </p>
-
-          <p className="info-item">
-            <b>Dose:</b> {medicine.dose}
-          </p>
-
-          <p className="info-item">
-            <b>Quantity:</b> {medicine.quantity}
-          </p>
-
-          <p className="info-item">
-            <b>Type:</b> {medicine.type}
-          </p>
-
-          <p className="info-item">
-            <b>Expiry Date:</b> {medicine.expiryDate}
-          </p>
-
-          
           <h3 style={{ marginTop: "20px", fontWeight: "700" }}>Description</h3>
-
           <p className="description-box">{medicine.description}</p>
 
           <h2 className="price-tag">Rs. {medicine.price}</h2>
@@ -113,8 +102,8 @@ const MedicineDetails = ({ medicineId }) => {
           >
             Add To Cart
           </button>
-        </div>
 
+        </div>
       </div>
     </div>
   );
