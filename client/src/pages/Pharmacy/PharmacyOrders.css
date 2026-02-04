@@ -1,0 +1,200 @@
+/* ===============================
+   PHARMACY ORDERS PAGE
+   =============================== */
+
+.orders-page {
+  padding: 20px;
+  background: #f9fafb;
+  min-height: 100%;
+}
+
+.orders-page h2 {
+  margin-bottom: 16px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* ===============================
+   ORDERS TABLE
+   =============================== */
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.orders-table thead {
+  background: #f3f4f6;
+}
+
+.orders-table th,
+.orders-table td {
+  padding: 14px 12px;
+  text-align: left;
+  font-size: 14px;
+  color: #374151;
+  vertical-align: top;
+}
+
+.orders-table th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+}
+
+.orders-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.2s ease;
+}
+
+.orders-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.orders-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+/* ===============================
+   CUSTOMER + ITEMS
+   =============================== */
+
+.orders-table td div {
+  margin-bottom: 4px;
+}
+
+.orders-table td div:last-child {
+  margin-bottom: 0;
+}
+
+.orders-table td {
+  line-height: 1.5;
+}
+
+/* ===============================
+   ORDER STATUS BADGES
+   =============================== */
+
+.orders-table td:nth-child(5) {
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.orders-table td:nth-child(5)::before {
+  content: "●";
+  margin-right: 6px;
+  font-size: 10px;
+}
+
+/* Status colors */
+.orders-table td:nth-child(5)[data-status="pending"]::before {
+  color: #f59e0b;
+}
+
+.orders-table td:nth-child(5)[data-status="assigned"]::before {
+  color: #3b82f6;
+}
+
+.orders-table td:nth-child(5)[data-status="delivered"]::before {
+  color: #10b981;
+}
+
+/* ===============================
+   RIDER SELECT DROPDOWN
+   =============================== */
+
+.orders-table select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 13px;
+  background: #ffffff;
+  color: #111827;
+  cursor: pointer;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.orders-table select:hover {
+  border-color: #2563eb;
+}
+
+.orders-table select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+/* ===============================
+   EMPTY STATE
+   =============================== */
+
+.orders-page p {
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.accept-btn {
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reject-btn {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.accept-btn:hover {
+  background: #15803d;
+}
+
+.reject-btn:hover {
+  background: #b91c1c;
+}
+
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+
+@media (max-width: 1024px) {
+  .orders-table th,
+  .orders-table td {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .orders-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .orders-page h2 {
+    font-size: 20px;
+  }
+}

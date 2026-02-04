@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../../Components/CartContext';
 import './Checkout.css';
+import { createOrdersFromCart } from './OrderServices';
 
 const Checkout = ({ setShowCart, setShowCheckout }) => {
   const { cart, getCartTotal, clearCart } = useCart();
@@ -21,7 +22,7 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
       ...prev,
       [name]: value
     }));
-    
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -57,22 +58,38 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handlePlaceOrder = (e) => {
+  // 🔥 MULTI-PHARMACY SAFE ORDER PLACEMENT
+  const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
 
-    setOrderPlaced(true);
-    
-    setTimeout(() => {
-      clearCart();
-      setShowCheckout(false);
-      setShowCart(false);
-    }, 3000);
+    if (!validateForm()) return;
+
+    try {
+      await createOrdersFromCart({
+        cart,
+        customer: {
+          name: formData.fullName,
+          email: formData.email,
+          phone: formData.phoneNumber,
+          address: formData.shippingAddress
+        }
+      });
+
+      setOrderPlaced(true);
+
+      setTimeout(() => {
+        clearCart();
+        setShowCheckout(false);
+        setShowCart(false);
+      }, 3000);
+
+    } catch (error) {
+      console.error(error);
+      alert('Failed to place order. Please try again.');
+    }
   };
 
+  // ✅ SUCCESS SCREEN (UNCHANGED)
   if (orderPlaced) {
     return (
       <div className="checkout-page">
@@ -94,12 +111,13 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
     );
   }
 
+  // ✅ MAIN CHECKOUT UI (UNCHANGED)
   return (
     <div className="checkout-page">
       <div className="checkout-container">
         <div className="checkout-header">
           <h2>Checkout</h2>
-          <button 
+          <button
             className="back-btn"
             onClick={() => setShowCheckout(false)}
           >
@@ -193,7 +211,7 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
               {cart.map(item => (
                 <div key={item.id} className="checkout-item">
                   <div className="item-info">
-                    <h4>{item.name}</h4>
+                    <h4>{item.productName}</h4>
                     <p>By {item.pharmacy || 'Pharmacy'}</p>
                     <span className="item-quantity">Qty: {item.quantity}</span>
                   </div>
@@ -203,7 +221,7 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
                 </div>
               ))}
             </div>
-            
+
             <div className="total-section">
               <div className="total-row">
                 <span>Subtotal:</span>
@@ -219,6 +237,7 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>

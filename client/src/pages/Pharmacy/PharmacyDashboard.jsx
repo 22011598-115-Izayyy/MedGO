@@ -1,12 +1,9 @@
-// PharmacyDashboard.jsx
-// Full component with Cloudinary upload UI integrated (Add + Edit) and UI improvements.
-// No business logic changed.
-
 import { MdDashboard } from "react-icons/md";
 import { AiOutlinePlus } from "react-icons/ai";
 import { FaPills } from "react-icons/fa";
 import { TbClipboardList } from "react-icons/tb";
 import PharmacyRiders from "./PharmacyRiders";
+import PharmacyOrders from "./PharmacyOrders";
 import MedGoLOGO from "../../assets/MedGo LOGO.png";
 import React, { useState, useEffect } from "react";
 import { auth, db } from "../../firebase/config";
@@ -1145,13 +1142,11 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
           {/* RIDERS PAGE */}
           {activePage === "riders" && <PharmacyRiders pharmacyId={pharmacyId} />}
 
-          {/* ORDERS PAGE */}
-          {activePage === "orders" && (
-            <div style={{ padding: 20 }}>
-              <h2>Orders</h2>
-              <p>Orders layout unchanged (placeholder).</p>
-            </div>
-          )}
+          
+{/* ORDERS PAGE */}
+{activePage === "orders" && (
+  <PharmacyOrders pharmacyId={pharmacyId} />
+)}
 
           {/* MASTER MEDICINES MODAL */}
           {showSelectModal && (

@@ -227,3 +227,265 @@ stat-card:hover {
   border-radius: 12px;
   box-shadow: 0 0 8px #00000020;
 }
+/* =====================================================
+   PREMIUM MY ORDERS – MODERN CARD DESIGN
+   ===================================================== */
+
+.order-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 22px 24px;
+  margin-bottom: 18px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  border-left: 6px solid #144530;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+}
+
+.order-card h4 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #144530;
+}
+
+.order-card p {
+  font-size: 15px;
+  margin-bottom: 14px;
+  color: #555;
+}
+
+/* =====================================================
+   STATUS BADGES
+   ===================================================== */
+
+.order-card strong {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Assigned */
+.order-card strong:contains("assigned") {
+  background: #fff3cd;
+  color: #b45309;
+}
+
+/* Picked Up */
+.order-card strong:contains("picked") {
+  background: #e0ecff;
+  color: #1d4ed8;
+}
+
+/* On the Way */
+.order-card strong:contains("on_the_way") {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+/* Delivered */
+.badge.success {
+  display: inline-block;
+  background: #dcfce7;
+  color: #166534;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =====================================================
+   PREMIUM BUTTONS
+   ===================================================== */
+
+.primary-btn,
+.success-btn {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 30px;
+  transition: all 0.25s ease;
+}
+
+/* Picked / On the Way */
+.primary-btn {
+  background: linear-gradient(135deg, #144530, #0f3426);
+  color: #fff;
+}
+
+.primary-btn:hover {
+  background: linear-gradient(135deg, #0f3426, #0b261c);
+  transform: scale(1.05);
+}
+
+/* Confirm Delivery */
+.success-btn {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: white;
+}
+
+.success-btn:hover {
+  background: linear-gradient(135deg, #15803d, #166534);
+  transform: scale(1.05);
+}
+
+/* =====================================================
+   PAGE SPACING FIX
+   ===================================================== */
+
+.page {
+  padding-top: 10px;
+}
+
+/* =====================================================
+   HEADER POLISH (NO STRUCTURE CHANGE)
+   ===================================================== */
+
+.header {
+  background: linear-gradient(135deg, #144530, #0f3426);
+  color: white;
+  padding: 18px 25px;
+  border-radius: 14px;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+/* =====================================================
+   CUSTOMER INFO INSIDE ORDER CARD
+   ===================================================== */
+
+.customer-info {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #e5e7eb;
+}
+
+.customer-info p {
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #374151;
+}
+
+.customer-info span {
+  font-weight: 600;
+  color: #144530;
+}
+
+.customer-info a {
+  color: #0f766e;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.customer-info a:hover {
+  text-decoration: underline;
+}
+
+.customer-info .price {
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #14532d;
+}
+/* =========================
+   🔧 STABILITY PATCH (NO SHAKE)
+   ========================= */
+
+/* Lock card position */
+.order-card {
+  transform: translateZ(0);
+  will-change: box-shadow;
+}
+
+/* Remove vertical movement */
+.order-card:hover {
+  transform: none !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.14);
+}
+
+/* Remove button scaling (main cause of shake) */
+.primary-btn:hover,
+.success-btn:hover {
+  transform: none !important;
+}
+
+/* Premium disabled look */
+.primary-btn:disabled,
+.success-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* =========================
+   ACTION BUTTON ROW (PREMIUM)
+   ========================= */
+
+.action-row {
+  margin-top: 18px;
+  display: flex;
+  gap: 14px;              /* ✅ more spacing */
+  flex-wrap: wrap;
+}
+
+/* =========================
+   PREMIUM BUTTONS (MODERN)
+   ========================= */
+
+.primary-btn,
+.success-btn {
+  border: none;
+  outline: none;
+  cursor: pointer;
+
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 600;
+
+  border-radius: 999px;   /* pill shape */
+  display: inline-flex;   /* icon + text */
+  align-items: center;
+  gap: 8px;
+
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Picked / On the Way */
+.primary-btn {
+  background: linear-gradient(135deg, #144530, #0f3426);
+  color: #ffffff;
+}
+
+.primary-btn:hover:not(:disabled) {
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+}
+
+/* Delivered */
+.success-btn {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: white;
+}
+
+.success-btn:hover:not(:disabled) {
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+}
+
+/* Disabled state */
+.primary-btn:disabled,
+.success-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.order-card .badge.success {
+  float: right;
+  margin-top: -250px;
+}
