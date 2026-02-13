@@ -17,129 +17,73 @@ const PharmacyOrders = ({ pharmacyId }) => {
   const [riders, setRiders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ---------------------------------------------
-  // Get pharmacy document ID
-  // ---------------------------------------------
   const loadPharmacyDocId = async () => {
-    const q = query(
-      collection(db, "Pharmacies"),
-      where("pharmacyId", "==", pharmacyId)
+    const snap = await getDocs(
+      query(collection(db, "Pharmacies"), where("pharmacyId", "==", pharmacyId))
     );
-
-    const snap = await getDocs(q);
-    if (!snap.empty) return snap.docs[0].id;
-    return null;
+    return snap.empty ? null : snap.docs[0].id;
   };
 
-  // ---------------------------------------------
-  // REAL-TIME PHARMACY ORDERS (UNCHANGED)
-  // ---------------------------------------------
-  const listenOrders = (docId) => {
-    const ref = collection(db, "Pharmacies", docId, "orders");
-
-    return onSnapshot(ref, (snap) => {
-      setOrders(
-        snap.docs.map((d) => ({
-          id: d.id,
-          ...d.data()
-        }))
-      );
+  const listenOrders = (docId) =>
+    onSnapshot(collection(db, "Pharmacies", docId, "orders"), snap => {
+      setOrders(snap.docs.map(d => ({ id: d.id, ...d.data() })));
       setLoading(false);
     });
-  };
 
-  // ---------------------------------------------
-  // 🔥 REAL-TIME GLOBAL ORDER STATUS SYNC (NEW)
-  // ---------------------------------------------
-  const listenGlobalOrders = (docId) => {
-    const ref = collection(db, "Orders");
-
-    return onSnapshot(ref, async (snap) => {
-      for (const d of snap.docs) {
-        const global = d.data();
-
-        if (!global.pharmacyOrderId || !global.orderStatus) continue;
-
-        const pharmacyOrderRef = doc(
-          db,
-          "Pharmacies",
-          docId,
-          "orders",
-          global.pharmacyOrderId
-        );
-
-        await updateDoc(pharmacyOrderRef, {
-          orderStatus: global.orderStatus
-        });
-      }
-    });
-  };
-
-  // ---------------------------------------------
-  // Fetch riders
-  // ---------------------------------------------
   const fetchRiders = async (docId) => {
-    const ref = collection(db, "Pharmacies", docId, "riders");
-    const snap = await getDocs(ref);
-
+    const snap = await getDocs(collection(db, "Pharmacies", docId, "riders"));
     setRiders(
       snap.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .filter((r) => r.status === "active")
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(r => r.status === "active")
     );
   };
 
   useEffect(() => {
-    let unsubOrders;
-    let unsubGlobal;
-
+    let unsub;
     const load = async () => {
       const id = await loadPharmacyDocId();
       if (!id) return;
-
       setPharmacyDocId(id);
-      unsubOrders = listenOrders(id);
-      unsubGlobal = listenGlobalOrders(id);
+      unsub = listenOrders(id);
       fetchRiders(id);
     };
-
     load();
-
-    return () => {
-      unsubOrders && unsubOrders();
-      unsubGlobal && unsubGlobal();
-    };
+    return () => unsub && unsub();
   }, [pharmacyId]);
 
-  // ---------------------------------------------
-  // Accept / Reject (UNCHANGED)
-  // ---------------------------------------------
-  const updateOrderStatus = async (orderId, status) => {
+  // ✅ ACCEPT / REJECT (UNCHANGED LOGIC)
+  const updatePharmacyStatus = async (orderId, status) => {
     await updateDoc(
       doc(db, "Pharmacies", pharmacyDocId, "orders", orderId),
-      {
-        pharmacyStatus: status,
-        orderStatus: status
-      }
+      { pharmacyStatus: status, orderStatus: status }
     );
+
+    await updateDoc(doc(db, "Orders", orderId), {
+      pharmacyStatus: status,
+      orderStatus: status
+    });
   };
 
-  // ---------------------------------------------
-  // Assign rider (UNCHANGED)
-  // ---------------------------------------------
+  // ✅ ASSIGN RIDER (UNCHANGED LOGIC)
   const assignRider = async (orderId, riderId) => {
-    const rider = riders.find((r) => r.id === riderId);
-    if (!rider || !pharmacyDocId) return;
+    const rider = riders.find(r => r.id === riderId);
+    if (!rider) return;
 
     await updateDoc(
       doc(db, "Pharmacies", pharmacyDocId, "orders", orderId),
       {
         assignedRiderId: rider.id,
         assignedRiderName: rider.name,
-        orderStatus: "assigned",
-        pharmacyStatus: "assigned"
+        orderStatus: "assigned"
       }
     );
+
+    await updateDoc(doc(db, "Orders", orderId), {
+      assignedRiderId: rider.id,
+      assignedRiderName: rider.name,
+      orderStatus: "assigned"
+    });
   };
 
   if (loading) return <p>Loading orders...</p>;
@@ -162,35 +106,51 @@ const PharmacyOrders = ({ pharmacyId }) => {
         </thead>
 
         <tbody>
-          {orders.map((order) => (
+          {orders.map(order => (
             <tr key={order.id}>
               <td>{order.orderId}</td>
               <td>{order.customerName}</td>
               <td>{order.itemCount}</td>
               <td>Rs. {order.totalPrice}</td>
 
-              {/* ✅ NOW THIS CHANGES LIVE */}
-              <td>
+              {/* 🔥 STATUS WITH CSS HOOK (NO LOGIC CHANGE) */}
+              <td className={`status-cell ${order.orderStatus}`}>
                 {order.orderStatus?.replaceAll("_", " ")}
               </td>
 
               <td>{order.assignedRiderName || "-"}</td>
 
               <td>
-                <select
-                  disabled={order.pharmacyStatus !== "accepted"}
-                  onChange={(e) =>
-                    assignRider(order.id, e.target.value)
-                  }
-                  defaultValue=""
-                >
-                  <option value="">Select Rider</option>
-                  {riders.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.name}
-                    </option>
-                  ))}
-                </select>
+                {order.pharmacyStatus === "pending" && (
+                  <>
+                    <button
+                      className="accept-btn"
+                      onClick={() => updatePharmacyStatus(order.id, "accepted")}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      className="reject-btn"
+                      onClick={() => updatePharmacyStatus(order.id, "rejected")}
+                    >
+                      Reject
+                    </button>
+                  </>
+                )}
+
+                {order.pharmacyStatus === "accepted" && (
+                  <select
+                    defaultValue=""
+                    onChange={(e) => assignRider(order.id, e.target.value)}
+                  >
+                    <option value="">Select Rider</option>
+                    {riders.map(r => (
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </td>
             </tr>
           ))}

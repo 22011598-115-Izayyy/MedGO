@@ -6,6 +6,8 @@ import { createOrdersFromCart } from './OrderServices';
 const Checkout = ({ setShowCart, setShowCheckout }) => {
   const { cart, getCartTotal, clearCart } = useCart();
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -63,6 +65,10 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
     e.preventDefault();
 
     if (!validateForm()) return;
+    if (isLoading) return; // Prevent double-submit
+
+    setIsLoading(true);
+    setErrorMessage('');
 
     try {
       await createOrdersFromCart({
@@ -84,8 +90,19 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
       }, 3000);
 
     } catch (error) {
-      console.error(error);
-      alert('Failed to place order. Please try again.');
+      console.error('Order error:', error);
+      let userMessage = 'Failed to place order. Please try again.';
+      
+      if (error.code === 'resource-exhausted') {
+        userMessage = 'Server is busy. Please wait a moment and try again.';
+      } else if (error.message) {
+        userMessage = error.message;
+      }
+      
+      setErrorMessage(userMessage);
+      alert(userMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -199,9 +216,14 @@ const Checkout = ({ setShowCart, setShowCheckout }) => {
                 </div>
               </div>
 
-              <button type="submit" className="place-order-btn">
-                Place Order - PKR {getCartTotal().toFixed(2)}
+              <button 
+                type="submit" 
+                className="place-order-btn"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Processing...' : `Place Order - PKR ${getCartTotal().toFixed(2)}`}
               </button>
+              {errorMessage && <div className="error-banner">{errorMessage}</div>}
             </form>
           </div>
 

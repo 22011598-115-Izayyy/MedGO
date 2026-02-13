@@ -17,8 +17,6 @@ import { MdDashboard } from "react-icons/md";
 import { TbClipboardList } from "react-icons/tb";
 import { FaUser } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
-
-/* ✅ ONLY ADDITION: icons for buttons */
 import { FaBoxOpen, FaMotorcycle, FaCheckCircle } from "react-icons/fa";
 
 const RiderDashboard = ({ setCurrentPage }) => {
@@ -39,11 +37,10 @@ const RiderDashboard = ({ setCurrentPage }) => {
 
       const { pharmacyId, email } = userSnap.data();
 
-      const pharmacyQuery = query(
-        collection(db, "Pharmacies"),
-        where("pharmacyId", "==", pharmacyId)
+      const pharmacySnap = await getDocs(
+        query(collection(db, "Pharmacies"), where("pharmacyId", "==", pharmacyId))
       );
-      const pharmacySnap = await getDocs(pharmacyQuery);
+
       if (pharmacySnap.empty) return;
 
       const pharmacyDocId = pharmacySnap.docs[0].id;
@@ -60,7 +57,6 @@ const RiderDashboard = ({ setCurrentPage }) => {
           setRiderData({
             ...riderDoc.data(),
             id: riderDoc.id,
-            pharmacyId,
             pharmacyDocId
           });
 
@@ -78,34 +74,32 @@ const RiderDashboard = ({ setCurrentPage }) => {
   }, []);
 
   // ---------------------------------------------------
-  // FETCH ASSIGNED ORDERS (UNCHANGED)
+  // FETCH ASSIGNED ORDERS (STATUS SAFE)
   // ---------------------------------------------------
   useEffect(() => {
-    if (!riderData?.pharmacyDocId) return;
+    if (!riderData?.pharmacyDocId || !riderData?.id) return;
 
     const q = query(
       collection(db, "Pharmacies", riderData.pharmacyDocId, "orders"),
       where("assignedRiderId", "==", riderData.id)
     );
 
-    const unsub = onSnapshot(q, async (snap) => {
-      const list = [];
+    const unsub = onSnapshot(q, (snap) => {
+      const list = snap.docs.map((d) => {
+        const data = d.data();
 
-      for (const d of snap.docs) {
-        let data = d.data();
-
-        if (!data.customer && data.orderId) {
-          const globalSnap = await getDoc(doc(db, "Orders", data.orderId));
-          if (globalSnap.exists()) {
-            data = {
-              ...data,
-              customer: globalSnap.data().customer
-            };
+        return {
+          id: d.id,
+          orderId: data.orderId,
+          orderStatus: data.orderStatus, // 🔥 SOURCE OF TRUTH
+          totalPrice: data.totalPrice,
+          customer: data.customer || {
+            name: data.customerName,
+            phone: data.customerPhone,
+            address: data.customerAddress
           }
-        }
-
-        list.push({ id: d.id, ...data });
-      }
+        };
+      });
 
       setOrders(list);
     });
@@ -114,9 +108,11 @@ const RiderDashboard = ({ setCurrentPage }) => {
   }, [riderData]);
 
   // ---------------------------------------------------
-  // STATUS UPDATE (ONLY ADDITION INSIDE)
+  // STATUS UPDATE (SAFE, NO DOWNGRADE)
   // ---------------------------------------------------
   const updateStatus = async (order, nextStatus) => {
+    if (order.orderStatus === "delivered") return;
+
     const allowed = {
       assigned: "picked_up",
       picked_up: "on_the_way"
@@ -139,34 +135,34 @@ const RiderDashboard = ({ setCurrentPage }) => {
       payload
     );
 
-    // ✅ ADDITION (GLOBAL ORDERS SYNC)
     await updateDoc(
       doc(db, "Orders", order.orderId),
-      { orderStatus: nextStatus }
+      payload
     );
   };
 
   // ---------------------------------------------------
-  // DELIVERY CONFIRMATION (ONLY ADDITION INSIDE)
+  // DELIVERY CONFIRMATION (FINAL STATE)
   // ---------------------------------------------------
   const confirmDelivery = async (order) => {
-    const ok = window.confirm(
-      "Confirm that this order has been delivered to the customer?"
-    );
+    if (order.orderStatus === "delivered") return;
+
+    const ok = window.confirm("Confirm delivery?");
     if (!ok) return;
+
+    const payload = {
+      orderStatus: "delivered",
+      "deliveryConfirmation.confirmed": true,
+      "deliveryConfirmation.confirmedAt": new Date(),
+      "deliveryConfirmation.riderId": riderData.id,
+      "riderTimeline.deliveredAt": new Date()
+    };
 
     await updateDoc(
       doc(db, "Pharmacies", riderData.pharmacyDocId, "orders", order.id),
-      {
-        orderStatus: "delivered",
-        "deliveryConfirmation.confirmed": true,
-        "deliveryConfirmation.confirmedAt": new Date(),
-        "deliveryConfirmation.riderId": riderData.id,
-        "riderTimeline.deliveredAt": new Date()
-      }
+      payload
     );
 
-    // ✅ ADDITION (GLOBAL ORDERS SYNC)
     await updateDoc(
       doc(db, "Orders", order.orderId),
       { orderStatus: "delivered" }
@@ -174,7 +170,7 @@ const RiderDashboard = ({ setCurrentPage }) => {
   };
 
   // ---------------------------------------------------
-  // LOGOUT (UNCHANGED)
+  // LOGOUT
   // ---------------------------------------------------
   const handleLogout = () => {
     auth.signOut();
@@ -210,12 +206,6 @@ const RiderDashboard = ({ setCurrentPage }) => {
     <div className="page">
       <h2>My Orders</h2>
 
-      {orders.length === 0 && (
-        <p style={{ marginTop: 20, color: "#777" }}>
-          No orders assigned yet.
-        </p>
-      )}
-
       {orders.map(order => (
         <div className="order-card" key={order.id}>
           <h4>Order #{order.orderId}</h4>
@@ -228,16 +218,9 @@ const RiderDashboard = ({ setCurrentPage }) => {
           </p>
 
           <div className="customer-info">
-            <p><span>Customer:</span> {order.customer?.name || order.customerName || "-"}</p>
-            <p><span>Address:</span> {order.customer?.address || "-"}</p>
-            <p>
-              <span>Phone:</span>{" "}
-              {order.customer?.phone ? (
-                <a href={`tel:${order.customer.phone}`}>
-                  {order.customer.phone}
-                </a>
-              ) : "-"}
-            </p>
+            <p><span>Customer:</span> {order.customer?.name}</p>
+            <p><span>Address:</span> {order.customer?.address}</p>
+            <p><span>Phone:</span> {order.customer?.phone}</p>
             <p className="price">Rs. {order.totalPrice}</p>
           </div>
 
@@ -279,10 +262,7 @@ const RiderDashboard = ({ setCurrentPage }) => {
   const Profile = () => (
     <div className="page">
       <h2>My Profile</h2>
-
-      {!riderData ? (
-        <p>Loading profile...</p>
-      ) : (
+      {!riderData ? <p>Loading profile...</p> : (
         <div className="profile-card">
           <p><strong>Name:</strong> {riderData.name}</p>
           <p><strong>Phone:</strong> {riderData.phone}</p>
@@ -303,36 +283,15 @@ const RiderDashboard = ({ setCurrentPage }) => {
         <h2 className="logo">MedGO Rider</h2>
 
         <ul className="menu">
-          <li
-            className={activePage === "dashboard" ? "active" : ""}
-            onClick={() => setActivePage("dashboard")}
-          >
-            <MdDashboard /> Dashboard
-          </li>
-
-          <li
-            className={activePage === "orders" ? "active" : ""}
-            onClick={() => setActivePage("orders")}
-          >
-            <TbClipboardList /> My Orders
-          </li>
-
-          <li
-            className={activePage === "profile" ? "active" : ""}
-            onClick={() => setActivePage("profile")}
-          >
-            <FaUser /> Profile
-          </li>
-
-          <li className="logout-btn" onClick={handleLogout}>
-            <FiLogOut /> Logout
-          </li>
+          <li onClick={() => setActivePage("dashboard")}><MdDashboard /> Dashboard</li>
+          <li onClick={() => setActivePage("orders")}><TbClipboardList /> My Orders</li>
+          <li onClick={() => setActivePage("profile")}><FaUser /> Profile</li>
+          <li className="logout-btn" onClick={handleLogout}><FiLogOut /> Logout</li>
         </ul>
       </div>
 
       <div className="main-area">
         <div className="header">Welcome Rider 👋</div>
-
         <div className="content">
           {activePage === "dashboard" && <DashboardHome />}
           {activePage === "orders" && <MyOrders />}

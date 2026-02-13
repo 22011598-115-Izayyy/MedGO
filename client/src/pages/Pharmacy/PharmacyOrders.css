@@ -38,7 +38,7 @@
   text-align: left;
   font-size: 14px;
   color: #374151;
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .orders-table th {
@@ -66,44 +66,52 @@
    CUSTOMER + ITEMS
    =============================== */
 
-.orders-table td div {
-  margin-bottom: 4px;
-}
-
-.orders-table td div:last-child {
-  margin-bottom: 0;
-}
-
 .orders-table td {
   line-height: 1.5;
 }
 
 /* ===============================
-   ORDER STATUS BADGES
+   ORDER STATUS (REAL-TIME READY)
    =============================== */
 
-.orders-table td:nth-child(5) {
+.orders-table td.status-cell {
   font-weight: 500;
   text-transform: capitalize;
 }
 
-.orders-table td:nth-child(5)::before {
+.orders-table td.status-cell::before {
   content: "●";
   margin-right: 6px;
   font-size: 10px;
 }
 
 /* Status colors */
-.orders-table td:nth-child(5)[data-status="pending"]::before {
+.orders-table td.status-cell.pending::before {
   color: #f59e0b;
 }
 
-.orders-table td:nth-child(5)[data-status="assigned"]::before {
-  color: #3b82f6;
+.orders-table td.status-cell.accepted::before {
+  color: #2563eb;
 }
 
-.orders-table td:nth-child(5)[data-status="delivered"]::before {
+.orders-table td.status-cell.assigned::before {
+  color: #2563eb;
+}
+
+.orders-table td.status-cell.picked_up::before {
+  color: #8b5cf6;
+}
+
+.orders-table td.status-cell.on_the_way::before {
+  color: #0ea5e9;
+}
+
+.orders-table td.status-cell.delivered::before {
   color: #10b981;
+}
+
+.orders-table td.status-cell.rejected::before {
+  color: #dc2626;
 }
 
 /* ===============================
@@ -132,6 +140,48 @@
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
 }
 
+.orders-table select:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+  color: #9ca3af;
+}
+
+/* ===============================
+   ACCEPT / REJECT BUTTONS
+   =============================== */
+
+.accept-btn,
+.reject-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 6px;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.accept-btn {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.accept-btn:hover {
+  background: #15803d;
+  transform: translateY(-1px);
+}
+
+.reject-btn {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.reject-btn:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
 /* ===============================
    EMPTY STATE
    =============================== */
@@ -144,36 +194,6 @@
   font-size: 14px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
-.accept-btn {
-  background: #16a34a;
-  color: #fff;
-  border: none;
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.reject-btn {
-  background: #dc2626;
-  color: #fff;
-  border: none;
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.accept-btn:hover {
-  background: #15803d;
-}
-
-.reject-btn:hover {
-  background: #b91c1c;
-}
-
 
 /* ===============================
    RESPONSIVE
