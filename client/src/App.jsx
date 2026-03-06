@@ -163,6 +163,7 @@ function App() {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedPharmacy, setSelectedPharmacy] = useState(null);
   const [selectedMedicineId, setSelectedMedicineId] = useState(null);
+  const [chatbotSearchQuery, setChatbotSearchQuery] = useState("");
 
   const handleSearch = (term) => {
     setSearchTerm(term);
@@ -222,11 +223,13 @@ function App() {
           />
 
         ) : currentPage === "products" ? (
-          <AllProductsPage
-            setCurrentPage={setCurrentPage}
-            setSelectedMedicineId={setSelectedMedicineId}
-          />
-
+  <AllProductsPage
+    setCurrentPage={setCurrentPage}
+    setSelectedMedicineId={setSelectedMedicineId}
+    chatbotSearchQuery={chatbotSearchQuery}
+  />
+        
+          
         ) : currentPage === "admin" ? (
           <AdminLogin setCurrentPage={setCurrentPage} />
 
@@ -269,12 +272,17 @@ function App() {
             <Reviews />
           </>
         )}
-
+        {/* ✅ CHATBOT - properly wired */}
         {!isDashboard && !isLoginPage && (
-          <Footer setCurrentPage={setCurrentPage} />
+          <Chatbot
+            setCurrentPage={setCurrentPage}
+            onMedicineSearch={(query) => {
+              setChatbotSearchQuery(query);
+              setCurrentPage("products");
+            }}
+          />
         )}
 
-        <Chatbot />
       </div>
     </CartProvider>
   );

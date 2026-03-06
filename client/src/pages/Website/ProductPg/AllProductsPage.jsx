@@ -4,7 +4,7 @@ import { db } from "../../../firebase/config";
 import { collection, getDocs } from "firebase/firestore";
 import { useCart } from "../../../Components/CartContext";
 
-function AllProductsPage({ setCurrentPage, setSelectedMedicineId }) {
+function AllProductsPage({ setCurrentPage, setSelectedMedicineId, chatbotSearchQuery }) {
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,6 +68,13 @@ function AllProductsPage({ setCurrentPage, setSelectedMedicineId }) {
 
     fetchAllProducts();
   }, []);
+
+  // ✅ ADDED: Apply chatbot search query when it changes
+  useEffect(() => {
+    if (chatbotSearchQuery) {
+      setSearchTerm(chatbotSearchQuery);
+    }
+  }, [chatbotSearchQuery]);
 
   const handleAddToCart = (product) => {
     addToCart(product);
