@@ -49,18 +49,29 @@ export default function Navbar({ showCart, setShowCart, currentPage, setCurrentP
         </ul>
         
         <div className="navbar-right">
+
+          {/* ⭐ ADDED BUTTON FOR NEARBY PHARMACY MAP */}
+          <button 
+            className={`nearby-btn ${currentPage === 'nearby-pharmacy' ? 'active' : ''}`}
+            onClick={() => handleNavClick('nearby-pharmacy')}
+          >
+            📍 Nearby Pharmacy
+          </button>
+
           <button 
             className="cart-btn"
             onClick={() => setShowCart(!showCart)}
           >
             🛒 Cart ({cartItemsCount})
           </button>
+
           <button 
             className={`login-btn ${currentPage === 'admin' ? 'active' : ''}`}
             onClick={() => handleNavClick('admin')}
           >
             🔐 Login
           </button>
+
         </div>
       </div>
     </nav>

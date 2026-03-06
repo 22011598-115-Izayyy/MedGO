@@ -242,6 +242,20 @@
     font-size: 0.7rem;
   }
 }
+.nearby-btn{
+  background:#1a7f4a;
+  color:white;
+  padding:8px 14px;
+  border-radius:6px;
+  border:none;
+  cursor:pointer;
+  margin-right:10px;
+}
+
+.nearby-btn:hover{
+  background:#145c35;
+  color:white;
+}
 
 @media screen and (max-width: 480px) {
   .navbar-container {

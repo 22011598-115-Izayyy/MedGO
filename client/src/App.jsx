@@ -17,6 +17,7 @@ import PharmacyDashboard from "./pages/Pharmacy/PharmacyDashboard";
 import AllProductsPage from "./pages/Website/ProductPg/AllProductsPage";
 import MedicineDetails from "./pages/Website/MedicineDetails.jsx";
 import RiderDashboard from "./pages/Rider/RiderDashboard";
+import NearbyPharmacyMap from "./Components/NearbyPharmacyMap"; // ⭐ ADDED FOR MAP
 import "./pages/Order/Cart.css";
 
 // ---------------- CART UI ----------------
@@ -244,14 +245,18 @@ function App() {
             setCurrentPage={setCurrentPage}
           />
 
+        ) : currentPage === "nearby-pharmacy" ? (
+          <NearbyPharmacyMap 
+          setCurrentPage={setCurrentPage}
+          setSelectedPharmacy={setSelectedPharmacy}
+          />
+
         ) : (
           <>
-          
             <Home
               onSearch={handleSearch}
               searchResults={searchResults}
               searchTerm={searchTerm}
-              // ⭐⭐⭐ ADD THIS FOR CLICKING SEARCH RESULTS ⭐⭐⭐
               setCurrentPage={setCurrentPage}
               setSelectedMedicineId={setSelectedMedicineId}
             />

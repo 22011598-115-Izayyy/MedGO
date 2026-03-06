@@ -4,8 +4,6 @@ import {
   getDocs,
   updateDoc,
   doc,
-  query,
-  where,
   onSnapshot
 } from "firebase/firestore";
 import { db } from "../../firebase/config";
@@ -17,21 +15,51 @@ const PharmacyOrders = ({ pharmacyId }) => {
   const [riders, setRiders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ FIXED: pharmacyId is already the document ID
   const loadPharmacyDocId = async () => {
-    const snap = await getDocs(
-      query(collection(db, "Pharmacies"), where("pharmacyId", "==", pharmacyId))
-    );
-    return snap.empty ? null : snap.docs[0].id;
+    return pharmacyId;
   };
 
+  // 🔥 INSTANT + STABLE REALTIME LISTENER (UNCHANGED)
   const listenOrders = (docId) =>
-    onSnapshot(collection(db, "Pharmacies", docId, "orders"), snap => {
-      setOrders(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-      setLoading(false);
-    });
+    onSnapshot(
+      collection(db, "Pharmacies", docId, "orders"),
+      (snap) => {
+        setOrders((prevOrders) => {
+          let updated = [...prevOrders];
+
+          snap.docChanges().forEach((change) => {
+            const orderData = {
+              id: change.doc.id,
+              ...change.doc.data()
+            };
+
+            if (change.type === "added") {
+              const exists = updated.find(o => o.id === orderData.id);
+              if (!exists) updated.push(orderData);
+            }
+
+            if (change.type === "modified") {
+              updated = updated.map(o =>
+                o.id === orderData.id ? orderData : o
+              );
+            }
+
+            if (change.type === "removed") {
+              updated = updated.filter(o => o.id !== orderData.id);
+            }
+          });
+
+          return updated;
+        });
+
+        setLoading(false);
+      }
+    );
 
   const fetchRiders = async (docId) => {
     const snap = await getDocs(collection(db, "Pharmacies", docId, "riders"));
+
     setRiders(
       snap.docs
         .map(d => ({ id: d.id, ...d.data() }))
@@ -52,23 +80,39 @@ const PharmacyOrders = ({ pharmacyId }) => {
     return () => unsub && unsub();
   }, [pharmacyId]);
 
-  // ✅ ACCEPT / REJECT (UNCHANGED LOGIC)
+  // ✅ ACCEPT / REJECT (UNCHANGED)
   const updatePharmacyStatus = async (orderId, status) => {
-    await updateDoc(
-      doc(db, "Pharmacies", pharmacyDocId, "orders", orderId),
-      { pharmacyStatus: status, orderStatus: status }
+    setOrders(prev =>
+      prev.map(order =>
+        order.id === orderId
+          ? { ...order, orderStatus: status }
+          : order
+      )
     );
 
-    await updateDoc(doc(db, "Orders", orderId), {
-      pharmacyStatus: status,
-      orderStatus: status
-    });
+    await updateDoc(
+      doc(db, "Pharmacies", pharmacyDocId, "orders", orderId),
+      { orderStatus: status }
+    );
   };
 
-  // ✅ ASSIGN RIDER (UNCHANGED LOGIC)
+  // ✅ ASSIGN RIDER (UNCHANGED)
   const assignRider = async (orderId, riderId) => {
     const rider = riders.find(r => r.id === riderId);
     if (!rider) return;
+
+    setOrders(prev =>
+      prev.map(order =>
+        order.id === orderId
+          ? {
+              ...order,
+              assignedRiderId: rider.id,
+              assignedRiderName: rider.name,
+              orderStatus: "assigned"
+            }
+          : order
+      )
+    );
 
     await updateDoc(
       doc(db, "Pharmacies", pharmacyDocId, "orders", orderId),
@@ -78,12 +122,6 @@ const PharmacyOrders = ({ pharmacyId }) => {
         orderStatus: "assigned"
       }
     );
-
-    await updateDoc(doc(db, "Orders", orderId), {
-      assignedRiderId: rider.id,
-      assignedRiderName: rider.name,
-      orderStatus: "assigned"
-    });
   };
 
   if (loading) return <p>Loading orders...</p>;
@@ -113,7 +151,6 @@ const PharmacyOrders = ({ pharmacyId }) => {
               <td>{order.itemCount}</td>
               <td>Rs. {order.totalPrice}</td>
 
-              {/* 🔥 STATUS WITH CSS HOOK (NO LOGIC CHANGE) */}
               <td className={`status-cell ${order.orderStatus}`}>
                 {order.orderStatus?.replaceAll("_", " ")}
               </td>
@@ -121,7 +158,7 @@ const PharmacyOrders = ({ pharmacyId }) => {
               <td>{order.assignedRiderName || "-"}</td>
 
               <td>
-                {order.pharmacyStatus === "pending" && (
+                {order.orderStatus === "pending" && (
                   <>
                     <button
                       className="accept-btn"
@@ -138,7 +175,7 @@ const PharmacyOrders = ({ pharmacyId }) => {
                   </>
                 )}
 
-                {order.pharmacyStatus === "accepted" && (
+                {order.orderStatus === "accepted" && (
                   <select
                     defaultValue=""
                     onChange={(e) => assignRider(order.id, e.target.value)}

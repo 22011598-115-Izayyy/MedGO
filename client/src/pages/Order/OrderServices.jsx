@@ -3,15 +3,14 @@ import {
   addDoc,
   serverTimestamp,
   updateDoc,
-  doc,
-  setDoc
+  doc
 } from "firebase/firestore";
 import { db } from "../../firebase/config";
 
 /**
  * Creates ONE order for ONE pharmacy
  * PharmacyId MUST be Pharmacies document ID
- * Order starts as PENDING (pharmacy must accept/reject)
+ * Order starts as PENDING
  */
 const createSingleOrder = async ({
   pharmacyId,
@@ -19,56 +18,27 @@ const createSingleOrder = async ({
   items,
   totalPrice
 }) => {
-  // 1️⃣ Create order in global Orders collection
-  const orderRef = await addDoc(collection(db, "Orders"), {
-    pharmacyId,
 
-    // Flat fields (Pharmacy dashboard)
-    customerName: customer.name,
-    customerPhone: customer.phone,
-    customerAddress: customer.address,
-
-    // Nested object (Rider dashboard)
-    customer,
-
-    items,
-    totalPrice,
-
-    // ✅ START AS PENDING
-    orderStatus: "pending",
-    pharmacyStatus: "pending",
-
-    assignedRiderId: null,
-    assignedRiderName: null,
-
-    paymentMethod: "Cash on Delivery",
-    createdAt: serverTimestamp()
-  });
-
-  // 2️⃣ Save orderId inside order document
-  await updateDoc(orderRef, {
-    orderId: orderRef.id
-  });
-
-  // 3️⃣ Create SAME order under Pharmacy
-  await setDoc(
-    doc(db, "Pharmacies", pharmacyId, "orders", orderRef.id),
+  // ✅ Create order ONLY under Pharmacy
+  const orderRef = await addDoc(
+    collection(db, "Pharmacies", pharmacyId, "orders"),
     {
-      orderId: orderRef.id,
       pharmacyId,
 
+      // Flat fields (Pharmacy dashboard)
       customerName: customer.name,
       customerPhone: customer.phone,
       customerAddress: customer.address,
+
+      // Nested object (Rider dashboard)
       customer,
 
       items,
       itemCount: items.length,
       totalPrice,
 
-      // ✅ SAME STATUS HERE
+      // ✅ SINGLE STATUS SYSTEM
       orderStatus: "pending",
-      pharmacyStatus: "pending",
 
       assignedRiderId: null,
       assignedRiderName: null,
@@ -77,6 +47,11 @@ const createSingleOrder = async ({
       createdAt: serverTimestamp()
     }
   );
+
+  // ✅ Save orderId inside same document
+  await updateDoc(orderRef, {
+    orderId: orderRef.id
+  });
 
   return orderRef.id;
 };

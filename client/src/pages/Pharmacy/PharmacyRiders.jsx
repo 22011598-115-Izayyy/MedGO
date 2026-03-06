@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import {
   collection,
-  addDoc,
   getDocs,
   updateDoc,
   deleteDoc,
   doc,
   query,
-  where
+  where,
+  setDoc
 } from "firebase/firestore";
 import { db } from "../../firebase/config";
 import "./PharmacyRiders.css";
@@ -81,33 +81,29 @@ const PharmacyRiders = ({ pharmacyId }) => {
 
     // ---------------- VALIDATIONS ---------------- //
 
-    // Name >= 3 chars
     if (name.length < 3) {
       alert("Rider name must be at least 3 characters long.");
       return;
     }
 
-    // Pakistani phone validation
     const phoneRegex = /^(03\d{9}|(\+92)3\d{9})$/;
     if (!phoneRegex.test(phone)) {
       alert("Enter a valid Pakistani phone number (0300xxxxxxx or +92300xxxxxxx)");
       return;
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       alert("Please enter a valid email address.");
       return;
     }
 
-    // Duplicate check
     const ridersRef = collection(db, "Pharmacies", pharmacyDocId, "riders");
     const allRidersSnap = await getDocs(ridersRef);
 
     const exists = allRidersSnap.docs.some((r) => {
       const data = r.data();
-      if (editId && r.id === editId) return false; // skip current user during edit
+      if (editId && r.id === editId) return false;
 
       return (
         data.email?.toLowerCase() === email ||
@@ -124,30 +120,51 @@ const PharmacyRiders = ({ pharmacyId }) => {
 
     try {
       if (editId) {
-        // UPDATE RIDER
+        // UPDATE RIDER (UNCHANGED)
         await updateDoc(
           doc(db, "Pharmacies", pharmacyDocId, "riders", editId),
           { name, phone, email, status: form.status }
         );
+
         alert("Rider updated successfully!");
 
       } else {
-        // ADD NEW RIDER
-        await addDoc(ridersRef, {
-          name,
-          phone,
-          email,
-          status: form.status,
-        });
+
+        // 🔥 FIXED: GET AUTH UID FROM users COLLECTION
+        const usersSnap = await getDocs(
+          query(
+            collection(db, "users"),
+            where("email", "==", email),
+            where("role", "==", "rider")
+          )
+        );
+
+        if (usersSnap.empty) {
+          alert("Rider account not found in Authentication.");
+          return;
+        }
+
+        const riderUserDoc = usersSnap.docs[0];
+        const riderUid = riderUserDoc.id;   // ✅ THIS IS REAL AUTH UID
+
+        await setDoc(
+          doc(db, "Pharmacies", pharmacyDocId, "riders", riderUid),
+          {
+            name,
+            phone,
+            email,
+            status: form.status,
+            authUid: riderUid
+          }
+        );
+
         alert("Rider added successfully!");
       }
 
-      // Close modal + reset form
       setModalOpen(false);
       setForm({ name: "", phone: "", email: "", status: "active" });
       setEditId(null);
 
-      // Refresh list
       fetchRiders();
 
     } catch (error) {
@@ -221,7 +238,6 @@ const PharmacyRiders = ({ pharmacyId }) => {
         </table>
       )}
 
-      {/* MODAL */}
       {modalOpen && (
         <div className="modal-bg">
           <div className="modal-box">
