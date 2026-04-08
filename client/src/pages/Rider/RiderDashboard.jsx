@@ -12,6 +12,9 @@ import {
   updateDoc
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import { createNotification } from "../../utils/createNotification";
+import { sendOrderStatusEmail } from "../../utils/sendCustomerEmail";
+import NotificationBell from "../../Components/NotificationBell";
 
 import MedGoLOGO from "../../assets/MedGo LOGO.png";
 import { MdDashboard } from "react-icons/md";
@@ -105,6 +108,7 @@ const RiderDashboard = ({ setCurrentPage }) => {
             totalPrice: data.totalPrice,
             customer: data.customer || {
               name: data.customerName,
+              email: data.customerEmail,
               phone: data.customerPhone,
               address: data.customerAddress
             }
@@ -134,7 +138,7 @@ const RiderDashboard = ({ setCurrentPage }) => {
   }, [pharmacyDocId, riderId]);
 
   // ---------------------------------------------------
-  // STATUS UPDATE (UNCHANGED LOGIC)
+  // STATUS UPDATE (+ notification + email added)
   // ---------------------------------------------------
   const updateStatus = async (order, nextStatus) => {
     if (order.orderStatus === "delivered") return;
@@ -167,10 +171,44 @@ const RiderDashboard = ({ setCurrentPage }) => {
       doc(db, "Pharmacies", pharmacyDocId, "orders", order.id),
       payload
     );
+
+    // 🔔 Notify admin about status change
+    const notifMessages = {
+      picked_up: {
+        type: "picked_up",
+        title: "Order Picked Up",
+        message: `Rider ${riderData?.name || ""} picked up order #${order.orderId}`,
+      },
+      on_the_way: {
+        type: "on_the_way",
+        title: "Order On The Way",
+        message: `Rider ${riderData?.name || ""} is on the way for order #${order.orderId}`,
+      },
+    };
+
+    if (notifMessages[nextStatus]) {
+      await createNotification({
+        pharmacyId: pharmacyDocId,
+        ...notifMessages[nextStatus],
+        orderId: order.id,
+        recipientRole: "admin",
+        recipientId: null,
+      });
+    }
+
+    // 📧 Email customer about status update
+    if (order.customer?.email) {
+      await sendOrderStatusEmail({
+        customerName: order.customer.name,
+        customerEmail: order.customer.email,
+        orderId: order.orderId,
+        status: nextStatus,
+      });
+    }
   };
 
   // ---------------------------------------------------
-  // DELIVERY CONFIRMATION (UNCHANGED LOGIC)
+  // DELIVERY CONFIRMATION (+ notification + email added)
   // ---------------------------------------------------
   const confirmDelivery = async (order) => {
     if (order.orderStatus === "delivered") return;
@@ -196,6 +234,27 @@ const RiderDashboard = ({ setCurrentPage }) => {
       doc(db, "Pharmacies", pharmacyDocId, "orders", order.id),
       payload
     );
+
+    // 🔔 Notify admin about delivery
+    await createNotification({
+      pharmacyId: pharmacyDocId,
+      type: "delivered",
+      title: "Order Delivered ✔",
+      message: `Order #${order.orderId} has been delivered by ${riderData?.name || "rider"}`,
+      orderId: order.id,
+      recipientRole: "admin",
+      recipientId: null,
+    });
+
+    // 📧 Email customer about delivery
+    if (order.customer?.email) {
+      await sendOrderStatusEmail({
+        customerName: order.customer.name,
+        customerEmail: order.customer.email,
+        orderId: order.orderId,
+        status: "delivered",
+      });
+    }
   };
 
   const handleLogout = () => {
@@ -303,7 +362,16 @@ const RiderDashboard = ({ setCurrentPage }) => {
         </ul>
       </div>
       <div className="main-area">
-        <div className="header">Welcome Rider 👋</div>
+        <div className="header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span>Welcome Rider 👋</span>
+          {pharmacyDocId && riderId && (
+            <NotificationBell
+              pharmacyId={pharmacyDocId}
+              recipientRole="rider"
+              recipientId={riderId}
+            />
+          )}
+        </div>
         <div className="content">
           {activePage === "dashboard" && <DashboardHome />}
           {activePage === "orders" && <MyOrders />}

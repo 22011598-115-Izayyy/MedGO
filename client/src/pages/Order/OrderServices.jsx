@@ -6,6 +6,8 @@ import {
   doc
 } from "firebase/firestore";
 import { db } from "../../firebase/config";
+import { createNotification } from "../../utils/createNotification";
+import { sendOrderConfirmationEmail } from "../../utils/sendCustomerEmail";
 
 /**
  * Creates ONE order for ONE pharmacy
@@ -51,6 +53,27 @@ const createSingleOrder = async ({
   // ✅ Save orderId inside same document
   await updateDoc(orderRef, {
     orderId: orderRef.id
+  });
+
+  // 🔔 Notify admin about new order
+  await createNotification({
+    pharmacyId,
+    type: "new_order",
+    title: "New Order Received",
+    message: `New order from ${customer.name} — Rs. ${totalPrice}`,
+    orderId: orderRef.id,
+    recipientRole: "admin",
+    recipientId: null,
+  });
+
+  // 📧 Send confirmation email to customer
+  await sendOrderConfirmationEmail({
+    customerName: customer.name,
+    customerEmail: customer.email,
+    orderId: orderRef.id,
+    items,
+    totalPrice,
+    address: customer.address,
   });
 
   return orderRef.id;

@@ -7,6 +7,8 @@ import {
   onSnapshot
 } from "firebase/firestore";
 import { db } from "../../firebase/config";
+import { createNotification } from "../../utils/createNotification";
+import { sendOrderStatusEmail } from "../../utils/sendCustomerEmail"; // ← ADDED
 import "./PharmacyOrders.css";
 
 const PharmacyOrders = ({ pharmacyId }) => {
@@ -80,13 +82,13 @@ const PharmacyOrders = ({ pharmacyId }) => {
     return () => unsub && unsub();
   }, [pharmacyId]);
 
-  // ✅ ACCEPT / REJECT (UNCHANGED)
+  // ✅ ACCEPT / REJECT (+ notification + email added)
   const updatePharmacyStatus = async (orderId, status) => {
+    const order = orders.find(o => o.id === orderId); // ← ADDED: get order first
+
     setOrders(prev =>
-      prev.map(order =>
-        order.id === orderId
-          ? { ...order, orderStatus: status }
-          : order
+      prev.map(o =>
+        o.id === orderId ? { ...o, orderStatus: status } : o
       )
     );
 
@@ -94,6 +96,34 @@ const PharmacyOrders = ({ pharmacyId }) => {
       doc(db, "Pharmacies", pharmacyDocId, "orders", orderId),
       { orderStatus: status }
     );
+
+    // 🔔 Notify admin about rejection
+    if (status === "rejected") {
+      await createNotification({
+        pharmacyId: pharmacyDocId,
+        type: "rejected",
+        title: "Order Rejected",
+        message: `Order from ${order?.customerName || "customer"} was rejected`,
+        orderId,
+        recipientRole: "admin",
+        recipientId: null,
+      });
+    }
+
+    // 📧 ADDED: Email customer on accepted or rejected
+    const customerEmail = order?.customer?.email;
+    const customerName  = order?.customer?.name || order?.customerName;
+
+    if (customerEmail && (status === "accepted" || status === "rejected")) {
+      await sendOrderStatusEmail({
+        customerName,
+        customerEmail,
+        orderId:    order?.orderId || orderId,
+        status,
+        totalPrice: order?.totalPrice || "",
+        address:    order?.customer?.address || order?.customerAddress || "",
+      });
+    }
   };
 
   // ✅ ASSIGN RIDER (UNCHANGED)
@@ -122,6 +152,17 @@ const PharmacyOrders = ({ pharmacyId }) => {
         orderStatus: "assigned"
       }
     );
+
+    // 🔔 Notify the assigned rider
+    await createNotification({
+      pharmacyId: pharmacyDocId,
+      type: "new_assignment",
+      title: "New Delivery Assigned",
+      message: `Order #${orderId} has been assigned to you`,
+      orderId,
+      recipientRole: "rider",
+      recipientId: rider.id,
+    });
   };
 
   if (loading) return <p>Loading orders...</p>;

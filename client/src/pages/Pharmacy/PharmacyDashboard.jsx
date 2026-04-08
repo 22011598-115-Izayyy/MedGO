@@ -21,6 +21,7 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import "./PharmacyDashboard.css";
+import NotificationBell from "../../Components/NotificationBell"; // ← ADDED
 
 const PharmacyDashboard = ({ setCurrentPage }) => {
   // Core states
@@ -29,6 +30,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   const [editProduct, setEditProduct] = useState(null);
   const [userId, setUserId] = useState(null);
   const [pharmacyId, setPharmacyId] = useState(null);
+  const [pharmacyDocId, setPharmacyDocId] = useState(null); // ← ADDED
   const [loading, setLoading] = useState(true);
 
   // Master & selection modal
@@ -142,6 +144,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
       if (!snap.empty) {
         const pharmacyDoc = snap.docs[0];
         setPharmacyName(pharmacyDoc.data().name || "Pharmacy Dashboard");
+        setPharmacyDocId(pharmacyDoc.id); // ← ADDED
 
         const productsSnap = await getDocs(
           collection(db, "Pharmacies", pharmacyDoc.id, "products")
@@ -232,7 +235,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
         await setDoc(doc(ref, medId), {
           productName: med.name || med.productName || "",
           formula: med.formula || "",
-          quantity: med.quantity || 0, // master->pharmacy mapping (keeps master value)
+          quantity: med.quantity || 0,
           manufacturer: med.manufacturer || med.brand || "",
           dose: med.dose || "",
           category: med.category || "",
@@ -299,7 +302,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     if (!file) return null;
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "medicines_upload"); // unsigned preset
+    formData.append("upload_preset", "medicines_upload");
 
     const res = await fetch(
       "https://api.cloudinary.com/v1_1/dvo9nyzgq/image/upload",
@@ -551,7 +554,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 stock: "",
                 expiryDate: "",
                 status: "Active",
-                quantity: "", // <-- ensure quantity reset when opening Add
+                quantity: "",
               });
               setDoseMode("dropdown");
               setSelectedImage(null);
@@ -596,7 +599,17 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
 
       {/* MAIN AREA */}
       <div className="main-area">
-        <div className="header">Welcome, {pharmacyName || "Pharmacy"} 👋</div>
+        {/* ← BELL ADDED TO HEADER */}
+        <div className="header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span>Welcome, {pharmacyName || "Pharmacy"} 👋</span>
+          {pharmacyDocId && (
+            <NotificationBell
+              pharmacyId={pharmacyDocId}
+              recipientRole="admin"
+              recipientId={null}
+            />
+          )}
+        </div>
 
         <div className="content-area">
           {/* DASHBOARD */}
@@ -755,21 +768,21 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 >
                   <option value="">Enter category</option>
                   <option>Pain Killer</option>
-                      <option>Antibiotic</option>
-                      <option>Fever And Pain</option>
-                      <option>Cold And Flu</option>
-                      <option>Allergy</option>
-                      <option>Digestive</option>
-                      <option>Respiratory</option>
-                      <option>Vitamin</option>
-                      <option>Bone And Joint Pain</option>
-                      <option>Cardiac Care</option>
-                      <option>Derma Care</option>
-                      <option>ENT Care</option>
-                      <option>Eye And Ear Care</option>
-                      <option>Mental Health</option>
-                      <option>Lung And Liver Care</option>
-                      <option>Other</option>
+                  <option>Antibiotic</option>
+                  <option>Fever And Pain</option>
+                  <option>Cold And Flu</option>
+                  <option>Allergy</option>
+                  <option>Digestive</option>
+                  <option>Respiratory</option>
+                  <option>Vitamin</option>
+                  <option>Bone And Joint Pain</option>
+                  <option>Cardiac Care</option>
+                  <option>Derma Care</option>
+                  <option>ENT Care</option>
+                  <option>Eye And Ear Care</option>
+                  <option>Mental Health</option>
+                  <option>Lung And Liver Care</option>
+                  <option>Other</option>
                 </select>
 
                 <select
@@ -838,7 +851,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                   <input type="file" accept="image/*" onChange={handleImageSelect} hidden />
                 </label>
 
-                {/* Preview with inside remove X (Option A) */}
                 {imagePreview && (
                   <div className="image-preview-container">
                     <img src={imagePreview} alt="Preview" className="img-preview" />
@@ -855,7 +867,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                   </div>
                 )}
 
-                {/* Save aligned to right */}
                 <div className="save-container">
                   <button type="submit" className="save-btn">
                     {editProduct ? "Update" : "Save"}
@@ -1022,7 +1033,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                       <option>Mental Health</option>
                       <option>Lung And Liver Care</option>
                       <option>Other</option>
-                              </select>
+                    </select>
 
                     <select
                       name="type"
@@ -1082,7 +1093,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                       />
                     </label>
 
-                    {/* Edit image preview with inside X */}
                     {editImagePreview && (
                       <div className="image-preview-container">
                         <img src={editImagePreview} alt="Edit Preview" className="img-preview" />
@@ -1122,10 +1132,9 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                             stock: "",
                             expiryDate: "",
                             status: "Active",
-                            quantity: "", // reset quantity
+                            quantity: "",
                           });
                           setDoseMode("dropdown");
-                          // clear edit-image preview
                           setEditSelectedImage(null);
                           setEditImagePreview(null);
                         }}
@@ -1142,11 +1151,10 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
           {/* RIDERS PAGE */}
           {activePage === "riders" && <PharmacyRiders pharmacyId={pharmacyId} />}
 
-          
-{/* ORDERS PAGE */}
-{activePage === "orders" && (
-  <PharmacyOrders pharmacyId={pharmacyId} />
-)}
+          {/* ORDERS PAGE — ← FIXED: now uses pharmacyDocId */}
+          {activePage === "orders" && (
+            <PharmacyOrders pharmacyId={pharmacyDocId} />
+          )}
 
           {/* MASTER MEDICINES MODAL */}
           {showSelectModal && (
