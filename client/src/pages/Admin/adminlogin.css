@@ -1,165 +1,430 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --em-rich:         #059669;
+  --em-bright:       #10b981;
+  --gold:            #c9956a;
+  --gold-soft:       rgba(201, 149, 106, 0.5);
+  --text-hi:         #edfaf2;
+  --text-mid:        rgba(237, 250, 242, 0.5);
+  --card-bg:         rgba(4, 18, 9, 0.88);
+  --border-card:     rgba(16, 185, 129, 0.25);
+  --input-bg:        rgba(255, 255, 255, 0.055);
+  --input-border:    rgba(255, 255, 255, 0.12);
+  --input-focus-brd: rgba(16, 185, 129, 0.55);
+  --input-focus-bg:  rgba(16, 185, 129, 0.065);
+  --font-serif:      'Cormorant Garamond', Georgia, serif;
+  --font-sans:       'DM Sans', sans-serif;
+  --ease:            cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+}
+
+/* ─────────────────────────────────────────
+   WRAPPER
+   Dark background scoped HERE only —
+   does NOT bleed to other pages
+───────────────────────────────────────── */
 .admin-login-wrapper {
   height: 100vh;
   width: 100%;
   background-size: contain;
-  background-position: right;
+  background-position: right center;
   background-repeat: no-repeat;
-
+  background-color: #030c05;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding-left: 120px;
-
+  padding-left: 6%;
   position: relative;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
+  overflow: hidden;
+  /* ✅ Also force the page body dark when this component is mounted */
+  isolation: isolate;
 }
 
+/* ✅ Scoped body fix — only when login wrapper exists */
+body:has(.admin-login-wrapper) {
+  background: #030c05 !important;
+  height: 100%;
+}
+
+/* ─────────────────────────────────────────
+   OVERLAY
+───────────────────────────────────────── */
 .bg-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  z-index: 0;
-}
-/* FLOATING PILLS (TRANSPARENT WHITE PILL SHAPES) */
-.floating-pill {
-  position: absolute;
-  width: 45px;
-  height: 20px;
-  border-radius: 50px;
-
-  background: rgba(255, 255, 255, 0.22);     /* semi-transparent white */
-  backdrop-filter: blur(3px);                /* glass effect */
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.35); /* soft glow */
-  border: 1px solid rgba(255, 255, 255, 0.35);
-
-  animation: floatUpDown 6s infinite ease-in-out;
+  background: linear-gradient(
+    105deg,
+    rgba(2, 8, 4, 0.98)  0%,
+    rgba(2, 8, 4, 0.96)  22%,
+    rgba(2, 8, 4, 0.80)  40%,
+    rgba(2, 8, 4, 0.40)  58%,
+    rgba(2, 8, 4, 0.10)  74%,
+    transparent          88%
+  );
   z-index: 1;
 }
 
-/* Individual pill positions */
-.pill1 { top: 12%; left: 60%; animation-delay: 0s; }
-.pill2 { top: 90%; left: 90%; animation-delay: 0.6s; }
-.pill3 { top: 52%; left: 55%; animation-delay: 1.2s; }
-.pill4 { top: 90%; left: 68%; animation-delay: 1.8s; }
-.pill5 { top: 15%; left: 88%; animation-delay: 2.4s; }
-.pill6 { top: 50%; left: 95%; animation-delay: 3s; }
-
-/* FLOAT ANIMATION */
-@keyframes floatUpDown {
-  0% { transform: translateY(0px) rotate(0deg); opacity: 0.9; }
-  50% { transform: translateY(-12px) rotate(10deg); opacity: 1; }
-  100% { transform: translateY(0px) rotate(0deg); opacity: 0.9; }
+.bg-overlay::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 180px;
+  background: linear-gradient(to top, rgba(2,8,4,0.7), transparent);
+  pointer-events: none;
 }
 
+/* ─────────────────────────────────────────
+   PILL CAPSULES
+───────────────────────────────────────── */
+.bg-pill {
+  position: absolute;
+  border-radius: 100px;
+  pointer-events: none;
+  z-index: 2;
+}
 
+.pill-top-left {
+  width: 72px; height: 28px;
+  top: 22%; left: 54%;
+  background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.08));
+  border: 1px solid rgba(16,185,129,0.38);
+  box-shadow: 0 0 22px rgba(16,185,129,0.14), inset 0 1px 0 rgba(255,255,255,0.09);
+  transform: rotate(-18deg);
+  animation: pillFloat 9s ease-in-out infinite;
+}
+.pill-top-left::after {
+  content: '';
+  position: absolute;
+  top: 20%; left: 12%; width: 50%; height: 28%;
+  border-radius: 50px;
+  background: rgba(255,255,255,0.1);
+}
+
+.pill-top-right {
+  width: 50px; height: 20px;
+  top: 28%; left: 78%;
+  background: linear-gradient(135deg, rgba(201,149,106,0.2), rgba(180,120,80,0.08));
+  border: 1px solid rgba(201,149,106,0.3);
+  box-shadow: 0 0 16px rgba(201,149,106,0.1);
+  transform: rotate(12deg);
+  animation: pillFloat 7.5s ease-in-out infinite 1.4s reverse;
+}
+.pill-top-right::after {
+  content: '';
+  position: absolute;
+  top: 18%; left: 10%; width: 46%; height: 28%;
+  border-radius: 50px;
+  background: rgba(255,255,255,0.08);
+}
+
+.pill-bottom-left {
+  width: 88px; height: 34px;
+  top: 60%; left: 57%;
+  background: linear-gradient(135deg, rgba(16,185,129,0.16), rgba(5,150,105,0.06));
+  border: 1px solid rgba(16,185,129,0.24);
+  box-shadow: 0 0 20px rgba(16,185,129,0.1), inset 0 1px 0 rgba(255,255,255,0.06);
+  transform: rotate(8deg);
+  animation: pillFloat 11s ease-in-out infinite 0.6s;
+}
+.pill-bottom-left::after {
+  content: '';
+  position: absolute;
+  top: 20%; left: 10%; width: 48%; height: 28%;
+  border-radius: 50px;
+  background: rgba(255,255,255,0.07);
+}
+
+.pill-bottom-right {
+  width: 58px; height: 22px;
+  top: 76%; left: 84%;
+  background: linear-gradient(135deg, rgba(201,149,106,0.17), rgba(180,120,80,0.06));
+  border: 1px solid rgba(201,149,106,0.24);
+  box-shadow: 0 0 14px rgba(201,149,106,0.08);
+  transform: rotate(-5deg);
+  animation: pillFloat 8.5s ease-in-out infinite 2s reverse;
+}
+.pill-bottom-right::after {
+  content: '';
+  position: absolute;
+  top: 18%; left: 10%; width: 44%; height: 26%;
+  border-radius: 50px;
+  background: rgba(255,255,255,0.07);
+}
 
 @keyframes pillFloat {
-  0% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
-  50% { transform: translateY(-18px) rotate(12deg); opacity: 1; }
-  100% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
+  0%, 100% { transform: translateY(0px)    rotate(var(--r, 0deg)); opacity: 0.7; }
+  50%       { transform: translateY(-11px) rotate(var(--r, 0deg)); opacity: 1; }
 }
 
-/* GLASS LOGIN CARD */
+/* ─────────────────────────────────────────
+   CARD
+───────────────────────────────────────── */
 .glass-login-card {
-  width: 450px;
-  height: 510px;
-  padding: 45px 40px;
+  position: relative;
+  z-index: 10;
+  width: 460px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  animation: cardIn 0.9s var(--ease) both;
 
-  background: rgba(15, 65, 30, 0.45);
-  border: 1px solid rgba(0, 255, 140, 0.3);
-  border-radius: 18px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.04) 0%,
+      rgba(255,255,255,0.01) 15%,
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.07) 0%,
+      transparent 50%,
+      rgba(5, 150, 105, 0.04) 100%
+    ),
+    rgba(4, 18, 9, 0.92);
 
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 
-  box-shadow: 0 0 25px rgba(0, 255, 100, 0.25);
-  color: white;
-  text-align: center;
-  z-index: 3;
+  box-shadow:
+    0 0 0 0.5px rgba(16,185,129,0.15),
+    0 4px  16px rgba(0,0,0,0.5),
+    0 20px 60px rgba(0,0,0,0.6),
+    0 48px 96px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
-/* Title + Subtitle centered */
+.glass-login-card::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 2px;
+  flex-shrink: 0;
+  background: linear-gradient(
+    90deg,
+    transparent      0%,
+    var(--em-rich)   20%,
+    var(--em-bright) 50%,
+    var(--em-rich)   80%,
+    transparent      100%
+  );
+  animation: shimmerPulse 3.5s ease-in-out infinite;
+}
+
+.glass-login-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 120px;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(16,185,129,0.1) 0%,
+    transparent 65%
+  );
+  pointer-events: none;
+  border-radius: 20px 20px 0 0;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(30px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes shimmerPulse {
+  0%, 100% { opacity: 0.4; transform: scaleX(0.6); }
+  50%       { opacity: 1;  transform: scaleX(1); }
+}
+
+/* ─────────────────────────────────────────
+   TITLE + SUBTITLE
+───────────────────────────────────────── */
 .admin-login-title {
-  font-size: 2rem;
+  font-family: var(--font-serif);
+  font-size: 2.9rem;
   font-weight: 700;
-  margin-bottom: 5px;
+  font-style: italic;
+  color: var(--text-hi);
+  text-align: center;
+  letter-spacing: -0.01em;
+  padding: 44px 48px 0;
+  line-height: 1;
+  animation: fadeUp 0.7s 0.15s var(--ease) both;
 }
 
 .admin-login-subtitle {
-  opacity: 0.8;
-  margin-bottom: 28px;
+  font-family: var(--font-sans);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-align: center;
+  padding: 10px 48px 0;
+  opacity: 0.85;
+  animation: fadeUp 0.7s 0.25s var(--ease) both;
 }
 
-/* Input Group */
+.admin-login-subtitle::after {
+  content: '';
+  display: block;
+  width: 28px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-soft), transparent);
+  margin: 14px auto 0;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─────────────────────────────────────────
+   FORM
+───────────────────────────────────────── */
+form {
+  padding: 28px 48px 42px;
+}
+
 .input-group {
   margin-bottom: 20px;
-  text-align: left;
+  animation: fadeUp 0.7s var(--ease) both;
 }
+.input-group:nth-child(1) { animation-delay: 0.33s; }
+.input-group:nth-child(2) { animation-delay: 0.43s; }
 
 .admin-form-label {
-  color: #c8ffd4;
-  font-weight: 600;
-  margin-bottom: 6px;
   display: block;
+  font-family: var(--font-sans);
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin-bottom: 8px;
 }
 
-/* PASSWORD WRAPPER */
-.password-wrapper {
-  position: relative;
-}
-
-/* INPUT */
+/* ─────────────────────────────────────────
+   INPUTS
+───────────────────────────────────────── */
 .admin-form-input {
   width: 100%;
   padding: 13px 16px;
-  border-radius: 12px;
-  border: none;
-
-  background: rgba(255, 255, 255, 0.28);
-  box-shadow: 0 0 10px rgba(0, 255, 90, 0.2);
-
-  color: white;
+  border-radius: 9px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-hi);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
   outline: none;
+  caret-color: var(--em-bright);
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 }
 
-/* Eye icon */
+.admin-form-input::placeholder {
+  color: rgba(255,255,255,0.22);
+  font-weight: 300;
+  font-size: 0.87rem;
+}
+
+.admin-form-input:hover {
+  border-color: rgba(255,255,255,0.2);
+}
+
+.admin-form-input:focus {
+  border-color: var(--input-focus-brd);
+  background: var(--input-focus-bg);
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+}
+
+/* ─────────────────────────────────────────
+   PASSWORD WRAPPER
+───────────────────────────────────────── */
+.password-wrapper { position: relative; }
+
 .toggle-password {
   position: absolute;
-  right: 15px;
-  top: 50%;
+  right: 14px; top: 50%;
   transform: translateY(-50%);
-  cursor: pointer;
-  font-size: 1.2rem;
-  user-select: none;
+  cursor: pointer; font-size: 1rem;
+  user-select: none; opacity: 0.35;
+  transition: opacity 0.18s;
+}
+.toggle-password:hover { opacity: 0.85; }
+
+/* ─────────────────────────────────────────
+   ERROR
+───────────────────────────────────────── */
+.error-text {
+  font-family: var(--font-sans);
+  font-size: 0.77rem;
+  color: #fca5a5;
+  background: rgba(239,68,68,0.07);
+  border: 1px solid rgba(239,68,68,0.18);
+  border-radius: 6px;
+  padding: 9px 14px;
+  margin-bottom: 10px;
+  text-align: center;
 }
 
+/* ─────────────────────────────────────────
+   BUTTON
+───────────────────────────────────────── */
 .admin-login-btn {
   width: 100%;
   padding: 14px;
-  margin-top: 20px;
-
-  border-radius: 12px;
+  margin-top: 10px;
+  border-radius: 9px;
   border: none;
-  background: #0b7c43;
-  color: white;
-  font-weight: 700;
+  background: var(--em-rich);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.22s, transform 0.25s var(--ease), box-shadow 0.25s;
+  animation: fadeUp 0.7s 0.53s var(--ease) both;
+}
 
-  transition: 0.25s;
+.admin-login-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    105deg, transparent 35%,
+    rgba(255,255,255,0.12) 50%, transparent 65%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.55s ease;
 }
 
 .admin-login-btn:hover {
-  background: #0a6a39;
-  transform: translateY(-3px);
+  background: #047857;
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 28px rgba(5,150,105,0.38),
+    0 2px  8px  rgba(5,150,105,0.2);
 }
+.admin-login-btn:hover::before { transform: translateX(100%); }
+.admin-login-btn:active { transform: translateY(0); }
 
-.error-text {
-  color: #ffbdbd;
-  margin-top: -10px;
+/* ─────────────────────────────────────────
+   FOOTER TAG
+───────────────────────────────────────── */
+form::after {
+  content: 'MedGO  ·  Secure Portal';
+  display: block;
+  margin-top: 22px;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: rgba(255,255,255,0.13);
 }

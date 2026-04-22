@@ -25,6 +25,9 @@ import {
   FaSignOutAlt,
   FaChartPie,
   FaPills,
+  FaSearch,
+  FaTimes,
+  FaPlus,
 } from "react-icons/fa";
 import { AiOutlineCalendar } from "react-icons/ai";
 
@@ -92,25 +95,60 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
 
   // Category & Type options
   const categoryOptions = [
-    "Pain Killer",
-    "Antibiotic",
-    "Fever And Pain",
-    "Cold And Flu",
-    "Allergy",
-    "Digestive",
-    "Respiratory",
-    "Vitamin",
-    "Bone And Joint Pain",
-    "Cardiac Care",
-    "Derma Care",
-    "ENT Care",
-    "Eye And Ear Care",
-    "Mental Health",
-    "Lung And Liver Care",
-    "Other",
+    "Pain Killer", "Antibiotic", "Fever And Pain", "Cold And Flu", "Allergy",
+    "Digestive", "Respiratory", "Vitamin", "Bone And Joint Pain", "Cardiac Care",
+    "Derma Care", "ENT Care", "Eye And Ear Care", "Mental Health",
+    "Lung And Liver Care", "Other",
   ];
 
   const typeOptions = ["Tablet", "Syrup", "Capsule", "Injection", "Other"];
+
+  // ===========================
+  // LIVE CLOCK STATE
+  // ===========================
+  const [liveTime, setLiveTime] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setLiveTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // ===========================
+  // SEARCH STATES
+  // ===========================
+  const [searchMaster, setSearchMaster] = useState("");
+  const [searchPharmacy, setSearchPharmacy] = useState("");
+  const [searchUser, setSearchUser] = useState("");
+
+  // ===========================
+  // FILTERED LISTS
+  // ===========================
+  const filteredMasterList = masterList.filter((m) => {
+    const q = searchMaster.toLowerCase();
+    return (
+      (m.name || "").toLowerCase().includes(q) ||
+      (m.formula || "").toLowerCase().includes(q) ||
+      (m.category || "").toLowerCase().includes(q) ||
+      (m.manufacturer || "").toLowerCase().includes(q)
+    );
+  });
+
+  const filteredPharmacies = pharmacies.filter((p) => {
+    const q = searchPharmacy.toLowerCase();
+    return (
+      (p.name || "").toLowerCase().includes(q) ||
+      (p.address || "").toLowerCase().includes(q) ||
+      (p.email || "").toLowerCase().includes(q)
+    );
+  });
+
+  const filteredUsers = users.filter((u) => {
+    const q = searchUser.toLowerCase();
+    return (
+      (u.email || "").toLowerCase().includes(q) ||
+      (u.role || "").toLowerCase().includes(q) ||
+      (u.pharmacyId || "").toLowerCase().includes(q)
+    );
+  });
 
   // ===========================
   // CLOUDINARY UPLOAD
@@ -121,17 +159,14 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
       const form = new FormData();
       form.append("file", file);
       form.append("upload_preset", "medicines_upload");
-
       const res = await fetch(
         "https://api.cloudinary.com/v1_1/dvo9nyzgq/image/upload",
         { method: "POST", body: form }
       );
-
       if (!res.ok) {
         const txt = await res.text();
         throw new Error("Cloudinary upload failed: " + txt);
       }
-
       const data = await res.json();
       return data.secure_url || "";
     } catch (err) {
@@ -153,21 +188,18 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
 
   const auth = getAuth();
 
-  // Fetch all users + pharmacies + master meds
   useEffect(() => {
     const unsubscribe = onSnapshot(usersRef, (snapshot) => {
       const fetched = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
       setUsers(fetched);
       setTotalRiders(fetched.filter((u) => u.role === "rider").length);
     });
-
     fetchPharmacies();
     fetchMasterMedicines();
     return () => unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fetch pharmacies
   const fetchPharmacies = async () => {
     const snapshot = await getDocs(pharmaciesRef);
     const pharms = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -186,7 +218,6 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
     setTotalOrders(count);
   };
 
-  // Fetch master medicines
   const fetchMasterMedicines = async () => {
     const snap = await getDocs(masterRef);
     setMasterList(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
@@ -211,8 +242,6 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
 
   const handleMasterSubmit = async (e) => {
     e.preventDefault();
-
-    // Validate expiry date if provided
     if (masterData.expiryDate) {
       try {
         const today = new Date();
@@ -228,13 +257,9 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
         return;
       }
     }
-
     try {
       let imgUrl = masterData.imageURL || "";
-      if (selectedImage) {
-        imgUrl = await uploadToCloudinary(selectedImage);
-      }
-
+      if (selectedImage) imgUrl = await uploadToCloudinary(selectedImage);
       const payload = {
         name: masterData.name || "",
         formula: masterData.formula || "",
@@ -249,7 +274,6 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
         expiryDate: masterData.expiryDate || "",
         imageURL: imgUrl || "",
       };
-
       if (editMaster) {
         await updateDoc(doc(db, "masterMedicines", editMaster.id), payload);
         alert("Master medicine updated.");
@@ -257,27 +281,11 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
         await addDoc(masterRef, payload);
         alert("Master medicine added.");
       }
-
-      // reset
       setMasterFormVisible(false);
       setEditMaster(null);
-      setMasterData({
-        name: "",
-        formula: "",
-        quantity:"",
-        manufacturer: "",
-        dose: "",
-        category: "",
-        type: "",
-        description: "",
-        price: "",
-        stock: "",
-        expiryDate: "",
-        imageURL: "",
-      });
+      setMasterData({ name: "", formula: "", quantity: "", manufacturer: "", dose: "", category: "", type: "", description: "", price: "", stock: "", expiryDate: "", imageURL: "" });
       setSelectedImage(null);
       setPreview(null);
-
       fetchMasterMedicines();
     } catch (err) {
       console.error("Error saving master medicine:", err);
@@ -288,18 +296,10 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
   const handleEditMaster = (med) => {
     setEditMaster(med);
     setMasterData({
-      name: med.name || "",
-      formula: med.formula || "",
-      quantity:med.quantity || "",
-      manufacturer: med.manufacturer || "",
-      dose: med.dose || "",
-      category: med.category || "",
-      type: med.type || "",
-      description: med.description || "",
-      price: med.price || "",
-      stock: med.stock || "",
-      expiryDate: med.expiryDate || "",
-      imageURL: med.imageURL || "",
+      name: med.name || "", formula: med.formula || "", quantity: med.quantity || "",
+      manufacturer: med.manufacturer || "", dose: med.dose || "", category: med.category || "",
+      type: med.type || "", description: med.description || "", price: med.price || "",
+      stock: med.stock || "", expiryDate: med.expiryDate || "", imageURL: med.imageURL || "",
     });
     setPreview(med.imageURL || null);
     setSelectedImage(null);
@@ -356,45 +356,28 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
 
   const handleCreateUser = async (e) => {
     e.preventDefault();
-
     const adminEmail = "medgo@gmail.com";
     const adminPass = "medgo123";
-
     try {
       if (editUser) {
         await updateDoc(doc(db, "users", editUser.id), newUser);
       } else {
-        const cred = await createUserWithEmailAndPassword(
-          auth,
-          newUser.email,
-          newUser.password
-        );
-
+        const cred = await createUserWithEmailAndPassword(auth, newUser.email, newUser.password);
         const uid = cred.user.uid;
-
         await setDoc(doc(db, "users", uid), {
           email: newUser.email,
           pharmacyId: newUser.pharmacyId,
           role: newUser.role,
           createdAt: new Date(),
         });
-
         await new Promise((r) => setTimeout(r, 400));
-
         await auth.signOut();
         await signInWithEmailAndPassword(auth, adminEmail, adminPass);
       }
-
       alert("User saved!");
       setFormVisible(false);
       setEditUser(null);
-
-      setNewUser({
-        email: "",
-        password: "",
-        pharmacyId: "",
-        role: "pharmacy_manager",
-      });
+      setNewUser({ email: "", password: "", pharmacyId: "", role: "pharmacy_manager" });
     } catch (err) {
       alert(err.message);
     }
@@ -402,50 +385,337 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
 
   const handleLogout = () => setCurrentPage("admin");
 
+  // ===========================
+  // HELPER — formatted clock
+  // ===========================
+  const formatTime = (date) =>
+    date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+  const formatDate = (date) =>
+    date.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
+  // ===========================
+  // DRAWER CLOSE HELPERS
+  // ===========================
+  const closeUserDrawer = () => {
+    setFormVisible(false);
+    setEditUser(null);
+    setNewUser({ email: "", password: "", pharmacyId: "", role: "pharmacy_manager" });
+  };
+
+  const closePharmacyDrawer = () => {
+    setFormVisible(false);
+    setEditPharmacy(null);
+    setPharmacyData({ pharmacyId: "", name: "", address: "", email: "", phone: "", status: "Active" });
+  };
+
+  const closeMasterDrawer = () => {
+    setMasterFormVisible(false);
+    setEditMaster(null);
+    setMasterData({ name: "", formula: "", quantity: "", manufacturer: "", dose: "", category: "", type: "", description: "", price: "", stock: "", expiryDate: "", imageURL: "" });
+    setPreview(null);
+    setSelectedImage(null);
+    setDoseMode("dropdown");
+  };
+
+  // Is any drawer open?
+  const anyDrawerOpen =
+    (selectedSection === "auth" && formVisible) ||
+    (selectedSection === "pharmacies" && formVisible) ||
+    masterFormVisible;
+
+  const handleBackdropClick = () => {
+    if (selectedSection === "auth" && formVisible) closeUserDrawer();
+    else if (selectedSection === "pharmacies" && formVisible) closePharmacyDrawer();
+    else if (masterFormVisible) closeMasterDrawer();
+  };
+
   // =========================================================
   // ====================  RENDER UI  ========================
   // =========================================================
   return (
     <div className="superadmin-dashboard">
+
+      {/* ── DRAWER BACKDROP ── */}
+      <div
+        className={`drawer-backdrop ${anyDrawerOpen ? "backdrop-visible" : ""}`}
+        onClick={handleBackdropClick}
+      />
+
+      {/* ══════════════════════════════════════
+          DRAWER — ADD / EDIT USER
+      ══════════════════════════════════════ */}
+      <div className={`form-drawer ${selectedSection === "auth" && formVisible ? "drawer-open" : ""}`}>
+        <div className="drawer-header">
+          <div className="drawer-header-text">
+            <span className="drawer-eyebrow">Authentication</span>
+            <h2 className="drawer-title">{editUser ? "Edit User" : "Add New User"}</h2>
+          </div>
+          <button className="drawer-close-btn" onClick={closeUserDrawer}>
+            <FaTimes />
+          </button>
+        </div>
+
+        <div className="drawer-body">
+          <form onSubmit={handleCreateUser} className="drawer-form" id="userForm">
+
+            <div className="drawer-section-label">Account Details</div>
+            <div className="form-grid-2">
+              <div className="form-group full-width">
+                <label>Email Address</label>
+                <input type="email" name="email" value={newUser.email} onChange={handleUserChange} required placeholder="user@example.com" />
+              </div>
+              {!editUser && (
+                <div className="form-group full-width">
+                  <label>Password</label>
+                  <input type="password" name="password" value={newUser.password} onChange={handleUserChange} required placeholder="Min. 6 characters" />
+                </div>
+              )}
+            </div>
+
+            <div className="drawer-section-label">Role & Access</div>
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label>Pharmacy ID</label>
+                <input type="text" name="pharmacyId" value={newUser.pharmacyId} onChange={handleUserChange} required placeholder="e.g. PH-001" />
+              </div>
+              <div className="form-group">
+                <label>Role</label>
+                <select name="role" value={newUser.role} onChange={handleUserChange}>
+                  <option value="pharmacy_manager">Pharmacy Manager</option>
+                  <option value="rider">Rider</option>
+                  <option value="super_admin">Super Admin</option>
+                </select>
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+        <div className="drawer-footer">
+          <button type="button" className="drawer-cancel-btn" onClick={closeUserDrawer}>Cancel</button>
+          <button type="submit" form="userForm" className="drawer-save-btn">
+            {editUser ? "Update User" : "Create User"}
+          </button>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════
+          DRAWER — ADD / EDIT PHARMACY
+      ══════════════════════════════════════ */}
+      <div className={`form-drawer ${selectedSection === "pharmacies" && formVisible ? "drawer-open" : ""}`}>
+        <div className="drawer-header">
+          <div className="drawer-header-text">
+            <span className="drawer-eyebrow">Pharmacies</span>
+            <h2 className="drawer-title">{editPharmacy ? "Edit Pharmacy" : "Add Pharmacy"}</h2>
+          </div>
+          <button className="drawer-close-btn" onClick={closePharmacyDrawer}>
+            <FaTimes />
+          </button>
+        </div>
+
+        <div className="drawer-body">
+          <form onSubmit={handleSubmit} className="drawer-form" id="pharmacyForm">
+
+            <div className="drawer-section-label">Identification</div>
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label>Pharmacy ID</label>
+                <input name="pharmacyId" value={pharmacyData.pharmacyId} onChange={handleChange} required placeholder="e.g. PH-001" />
+              </div>
+              <div className="form-group">
+                <label>Pharmacy Name</label>
+                <input name="name" value={pharmacyData.name} onChange={handleChange} required placeholder="City Pharma" />
+              </div>
+            </div>
+
+            <div className="drawer-section-label">Contact Information</div>
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label>Email</label>
+                <input type="email" name="email" value={pharmacyData.email} onChange={handleChange} required placeholder="contact@pharma.com" />
+              </div>
+              <div className="form-group">
+                <label>Phone</label>
+                <input name="phone" value={pharmacyData.phone} onChange={handleChange} required placeholder="+92 300 0000000" />
+              </div>
+              <div className="form-group full-width">
+                <label>Address</label>
+                <input name="address" value={pharmacyData.address} onChange={handleChange} required placeholder="Street, City, Province" />
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+        <div className="drawer-footer">
+          <button type="button" className="drawer-cancel-btn" onClick={closePharmacyDrawer}>Cancel</button>
+          <button type="submit" form="pharmacyForm" className="drawer-save-btn">
+            {editPharmacy ? "Update Pharmacy" : "Add Pharmacy"}
+          </button>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════
+          DRAWER — ADD / EDIT MASTER MEDICINE
+      ══════════════════════════════════════ */}
+      <div className={`form-drawer form-drawer--wide ${masterFormVisible ? "drawer-open" : ""}`}>
+        <div className="drawer-header">
+          <div className="drawer-header-text">
+            <span className="drawer-eyebrow">Master Medicines</span>
+            <h2 className="drawer-title">{editMaster ? "Edit Medicine" : "Add Medicine"}</h2>
+          </div>
+          <button className="drawer-close-btn" onClick={closeMasterDrawer}>
+            <FaTimes />
+          </button>
+        </div>
+
+        <div className="drawer-body">
+          <form onSubmit={handleMasterSubmit} className="drawer-form" id="masterForm">
+
+            <div className="drawer-section-label">Basic Information</div>
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label>Medicine Name</label>
+                <input name="name" value={masterData.name} onChange={handleMasterChange} required placeholder="e.g. Panadol" />
+              </div>
+              <div className="form-group">
+                <label>Formula</label>
+                <input name="formula" value={masterData.formula} onChange={handleMasterChange} required placeholder="e.g. Paracetamol" />
+              </div>
+              <div className="form-group">
+                <label>Manufacturer</label>
+                <input name="manufacturer" value={masterData.manufacturer} onChange={handleMasterChange} required placeholder="e.g. GSK" />
+              </div>
+              <div className="form-group">
+                <label>Quantity (Tablets/ml)</label>
+                <input type="text" name="quantity" value={masterData.quantity} onChange={handleMasterChange} required placeholder="e.g. 10 Tablets" />
+              </div>
+            </div>
+
+            <div className="drawer-section-label">Classification</div>
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label>Dose</label>
+                <select
+                  className="input"
+                  value={doseMode === "dropdown" ? masterData.dose : "Custom"}
+                  onChange={handleDoseChange}
+                >
+                  <option value="">Select dose</option>
+                  {doseOptions.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
+                {doseMode === "custom" && (
+                  <input
+                    name="dose"
+                    placeholder="Enter custom dose"
+                    value={masterData.dose}
+                    onChange={handleMasterChange}
+                    className="input"
+                    style={{ marginTop: 8 }}
+                  />
+                )}
+              </div>
+              <div className="form-group">
+                <label>Type</label>
+                <select name="type" value={masterData.type} onChange={handleMasterChange} required>
+                  <option value="">Select type</option>
+                  {typeOptions.map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div className="form-group full-width">
+                <label>Category</label>
+                <select name="category" value={masterData.category} onChange={handleMasterChange} required>
+                  <option value="">Select category</option>
+                  {categoryOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="drawer-section-label">Inventory & Pricing</div>
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label>Stock</label>
+                <input type="number" min="0" name="stock" value={masterData.stock} onChange={handleMasterChange} required placeholder="0" />
+              </div>
+              <div className="form-group">
+                <label>Price (Rs.)</label>
+                <input type="number" min="0" name="price" value={masterData.price} onChange={handleMasterChange} required placeholder="0" />
+              </div>
+              <div className="form-group full-width expiry-row">
+                <label>Expiry Date</label>
+                <div className="expiry-input-wrap">
+                  <input type="date" name="expiryDate" value={masterData.expiryDate} onChange={handleMasterChange} className="input date-input" />
+                  <AiOutlineCalendar className="calendar-icon" />
+                </div>
+              </div>
+            </div>
+
+            <div className="drawer-section-label">Additional Details</div>
+            <div className="form-grid-2">
+              <div className="form-group full-width">
+                <label>Description</label>
+                <textarea name="description" value={masterData.description} onChange={handleMasterChange} rows="3" placeholder="Brief description of the medicine…" />
+              </div>
+            </div>
+
+            <div className="drawer-section-label">Product Image</div>
+            <div className="drawer-upload-zone">
+              {preview ? (
+                <div className="drawer-preview-wrap">
+                  <img src={preview} className="drawer-img-preview" alt="Preview" />
+                  <div className="drawer-preview-actions">
+                    <span className="drawer-preview-name">Image selected</span>
+                    <button
+                      type="button"
+                      className="drawer-remove-img"
+                      onClick={() => { setPreview(null); setSelectedImage(null); setMasterData({ ...masterData, imageURL: "" }); }}
+                    >
+                      <FaTimes /> Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <label className="drawer-upload-label">
+                  <div className="drawer-upload-icon">📷</div>
+                  <span className="drawer-upload-text">Click to upload image</span>
+                  <span className="drawer-upload-sub">PNG, JPG, WEBP supported</span>
+                  <input type="file" accept="image/*" hidden onChange={handleMasterImageSelect} />
+                </label>
+              )}
+            </div>
+
+          </form>
+        </div>
+
+        <div className="drawer-footer">
+          <button type="button" className="drawer-cancel-btn" onClick={closeMasterDrawer}>Cancel</button>
+          <button type="submit" form="masterForm" className="drawer-save-btn">
+            {editMaster ? "Update Medicine" : "Save Medicine"}
+          </button>
+        </div>
+      </div>
+
       {/* Sidebar */}
       <div className="sidebar">
         <div className="superadmin-logo-circle">
           <img src={MedGoLogo} alt="MedGO Logo" />
         </div>
-
         <h2 className="sidebar-title">MedGO</h2>
-
         <ul className="sidebar-menu">
-          <li
-            className={selectedSection === "main" ? "active" : ""}
-            onClick={() => setSelectedSection("main")}
-          >
+          <li className={selectedSection === "main" ? "active" : ""} onClick={() => setSelectedSection("main")}>
             <FaChartPie className="sidebar-icon" /> Dashboard
           </li>
-
-          <li
-            className={selectedSection === "auth" ? "active" : ""}
-            onClick={() => setSelectedSection("auth")}
-          >
+          <li className={selectedSection === "auth" ? "active" : ""} onClick={() => setSelectedSection("auth")}>
             <FaUserShield className="sidebar-icon" /> Authentication
           </li>
-
-          <li
-            className={selectedSection === "pharmacies" ? "active" : ""}
-            onClick={() => setSelectedSection("pharmacies")}
-          >
+          <li className={selectedSection === "pharmacies" ? "active" : ""} onClick={() => setSelectedSection("pharmacies")}>
             <FaHospitalAlt className="sidebar-icon" /> Pharmacies
           </li>
-
-          {/* NEW MENU ITEM */}
-          <li
-            className={selectedSection === "master" ? "active" : ""}
-            onClick={() => setSelectedSection("master")}
-          >
+          <li className={selectedSection === "master" ? "active" : ""} onClick={() => setSelectedSection("master")}>
             <FaPills className="sidebar-icon" /> Master Medicines
           </li>
         </ul>
-
         <button onClick={handleLogout} className="logout-btn">
           <FaSignOutAlt className="sidebar-icon" /> Logout
         </button>
@@ -455,32 +725,96 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
       <div className="dashboard-content">
         <h1 className="dashboard-header">MedGO Dashboard</h1>
 
-        {/* MAIN */}
+        {/* ── MAIN ── */}
         {selectedSection === "main" && (
-          <div className="superadmin-stats">
-            <div className="stat-card">
-              <h2>{pharmacies.length}</h2>
-              <p>Total Pharmacies</p>
+          <>
+            <div className="welcome-banner">
+              <div className="welcome-text">
+                <span className="welcome-greeting">Welcome back, Super Admin 👋</span>
+                <span className="welcome-date">{formatDate(liveTime)}</span>
+              </div>
+              <div className="welcome-clock">{formatTime(liveTime)}</div>
             </div>
 
-            <div className="stat-card">
-              <h2>{activePharmacies}</h2>
-              <p>Active Pharmacies</p>
+            <div className="superadmin-stats">
+              <div className="stat-card">
+                <h2>{pharmacies.length}</h2>
+                <p>Total Pharmacies</p>
+              </div>
+              <div className="stat-card">
+                <h2>{activePharmacies}</h2>
+                <p>Active Pharmacies</p>
+              </div>
+              <div className="stat-card">
+                <h2>{inactivePharmacies}</h2>
+                <p>Inactive Pharmacies</p>
+              </div>
+              <div className="stat-card">
+                <h2>{totalRiders}</h2>
+                <p>Total Riders</p>
+              </div>
+              <div className="stat-card stat-card--users">
+                <h2>{users.length}</h2>
+                <p>Total Users</p>
+              </div>
+              <div className="stat-card stat-card--meds">
+                <h2>{masterList.length}</h2>
+                <p>Master Medicines</p>
+              </div>
             </div>
 
-            <div className="stat-card">
-              <h2>{inactivePharmacies}</h2>
-              <p>Inactive Pharmacies</p>
+            <div className="quick-overview">
+              <div className="qo-header">
+                <span className="qo-title">Recent Pharmacies</span>
+                <button className="qo-view-all" onClick={() => setSelectedSection("pharmacies")}>
+                  View All →
+                </button>
+              </div>
+              <div className="qo-list">
+                {pharmacies.slice(0, 5).length === 0 ? (
+                  <p className="qo-empty">No pharmacies added yet.</p>
+                ) : (
+                  pharmacies.slice(0, 5).map((p) => (
+                    <div className="qo-item" key={p.id}>
+                      <div className="qo-item-icon"><FaHospitalAlt /></div>
+                      <div className="qo-item-info">
+                        <span className="qo-item-name">{p.name}</span>
+                        <span className="qo-item-sub">{p.address}</span>
+                      </div>
+                      <span className={`status-badge ${p.status === "Active" ? "active" : "inactive"}`}>
+                        {p.status}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
 
-            <div className="stat-card">
-              <h2>{totalRiders}</h2>
-              <p>Total Riders</p>
+            <div className="system-strip">
+              <div className="strip-item">
+                <span className="strip-label">Total Orders</span>
+                <span className="strip-value">{totalOrders}</span>
+              </div>
+              <div className="strip-divider" />
+              <div className="strip-item">
+                <span className="strip-label">Managers</span>
+                <span className="strip-value">{users.filter((u) => u.role === "pharmacy_manager").length}</span>
+              </div>
+              <div className="strip-divider" />
+              <div className="strip-item">
+                <span className="strip-label">Riders</span>
+                <span className="strip-value">{totalRiders}</span>
+              </div>
+              <div className="strip-divider" />
+              <div className="strip-item">
+                <span className="strip-label">Uptime Status</span>
+                <span className="strip-value strip-online">● Online</span>
+              </div>
             </div>
-          </div>
+          </>
         )}
 
-        {/* AUTH */}
+        {/* ── AUTH ── */}
         {selectedSection === "auth" && (
           <>
             <button
@@ -488,74 +822,25 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
               onClick={() => {
                 setFormVisible(!formVisible);
                 setEditUser(null);
-                setNewUser({
-                  email: "",
-                  password: "",
-                  pharmacyId: "",
-                  role: "pharmacy_manager",
-                });
+                setNewUser({ email: "", password: "", pharmacyId: "", role: "pharmacy_manager" });
               }}
             >
-              {formVisible ? "Close Form" : "Add User"}
+              <FaPlus /> {formVisible ? "Close" : "Add User"}
             </button>
 
-            {formVisible && (
-              <form onSubmit={handleCreateUser} className="edit-form">
-                <h3>{editUser ? "Edit User" : "Add New User"}</h3>
-
-                <div className="form-group">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={newUser.email}
-                    onChange={handleUserChange}
-                    required
-                  />
-                </div>
-
-                {!editUser && (
-                  <div className="form-group">
-                    <label>Password</label>
-                    <input
-                      type="password"
-                      name="password"
-                      value={newUser.password}
-                      onChange={handleUserChange}
-                      required
-                    />
-                  </div>
-                )}
-
-                <div className="form-group">
-                  <label>Pharmacy ID</label>
-                  <input
-                    type="text"
-                    name="pharmacyId"
-                    value={newUser.pharmacyId}
-                    onChange={handleUserChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Role</label>
-                  <select
-                    name="role"
-                    value={newUser.role}
-                    onChange={handleUserChange}
-                  >
-                    <option value="pharmacy_manager">Pharmacy Manager</option>
-                    <option value="rider">Rider</option>
-                    <option value="super_admin">Super Admin</option>
-                  </select>
-                </div>
-
-                <button className="save-btn" type="submit">
-                  Save
-                </button>
-              </form>
-            )}
+            <div className="search-bar-wrap">
+              <FaSearch className="search-icon" />
+              <input
+                className="search-bar-input"
+                type="text"
+                placeholder="Search users by email, role or pharmacy ID…"
+                value={searchUser}
+                onChange={(e) => setSearchUser(e.target.value)}
+              />
+              {searchUser && (
+                <span className="search-results-count">{filteredUsers.length} result{filteredUsers.length !== 1 ? "s" : ""}</span>
+              )}
+            </div>
 
             <table className="pharmacy-table">
               <thead>
@@ -566,30 +851,15 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
                   <th>Actions</th>
                 </tr>
               </thead>
-
               <tbody>
-                {users.map((u) => (
+                {filteredUsers.map((u) => (
                   <tr key={u.id}>
                     <td>{u.email}</td>
                     <td>{u.role}</td>
                     <td>{u.pharmacyId}</td>
                     <td className="action-buttons">
-                      <button className="edit-btn" onClick={() => {
-                        setEditUser(u);
-                        setNewUser(u);
-                        setFormVisible(true);
-                      }}>
-                        Edit
-                      </button>
-                      <button
-                        className="delete-btn"
-                        onClick={async () => {
-                          if (!window.confirm("Delete user?")) return;
-                          await deleteDoc(doc(db, "users", u.id));
-                        }}
-                      >
-                        Delete
-                      </button>
+                      <button className="edit-btn" onClick={() => { setEditUser(u); setNewUser(u); setFormVisible(true); }}>Edit</button>
+                      <button className="delete-btn" onClick={async () => { if (!window.confirm("Delete user?")) return; await deleteDoc(doc(db, "users", u.id)); }}>Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -598,7 +868,7 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
           </>
         )}
 
-        {/* PHARMACIES */}
+        {/* ── PHARMACIES ── */}
         {selectedSection === "pharmacies" && (
           <>
             <button
@@ -606,79 +876,25 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
               onClick={() => {
                 setFormVisible(!formVisible);
                 setEditPharmacy(null);
-                setPharmacyData({
-                  pharmacyId: "",
-                  name: "",
-                  address: "",
-                  email: "",
-                  phone: "",
-                  status: "Active",
-                });
+                setPharmacyData({ pharmacyId: "", name: "", address: "", email: "", phone: "", status: "Active" });
               }}
             >
-              {formVisible ? "Close Form" : "Add Pharmacy"}
+              <FaPlus /> {formVisible ? "Close" : "Add Pharmacy"}
             </button>
 
-            {formVisible && (
-              <form onSubmit={handleSubmit} className="edit-form">
-                <h3>{editPharmacy ? "Edit Pharmacy" : "Add Pharmacy"}</h3>
-
-                <div className="form-group">
-                  <label>Pharmacy ID</label>
-                  <input
-                    name="pharmacyId"
-                    value={pharmacyData.pharmacyId}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Name</label>
-                  <input
-                    name="name"
-                    value={pharmacyData.name}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Address</label>
-                  <input
-                    name="address"
-                    value={pharmacyData.address}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={pharmacyData.email}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Phone</label>
-                  <input
-                    name="phone"
-                    value={pharmacyData.phone}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <button className="save-btn" type="submit">
-                  {editPharmacy ? "Update" : "Save"}
-                </button>
-              </form>
-            )}
+            <div className="search-bar-wrap">
+              <FaSearch className="search-icon" />
+              <input
+                className="search-bar-input"
+                type="text"
+                placeholder="Search pharmacies by name, address or email…"
+                value={searchPharmacy}
+                onChange={(e) => setSearchPharmacy(e.target.value)}
+              />
+              {searchPharmacy && (
+                <span className="search-results-count">{filteredPharmacies.length} result{filteredPharmacies.length !== 1 ? "s" : ""}</span>
+              )}
+            </div>
 
             <table className="pharmacy-table">
               <thead>
@@ -692,9 +908,8 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
                   <th>Actions</th>
                 </tr>
               </thead>
-
               <tbody>
-                {pharmacies.map((p) => (
+                {filteredPharmacies.map((p) => (
                   <tr key={p.id}>
                     <td>{p.pharmacyId || p.id}</td>
                     <td>{p.name}</td>
@@ -702,33 +917,16 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
                     <td>{p.email}</td>
                     <td>{p.phone}</td>
                     <td>
-                      <span
-                        className={`status-badge ${
-                          p.status === "Active" ? "active" : "inactive"
-                        }`}
-                      >
+                      <span className={`status-badge ${p.status === "Active" ? "active" : "inactive"}`}>
                         {p.status}
                       </span>
                     </td>
-
                     <td className="action-buttons">
-                      <button className="edit-btn" onClick={() => handleEdit(p)}>
-                        Edit
-                      </button>
-
-                      <button
-                        className="toggle-btn"
-                        onClick={() => handleToggleStatus(p.id, p.status)}
-                      >
+                      <button className="edit-btn" onClick={() => handleEdit(p)}>Edit</button>
+                      <button className="toggle-btn" onClick={() => handleToggleStatus(p.id, p.status)}>
                         {p.status === "Active" ? "Deactivate" : "Activate"}
                       </button>
-
-                      <button
-                        className="delete-btn"
-                        onClick={() => handleDelete(p.id)}
-                      >
-                        Delete
-                      </button>
+                      <button className="delete-btn" onClick={() => handleDelete(p.id)}>Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -737,7 +935,7 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
           </>
         )}
 
-        {/* MASTER MEDICINES */}
+        {/* ── MASTER MEDICINES ── */}
         {selectedSection === "master" && (
           <>
             <button
@@ -745,258 +943,29 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
               onClick={() => {
                 setMasterFormVisible(!masterFormVisible);
                 setEditMaster(null);
-                setMasterData({
-                  name: "",
-                  formula: "",
-                  quantity:"",
-                  manufacturer: "",
-                  dose: "",
-                  category: "",
-                  type: "",
-                  description: "",
-                  price: "",
-                  stock: "",
-                  expiryDate: "",
-                  imageURL: "",
-                });
+                setMasterData({ name: "", formula: "", quantity: "", manufacturer: "", dose: "", category: "", type: "", description: "", price: "", stock: "", expiryDate: "", imageURL: "" });
                 setPreview(null);
                 setSelectedImage(null);
                 setDoseMode("dropdown");
               }}
             >
-              {masterFormVisible ? "Close Form" : "Add Master Medicine"}
+              <FaPlus /> {masterFormVisible ? "Close" : "Add Master Medicine"}
             </button>
 
-            {masterFormVisible && (
-              <form onSubmit={handleMasterSubmit} className="edit-form">
-                <h3>{editMaster ? "Edit Master Medicine" : "Add Master Medicine"}</h3>
+            <div className="search-bar-wrap">
+              <FaSearch className="search-icon" />
+              <input
+                className="search-bar-input"
+                type="text"
+                placeholder="Search by name, formula, category or manufacturer…"
+                value={searchMaster}
+                onChange={(e) => setSearchMaster(e.target.value)}
+              />
+              {searchMaster && (
+                <span className="search-results-count">{filteredMasterList.length} result{filteredMasterList.length !== 1 ? "s" : ""}</span>
+              )}
+            </div>
 
-                {/* NAME */}
-                <div className="form-group">
-                  <label>Name</label>
-                  <input
-                    name="name"
-                    value={masterData.name}
-                    onChange={handleMasterChange}
-                    required
-                  />
-                </div>
-
-                {/* FORMULA */}
-                <div className="form-group">
-                  <label>Formula</label>
-                  <input
-                    name="formula"
-                    value={masterData.formula}
-                    onChange={handleMasterChange}
-                    required
-                  />
-                </div>
-<div className="form-group">
-  <label>Quantity (Tablets/ml)</label>
-  <input
-    type="text"
-    min="0"
-    name="quantity"
-    value={masterData.quantity}
-    onChange={handleMasterChange}
-    required
-  />
-</div>
-
-                {/* MANUFACTURER */}
-                <div className="form-group">
-                  <label>Manufacturer</label>
-                  <input
-                    name="manufacturer"
-                    value={masterData.manufacturer}
-                    onChange={handleMasterChange}
-                    required
-                  />
-                </div>
-
-                {/* DOSE (dropdown + custom) */}
-                <div className="form-group">
-                  <label>Dose</label>
-                  <select
-                    className="input"
-                    value={doseMode === "dropdown" ? masterData.dose : "Custom"}
-                    onChange={handleDoseChange}
-                  >
-                    <option value="">Select dose</option>
-                    {doseOptions.map((d) => (
-                      <option key={d} value={d}>
-                        {d}
-                      </option>
-                    ))}
-                  </select>
-                  {doseMode === "custom" && (
-                    <input
-                      name="dose"
-                      placeholder="Enter custom dose"
-                      value={masterData.dose}
-                      onChange={handleMasterChange}
-                      className="input"
-                    />
-                  )}
-                </div>
-
-                {/* CATEGORY */}
-                <div className="form-group">
-                  <label>Category</label>
-                  <select
-                    name="category"
-                    value={masterData.category}
-                    onChange={handleMasterChange}
-                    required
-                  >
-                    <option value="">Select category</option>
-                    {categoryOptions.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* TYPE */}
-                <div className="form-group">
-                  <label>Type</label>
-                  <select
-                    name="type"
-                    value={masterData.type}
-                    onChange={handleMasterChange}
-                    required
-                  >
-                    <option value="">Select type</option>
-                    {typeOptions.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* STOCK */}
-                <div className="form-group">
-                  <label>Stock</label>
-                  <input
-                    type="number"
-                    min="0"
-                    name="stock"
-                    value={masterData.stock}
-                    onChange={handleMasterChange}
-                    required
-                  />
-                </div>
-
-                {/* PRICE */}
-                <div className="form-group">
-                  <label>Price (Rs.)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    name="price"
-                    value={masterData.price}
-                    onChange={handleMasterChange}
-                    required
-                  />
-                </div>
-
-                {/* EXPIRY (date + calendar icon) */}
-                <div className="form-group expiry-row">
-                  <label>Expiry</label>
-                  <div className="expiry-input-wrap">
-                    <input
-                      type="date"
-                      name="expiryDate"
-                      value={masterData.expiryDate}
-                      onChange={handleMasterChange}
-                      className="input date-input"
-                      placeholder="Expiry date"
-                    />
-                    <AiOutlineCalendar className="calendar-icon" />
-                  </div>
-                </div>
-
-                {/* DESCRIPTION */}
-                <div className="form-group">
-                  <label>Description</label>
-                  <textarea
-                    name="description"
-                    value={masterData.description}
-                    onChange={handleMasterChange}
-                    rows="3"
-                  />
-                </div>
-
-                {/* UPLOAD IMAGE */}
-                <label className="upload-btn">
-                  Upload Image
-                  <input
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={handleMasterImageSelect}
-                  />
-                </label>
-
-                {preview && (
-                  <div className="image-preview-container">
-                    <img src={preview} className="img-preview" alt="Preview" />
-                    <button
-                      type="button"
-                      className="remove-image-btn"
-                      onClick={() => {
-                        setPreview(null);
-                        setSelectedImage(null);
-                        setMasterData({ ...masterData, imageURL: "" });
-                      }}
-                    >
-                      ✖
-                    </button>
-                  </div>
-                )}
-
-                <div style={{ marginTop: 12 }}>
-                  <button className="save-btn" type="submit">
-                    {editMaster ? "Update" : "Save"}
-                  </button>
-
-                  {editMaster && (
-                    <button
-                      type="button"
-                      className="delete-btn"
-                      style={{ marginLeft: 8 }}
-                      onClick={() => {
-                        setEditMaster(null);
-                        setMasterFormVisible(false);
-                        setMasterData({
-                          name: "",
-                          formula: "",
-                          quantity:"",
-                          manufacturer: "",
-                          dose: "",
-                          category: "",
-                          type: "",
-                          description: "",
-                          price: "",
-                          stock: "",
-                          expiryDate: "",
-                          imageURL: "",
-                        });
-                        setPreview(null);
-                        setSelectedImage(null);
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  )}
-                </div>
-              </form>
-            )}
-
-            {/* MASTER LIST TABLE */}
             <table className="pharmacy-table">
               <thead>
                 <tr>
@@ -1010,18 +979,18 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
                   <th>Stock</th>
                   <th>Price</th>
                   <th>Expiry</th>
-                  
                   <th>Actions</th>
                 </tr>
               </thead>
-
               <tbody>
-                {masterList.length === 0 ? (
+                {filteredMasterList.length === 0 ? (
                   <tr>
-                    <td colSpan="11" className="no-products">No master medicines.</td>
+                    <td colSpan="11" className="no-products">
+                      {searchMaster ? "No medicines match your search." : "No master medicines."}
+                    </td>
                   </tr>
                 ) : (
-                  masterList.map((m) => (
+                  filteredMasterList.map((m) => (
                     <tr key={m.id}>
                       <td>{m.name}</td>
                       <td>{m.formula || "-"}</td>
@@ -1033,15 +1002,9 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
                       <td>{m.stock != null ? m.stock : "-"}</td>
                       <td>Rs. {m.price != null ? m.price : "-"}</td>
                       <td>{m.expiryDate || "N/A"}</td>
-                      
                       <td className="action-buttons">
-                        <button className="edit-btn" onClick={() => handleEditMaster(m)}>
-                          Edit
-                        </button>
-
-                        <button className="delete-btn" onClick={() => handleDeleteMaster(m.id)}>
-                          Delete
-                        </button>
+                        <button className="edit-btn" onClick={() => handleEditMaster(m)}>Edit</button>
+                        <button className="delete-btn" onClick={() => handleDeleteMaster(m.id)}>Delete</button>
                       </td>
                     </tr>
                   ))
