@@ -109,7 +109,7 @@ export const HealthcareGapSection = () => {
 
           {/* Floating stat cards */}
           <div className="stat-card sc-top-left">
-            <span className="stat-num">500<span className="stat-plus">+</span></span>
+            <span className="stat-num">3<span className="stat-plus"></span></span>
             <span className="stat-label">Verified Pharmacies</span>
           </div>
 
