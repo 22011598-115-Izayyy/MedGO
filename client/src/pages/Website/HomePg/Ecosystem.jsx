@@ -5,7 +5,8 @@ import "./Ecosystem.css";
 import sourceImg from "../../../assets/source.jpeg";
 import expiryImg from "../../../assets/expiry.jpeg";
 import safetyImg from "../../../assets/safety.jpeg";
-import trackingImg  from "../../../assets/tracking.jpeg"; // ⭐ 4th card image
+import trackingImg from "../../../assets/tracking.jpeg";
+
 // ==========================================
 // QUALITY SECTION
 // ==========================================
@@ -47,7 +48,7 @@ export const QualityPromiseSection = () => {
           <div className="quality-step">
             <img src={trackingImg} className="quality-icon" alt="Verified Pharmacies" />
             <h3>Authenticity Chain Tracking</h3>
-            <p>We record every medicine’s movement from  pharmacy → customer to guarantee authenticity at every step.</p>
+            <p>We record every medicine's movement from pharmacy → customer to guarantee authenticity at every step.</p>
           </div>
 
         </div>
@@ -77,7 +78,7 @@ export const HealthcareGapSection = () => {
 
           <div className="story-block">
             <p className="highlight-p">
-              Everyone knows the frustration of hearing 
+              Everyone knows the frustration of hearing
               <span className="red-text"> "Out of Stock."</span>
             </p>
 
@@ -94,17 +95,39 @@ export const HealthcareGapSection = () => {
           </div>
         </div>
 
+        {/* ── PREMIUM VISUAL PANEL (replaces old glass card) ── */}
         <div className="gap-image-wrapper">
-          <div className="abstract-circle c1"></div>
-          <div className="abstract-circle c2"></div>
 
-          <div className="glass-card">
-            <div className="check-icon">✓</div>
-            <div>
-              <span className="glass-title">Medicine Found!</span><br />
-              <span className="glass-sub">G-9 Markaz • 12 mins away</span>
-            </div>
+          {/* Pulsing core orb */}
+          <div className="orb-core">
+            <div className="orb-ring r1"></div>
+            <div className="orb-ring r2"></div>
+            <div className="orb-ring r3"></div>
+            <div className="orb-pulse"></div>
+            <span className="orb-emoji">💊</span>
           </div>
+
+          {/* Floating stat cards */}
+          <div className="stat-card sc-top-left">
+            <span className="stat-num">500<span className="stat-plus">+</span></span>
+            <span className="stat-label">Verified Pharmacies</span>
+          </div>
+
+          <div className="stat-card sc-top-right">
+            <span className="stat-num">30<span className="stat-unit">min</span></span>
+            <span className="stat-label">Avg. Delivery Time</span>
+          </div>
+
+          <div className="stat-card sc-bottom-left">
+            <span className="stat-num">99.8<span className="stat-unit">%</span></span>
+            <span className="stat-label">Authentic Medicines</span>
+          </div>
+
+          <div className="stat-card sc-bottom-right">
+            <span className="stat-num">24<span className="stat-unit">/7</span></span>
+            <span className="stat-label">Live Support</span>
+          </div>
+
         </div>
 
       </div>

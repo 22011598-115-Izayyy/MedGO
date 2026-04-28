@@ -60,6 +60,7 @@ const PharmacyRiders = ({ pharmacyId }) => {
       if (id) await fetchRiders();
     };
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pharmacyId, pharmacyDocId]);
 
   // 3️⃣ Input handler

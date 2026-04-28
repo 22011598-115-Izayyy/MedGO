@@ -3,7 +3,8 @@ import {
   addDoc,
   serverTimestamp,
   updateDoc,
-  doc
+  doc,
+  getDoc
 } from "firebase/firestore";
 import { db } from "../../firebase/config";
 import { createNotification } from "../../utils/createNotification";
@@ -54,6 +55,22 @@ const createSingleOrder = async ({
   await updateDoc(orderRef, {
     orderId: orderRef.id
   });
+
+  // ✅ REDUCE STOCK for each ordered item
+  for (const item of items) {
+    try {
+      const productRef = doc(db, "Pharmacies", pharmacyId, "products", item.productId);
+      const productSnap = await getDoc(productRef);
+      if (productSnap.exists()) {
+        const currentStock = Number(productSnap.data().stock) || 0;
+        const newStock = Math.max(0, currentStock - (Number(item.quantity) || 1));
+        await updateDoc(productRef, { stock: newStock });
+      }
+    } catch (err) {
+      // Stock update failure should NOT block the order
+      console.error("Stock update failed for product:", item.productId, err);
+    }
+  }
 
   // 🔔 Notify admin about new order
   await createNotification({

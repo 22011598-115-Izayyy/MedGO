@@ -252,7 +252,8 @@ const SuperAdminDashboard = ({ setCurrentPage }) => {
         if (exp <= today) {
           if (!window.confirm("Expiry is today or in the past. Save anyway?")) return;
         }
-      } catch (err) {
+      } catch {
+        // ── FIXED: removed unused (err) parameter ──
         alert("Invalid expiry date.");
         return;
       }

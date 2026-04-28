@@ -17,7 +17,7 @@ import PharmacyDashboard from "./pages/Pharmacy/PharmacyDashboard";
 import AllProductsPage from "./pages/Website/ProductPg/AllProductsPage";
 import MedicineDetails from "./pages/Website/MedicineDetails.jsx";
 import RiderDashboard from "./pages/Rider/RiderDashboard";
-import NearbyPharmacyMap from "./Components/NearbyPharmacyMap"; // ⭐ ADDED FOR MAP
+import NearbyPharmacyMap from "./Components/NearbyPharmacyMap";
 import "./pages/Order/Cart.css";
 
 // ---------------- CART UI ----------------
@@ -45,7 +45,6 @@ const SimpleCart = ({ setShowCheckout }) => {
       </div>
 
       <div className="cart-content">
-
         <div className="cart-items">
           {cart.map((item) => (
             <div className="cart-item" key={item.id}>
@@ -60,16 +59,13 @@ const SimpleCart = ({ setShowCheckout }) => {
                 <h3 className="item-name">
                   {item.productName || item.name}
                 </h3>
-
                 <p className="item-pharmacy">
                   {item.pharmacyName || "Unknown Pharmacy"}
                 </p>
-
                 <p className="item-meta">
                   {item.dose ? `${item.dose} • ` : ""}
                   {item.quantity ? item.quantity : ""}
                 </p>
-
                 <p className="item-manufacturer">
                   {item.manufacturer}
                 </p>
@@ -82,9 +78,7 @@ const SimpleCart = ({ setShowCheckout }) => {
                 >
                   -
                 </button>
-
                 <span className="quantity">{item.quantity}</span>
-
                 <button
                   className="quantity-btn"
                   onClick={() => updateQuantity(item.id, item.quantity + 1)}
@@ -199,7 +193,7 @@ function App() {
           />
         )}
 
-        {/* CHECKOUT PAGE */}
+        {/* PAGES */}
         {showCheckout ? (
           <Checkout
             setShowCart={setShowCart}
@@ -223,13 +217,12 @@ function App() {
           />
 
         ) : currentPage === "products" ? (
-  <AllProductsPage
-    setCurrentPage={setCurrentPage}
-    setSelectedMedicineId={setSelectedMedicineId}
-    chatbotSearchQuery={chatbotSearchQuery}
-  />
-        
-          
+          <AllProductsPage
+            setCurrentPage={setCurrentPage}
+            setSelectedMedicineId={setSelectedMedicineId}
+            chatbotSearchQuery={chatbotSearchQuery}
+          />
+
         ) : currentPage === "admin" ? (
           <AdminLogin setCurrentPage={setCurrentPage} />
 
@@ -249,9 +242,9 @@ function App() {
           />
 
         ) : currentPage === "nearby-pharmacy" ? (
-          <NearbyPharmacyMap 
-          setCurrentPage={setCurrentPage}
-          setSelectedPharmacy={setSelectedPharmacy}
+          <NearbyPharmacyMap
+            setCurrentPage={setCurrentPage}
+            setSelectedPharmacy={setSelectedPharmacy}
           />
 
         ) : (
@@ -263,16 +256,20 @@ function App() {
               setCurrentPage={setCurrentPage}
               setSelectedMedicineId={setSelectedMedicineId}
             />
-
             <TopSellingMedicines
               setCurrentPage={setCurrentPage}
               setSelectedMedicineId={setSelectedMedicineId}
             />
-
             <Reviews />
           </>
         )}
-        {/* ✅ CHATBOT - properly wired */}
+
+        {/* FOOTER — hidden on dashboards and login */}
+        {!isDashboard && !isLoginPage && (
+          <Footer setCurrentPage={setCurrentPage} />
+        )}
+
+        {/* CHATBOT — hidden on dashboards and login */}
         {!isDashboard && !isLoginPage && (
           <Chatbot
             setCurrentPage={setCurrentPage}

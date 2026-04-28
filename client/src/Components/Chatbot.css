@@ -1,311 +1,445 @@
-/* Chat Toggle Button */
-.chat-toggle {
+/* ================================================
+   MEDGO CHATBOT — PREMIUM UI
+   All classes prefixed "medgo-" to avoid conflicts
+================================================ */
+
+/* ── Toggle Button ─────────────────────────────── */
+.medgo-chat-toggle {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #1a7f45 0%, #2d9c5a 100%);
+  bottom: 28px;
+  right: 28px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1.5rem;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
   color: white;
-  box-shadow: 0 4px 20px rgba(26, 127, 69, 0.4);
-  transition: all 0.3s ease;
-  z-index: 1000;
-}
-
-.chat-toggle:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 30px rgba(26, 127, 69, 0.6);
-}
-
-.chat-toggle.open {
-  background: #ff4444;
-}
-
-.chat-notification {
-  position: absolute;
-  bottom: 70px;
-  right: 0;
-  background: #333;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  white-space: nowrap;
-  opacity: 0;
-  animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { opacity: 0; transform: translateY(0); }
-  40%, 60% { opacity: 1; transform: translateY(-10px); }
-}
-
-/* Chat Container */
-.chatbot-container {
-  position: fixed;
-  bottom: 90px;
-  right: 20px;
-  width: 350px;
-  height: 500px;
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  z-index: 1000;
-  border: 1px solid #e0e0e0;
-  overflow: hidden;
-}
-
-/* Header */
-.chatbot-header {
-  background: linear-gradient(135deg, #1a7f45 0%, #2d9c5a 100%);
-  color: white;
-  padding: 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.bot-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.bot-avatar {
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-}
-
-.bot-info h4 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.bot-status {
-  font-size: 0.8rem;
-  opacity: 0.9;
-}
-
-.close-chat {
-  background: none;
   border: none;
-  color: white;
-  font-size: 1.2rem;
   cursor: pointer;
-  padding: 5px;
-  border-radius: 4px;
-}
-
-.close-chat:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-/* Messages Area */
-.chatbot-messages {
-  flex: 1;
-  padding: 15px;
-  overflow-y: auto;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: #f8f9fa;
-}
-
-.message {
-  display: flex;
-  flex-direction: column;
-  max-width: 80%;
-}
-
-.message.user {
-  align-self: flex-end;
-}
-
-.message.bot {
-  align-self: flex-start;
-}
-
-.message-content {
-  padding: 10px 15px;
-  border-radius: 15px;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-.message.user .message-content {
-  background: #1a7f45;
-  color: white;
-  border-bottom-right-radius: 5px;
-}
-
-.message.bot .message-content {
-  background: white;
-  color: #333;
-  border: 1px solid #e0e0e0;
-  border-bottom-left-radius: 5px;
-}
-
-.message-time {
-  font-size: 0.7rem;
-  color: #999;
-  margin-top: 5px;
-  align-self: flex-end;
-}
-
-.message.bot .message-time {
-  align-self: flex-start;
-}
-
-/* Typing Indicator */
-.typing-indicator {
-  display: flex;
-  gap: 4px;
-  padding: 5px 0;
-}
-
-.typing-indicator span {
-  width: 6px;
-  height: 6px;
-  background: #1a7f45;
-  border-radius: 50%;
-  animation: typing 1.4s infinite;
-}
-
-.typing-indicator span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing-indicator span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes typing {
-  0%, 60%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-10px); }
-}
-
-/* Quick Questions */
-.quick-questions {
-  padding: 10px 15px;
-  border-top: 1px solid #e0e0e0;
-  background: white;
-}
-
-.quick-questions p {
-  margin: 0 0 10px 0;
-  font-size: 0.8rem;
-  color: #666;
-  font-weight: 500;
-}
-
-.quick-question-btn {
-  display: block;
-  width: 100%;
-  background: none;
-  border: 1px solid #1a7f45;
-  color: #1a7f45;
-  padding: 8px 12px;
-  margin-bottom: 5px;
-  border-radius: 15px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.3s ease;
-}
-
-.quick-question-btn:hover {
-  background: #1a7f45;
-  color: white;
-}
-
-/* Input Area */
-.chatbot-input {
-  display: flex;
-  padding: 15px;
-  background: white;
-  border-top: 1px solid #e0e0e0;
-  gap: 10px;
-}
-
-.chatbot-input input {
-  flex: 1;
-  padding: 10px 15px;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 24px rgba(22, 163, 74, 0.45);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  z-index: 10000;
   outline: none;
-  font-size: 0.9rem;
 }
 
-.chatbot-input input:focus {
-  border-color: #1a7f45;
+.medgo-chat-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px rgba(22, 163, 74, 0.6);
 }
 
-.chatbot-input button {
+.medgo-chat-toggle.open {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 4px 24px rgba(220, 38, 38, 0.4);
+}
+
+.medgo-toggle-icon {
+  font-size: 24px;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.medgo-toggle-pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(22, 163, 74, 0.35);
+  animation: medgo-pulse 2.2s ease-out infinite;
+}
+
+@keyframes medgo-pulse {
+  0%   { transform: scale(1);    opacity: 0.8; }
+  70%  { transform: scale(1.55); opacity: 0;   }
+  100% { transform: scale(1.55); opacity: 0;   }
+}
+
+/* ── Chat Window ───────────────────────────────── */
+.medgo-chatbot {
+  position: fixed;
+  bottom: 100px;
+  right: 28px;
+  /* FIX: responsive width — never overflows viewport */
+  width: min(400px, calc(100vw - 40px));
+  height: min(620px, calc(100vh - 120px));
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.14),
+    0 8px 24px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  z-index: 9999;
+  overflow: hidden;
+  animation: medgo-slideUp 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  /* FIX: ensure the box itself doesn't bleed off screen */
+  box-sizing: border-box;
+}
+
+@keyframes medgo-slideUp {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* ── Header ────────────────────────────────────── */
+.medgo-header {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.medgo-header-left {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.medgo-avatar {
   width: 40px;
   height: 40px;
-  background: #1a7f45;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.22);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  font-size: 20px;
+  flex-shrink: 0;
+  backdrop-filter: blur(4px);
 }
 
-.chatbot-input button:hover:not(:disabled) {
-  background: #136c39;
-  transform: scale(1.05);
+.medgo-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
-.chatbot-input button:disabled {
-  background: #ccc;
+.medgo-header-title {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.medgo-header-status {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.medgo-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.medgo-dot.online {
+  background: #bbf7d0;
+  box-shadow: 0 0 0 2px rgba(187, 247, 208, 0.35);
+}
+
+.medgo-dot.loading {
+  background: #fde68a;
+  animation: medgo-blink 1s ease-in-out infinite;
+}
+
+@keyframes medgo-blink {
+  0%, 100% { opacity: 1;    }
+  50%       { opacity: 0.35; }
+}
+
+.medgo-close-btn {
+  background: rgba(255, 255, 255, 0.18);
+  border: none;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.medgo-close-btn:hover { background: rgba(255, 255, 255, 0.32); }
+
+/* ── Messages Area ─────────────────────────────── */
+.medgo-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f6f8f7;
+  scroll-behavior: smooth;
+  /* FIX: prevent content from overflowing horizontally */
+  overflow-x: hidden;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.medgo-messages::-webkit-scrollbar       { width: 5px; }
+.medgo-messages::-webkit-scrollbar-track { background: transparent; }
+.medgo-messages::-webkit-scrollbar-thumb {
+  background: #c4dbc9;
+  border-radius: 10px;
+}
+
+/* ── Individual Message ────────────────────────── */
+.medgo-message {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  animation: medgo-fadeIn 0.22s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@keyframes medgo-fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+.medgo-message.user { flex-direction: row-reverse; }
+
+.medgo-bot-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid #d1fae5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+}
+
+.medgo-bubble {
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  box-sizing: border-box;
+}
+
+.medgo-message.bot .medgo-bubble {
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.medgo-message.user .medgo-bubble {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+}
+
+/* ── Typing Indicator ──────────────────────────── */
+.medgo-typing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 16px !important;
+  min-width: 56px;
+}
+
+.medgo-typing span {
+  width: 7px;
+  height: 7px;
+  background: #16a34a;
+  border-radius: 50%;
+  animation: medgo-bounce 1.3s ease-in-out infinite;
+}
+
+.medgo-typing span:nth-child(2) { animation-delay: 0.18s; }
+.medgo-typing span:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes medgo-bounce {
+  0%, 60%, 100% { transform: translateY(0);    }
+  30%            { transform: translateY(-7px); }
+}
+
+/* ── Quick Actions ─────────────────────────────── */
+.medgo-quick {
+  padding: 10px 14px 8px;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.medgo-quick-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 7px 2px;
+}
+
+.medgo-quick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.medgo-quick-btn {
+  padding: 8px 10px;
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  color: #15803d;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.18s ease;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.medgo-quick-btn:hover {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(22, 163, 74, 0.25);
+}
+
+/* ── Input Row — FULL WIDTH FIX ────────────────── */
+.medgo-input-row {
+  display: flex;
+  align-items: center;
+  /* FIX: padding only on top/bottom, let input+button fill the rest */
+  padding: 10px 12px;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+  flex-shrink: 0;
+  /* FIX: critical — box-sizing ensures padding doesn't push content out */
+  box-sizing: border-box;
+  width: 100%;
+  gap: 8px;
+}
+
+.medgo-input {
+  /* FIX: flex: 1 1 0 with min-width: 0 forces it to shrink and fill */
+  flex: 1 1 0;
+  min-width: 330px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-size: 12.5px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: #fafafa;
+  color: #1f2937;
+  box-sizing: border-box;
+  height: 42px;
+}
+
+.medgo-input::placeholder { color: #9ca3af; }
+
+.medgo-input:focus {
+  border-color: #16a34a;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+.medgo-input:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* Responsive */
-@media (max-width: 480px) {
-  .chatbot-container {
-    width: calc(100vw - 40px);
-    height: 400px;
-    right: 20px;
-    left: 20px;
+.medgo-send-btn {
+  /* FIX: fixed dimensions, flex-shrink: 0 so it never compresses */
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s, box-shadow 0.18s;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+  box-sizing: border-box;
+}
+
+.medgo-send-btn:hover:not(:disabled) {
+  transform: scale(1.07);
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.45);
+}
+
+.medgo-send-btn:disabled {
+  background: #d1d5db;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Responsive ────────────────────────────────── */
+@media (max-width: 500px) {
+  .medgo-chatbot {
+    right: 12px;
+    bottom: 88px;
+    width: calc(100vw - 24px);
+    height: calc(100vh - 110px);
+    border-radius: 16px;
   }
-  
-  .chat-toggle {
-    width: 50px;
-    height: 50px;
-    font-size: 1.2rem;
+
+  .medgo-chat-toggle {
+    right: 16px;
+    bottom: 20px;
   }
-}
 
-/* Scrollbar */
-.chatbot-messages::-webkit-scrollbar {
-  width: 4px;
-}
+  .medgo-bubble {
+    max-width: 88%;
+    font-size: 12px;
+  }
 
-.chatbot-messages::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-.chatbot-messages::-webkit-scrollbar-thumb {
-  background: #1a7f45;
-  border-radius: 4px;
+  .medgo-input {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
 }

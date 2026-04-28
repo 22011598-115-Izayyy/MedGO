@@ -31,7 +31,7 @@ function TopSellingMedicines({ setCurrentPage, setSelectedMedicineId }) {
 
           const products = productsSnapshot.docs.map((doc) => ({
             id: doc.id,
-            pharmacyId, // ⭐ REQUIRED FOR REDIRECT
+            pharmacyId,
             pharmacyName: pharmacyDoc.data().name,
             ...doc.data(),
           }));
@@ -51,7 +51,7 @@ function TopSellingMedicines({ setCurrentPage, setSelectedMedicineId }) {
   }, []);
 
   const handleAddToCart = (product, e) => {
-    e.stopPropagation(); // prevent redirect
+    e.stopPropagation();
     addToCart(product);
     alert(`${product.productName} added to cart!`);
   };
@@ -62,25 +62,33 @@ function TopSellingMedicines({ setCurrentPage, setSelectedMedicineId }) {
 
   return (
     <section className="top-selling-section">
+      {/* decorative orbs */}
+      <div className="ts-orb ts-orb-1"></div>
+      <div className="ts-orb ts-orb-2"></div>
+      <div className="ts-orb ts-orb-3"></div>
+
       <div className="top-selling-container">
         <div className="section-header">
+          <span className="ts-eyebrow">TRENDING NOW</span>
           <h2 className="section-title">Most Ordered Medicines on Med-Go</h2>
           <p className="section-subtitle">
             Shop our most popular medicines, trusted by thousands of customers.
           </p>
+          <div className="ts-title-line"></div>
         </div>
 
         <div className="products-grid">
           {loading ? (
-            <p style={{ textAlign: "center", fontSize: "1.2rem", color: "#666" }}>
-              Loading medicines...
-            </p>
+            <div className="ts-loading">
+              <div className="ts-spinner"></div>
+              <p>Loading medicines…</p>
+            </div>
           ) : topSellingProducts.length === 0 ? (
             <p style={{ textAlign: "center", fontSize: "1.2rem", color: "#666" }}>
               No medicines found.
             </p>
           ) : (
-            topSellingProducts.map((product) => {
+            topSellingProducts.map((product, index) => {
               const productImage =
                 product.imageURL ||
                 product.image ||
@@ -97,9 +105,7 @@ function TopSellingMedicines({ setCurrentPage, setSelectedMedicineId }) {
                 <div
                   key={product.id}
                   className="product-card"
-                  style={{ cursor: "pointer" }}
-
-                  // ⭐ REDIRECT TO MEDICINE DETAILS PAGE
+                  style={{ cursor: "pointer", animationDelay: `${index * 0.1}s` }}
                   onClick={() => {
                     setSelectedMedicineId({
                       productId: product.id,
@@ -108,6 +114,9 @@ function TopSellingMedicines({ setCurrentPage, setSelectedMedicineId }) {
                     setCurrentPage("medicine-details");
                   }}
                 >
+                  {/* CARD SHIMMER BORDER */}
+                  <div className="card-border-glow"></div>
+
                   {/* PRODUCT IMAGE */}
                   <div className="product-image">
                     <img
@@ -129,6 +138,9 @@ function TopSellingMedicines({ setCurrentPage, setSelectedMedicineId }) {
                       <span className="stars">★★★★★</span>
                       <span className="rating-number">(4.5)</span>
                     </div>
+
+                    {/* image overlay on hover */}
+                    <div className="image-overlay"></div>
                   </div>
 
                   {/* PRODUCT DETAILS */}

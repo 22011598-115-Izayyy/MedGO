@@ -71,6 +71,7 @@
   padding: 8px 18px;
   border-radius: 50px;
   cursor: pointer;
+  padding-left: 20px;
   font-size: 1.2rem;
 }
 
@@ -114,27 +115,33 @@
   padding: 10px 0;
 }
 
-/* FLOATING PILLS */
+/* FLOATING PILLS — horizontal capsule shapes */
 .floating-pill {
   position: absolute;
-  font-size: 2.2rem;
-  opacity: 0.8;
+  width: 36px;
+  height: 14px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 10px rgba(100, 255, 160, 0.15),
+              inset 0 0 6px rgba(255, 255, 255, 0.08);
+  opacity: 0.7;
   animation: floatUpDown 6s infinite ease-in-out;
   z-index: 1;
 }
 
-/* PILL POSITIONS */
-.pill1 { top: 10%; left: 60%; animation-delay: 0s; }
-.pill2 { top: 25%; left: 70%; animation-delay: 1s; }
-.pill3 { top: 40%; left: 55%; animation-delay: 1.5s; }
-.pill4 { top: 60%; left: 68%; animation-delay: 2s; }
-.pill5 { top: 75%; left: 58%; animation-delay: 2.5s; }
-.pill6 { top: 50%; left: 80%; animation-delay: 3s; }
+/* PILL POSITIONS — slight horizontal tilts */
+.pill1 { top: 15%; left: 65%; animation-delay: 0s;   width: 38px; height: 14px; transform: rotate(10deg);  }
+.pill2 { top: 18%; left: 85%; animation-delay: 1s;   width: 38px; height: 14px; transform: rotate(-8deg);  }
+.pill3 { top: 50%; left: 57%; animation-delay: 1.5s; width: 38px; height: 14px; transform: rotate(15deg);  }
+.pill4 { top: 80%; left: 69%; animation-delay: 2s;   width: 38px; height: 14px; transform: rotate(-12deg); }
+.pill5 { top: 79%; left: 90%; animation-delay: 2.5s; width: 38px; height: 14px; transform: rotate(6deg);   }
+
 
 @keyframes floatUpDown {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-12px) rotate(10deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  0%   { transform: translateY(0px)   rotate(var(--rot, 10deg)); opacity: 0.7; }
+  50%  { transform: translateY(-12px) rotate(var(--rot, 10deg)); opacity: 1;   }
+  100% { transform: translateY(0px)   rotate(var(--rot, 10deg)); opacity: 0.7; }
 }
 
 /* RESPONSIVE */

@@ -39,7 +39,7 @@ const AdminLogin = ({ setCurrentPage }) => {
         setCurrentPage("pharmacy-dashboard");
       }
       else if (role === "rider") {
-        setCurrentPage("rider-dashboard");   // ⭐ NEWLY ADDED
+        setCurrentPage("rider-dashboard");   
       }
       else {
         setError("Unauthorized role.");

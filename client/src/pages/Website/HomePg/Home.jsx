@@ -14,9 +14,6 @@ import { db } from "../../../firebase/config";
 import { collection, getDocs } from "firebase/firestore";
 
 function Home({
-  onSearch,
-  searchResults,
-  searchTerm,
   setCurrentPage,
   setSelectedMedicineId,
 }) {
@@ -46,7 +43,7 @@ function Home({
 
       productsSnap.forEach((prodDoc) => {
         allProducts.push({
-          id: pharmacyId + "-" + prodDoc.id,  
+          id: pharmacyId + "-" + prodDoc.id,
           productId: prodDoc.id,
           pharmacyId: pharmacyId,
           ...prodDoc.data(),

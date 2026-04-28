@@ -1,11 +1,14 @@
 import { MdDashboard } from "react-icons/md";
 import { AiOutlinePlus } from "react-icons/ai";
-import { FaPills, FaTimes, FaSearch, FaBoxes, FaExclamationTriangle, FaClipboardList, FaMotorcycle } from "react-icons/fa";
+import {
+  FaPills, FaTimes, FaSearch, FaBoxes,
+  FaExclamationTriangle, FaClipboardList, FaMotorcycle,
+} from "react-icons/fa";
 import { TbClipboardList } from "react-icons/tb";
 import PharmacyRiders from "./PharmacyRiders";
 import PharmacyOrders from "./PharmacyOrders";
 import MedGoLOGO from "../../assets/MedGo LOGO.png";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { auth, db } from "../../firebase/config";
 import {
   collection, addDoc, getDocs, getDoc, updateDoc,
@@ -15,15 +18,212 @@ import { onAuthStateChanged } from "firebase/auth";
 import "./PharmacyDashboard.css";
 import NotificationBell from "../../Components/NotificationBell";
 
+// ═══════════════════════════════════════════════════════════
+// MOVED OUTSIDE PharmacyDashboard — THIS IS THE CRITICAL FIX
+// Defining a component inside another component causes React
+// to unmount/remount it on every parent render, killing input focus.
+// ═══════════════════════════════════════════════════════════
+const MedicineFormFields = ({
+  isEdit,
+  productData,
+  handleChange,
+  handleDoseChange,
+  doseMode,
+  doseOptions,
+  imagePreview,
+  editImagePreview,
+  setSelectedImage,
+  setImagePreview,
+  setEditSelectedImage,
+  setEditImagePreview,
+  handleImageSelect,
+  handleEditImageSelect,
+}) => (
+  <>
+    <div className="ph-drawer-section-label">Basic Information</div>
+    <div className="ph-form-grid-2">
+      <div className="ph-form-group">
+        <label>Medicine Name</label>
+        <input
+          type="text" name="productName"
+          placeholder="e.g. Panadol" className="input"
+          value={productData.productName} onChange={handleChange} required
+        />
+      </div>
+      <div className="ph-form-group">
+        <label>Formula</label>
+        <input
+          type="text" name="formula"
+          placeholder="e.g. Paracetamol" className="input"
+          value={productData.formula} onChange={handleChange} required
+        />
+      </div>
+      <div className="ph-form-group">
+        <label>Manufacturer</label>
+        <input
+          type="text" name="manufacturer"
+          placeholder="e.g. GSK" className="input"
+          value={productData.manufacturer} onChange={handleChange} required
+        />
+      </div>
+      <div className="ph-form-group">
+        <label>Quantity</label>
+        <input
+          type="text" name="quantity"
+          placeholder="e.g. 10 Tablets" className="input"
+          value={productData.quantity} onChange={handleChange}
+        />
+      </div>
+    </div>
+
+    <div className="ph-drawer-section-label">Classification</div>
+    <div className="ph-form-grid-2">
+      <div className="ph-form-group">
+        <label>Dose</label>
+        <select
+          className="input"
+          value={doseMode === "dropdown" ? productData.dose : "Custom"}
+          onChange={handleDoseChange}
+        >
+          <option value="">Select dose</option>
+          {doseOptions.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        {doseMode === "custom" && (
+          <input
+            type="text" name="dose"
+            placeholder="Enter custom dose" className="input"
+            value={productData.dose} onChange={handleChange}
+            style={{ marginTop: 8 }}
+          />
+        )}
+      </div>
+      <div className="ph-form-group">
+        <label>Type</label>
+        <select name="type" className="input" value={productData.type} onChange={handleChange}>
+          <option value="">Select type</option>
+          <option>Tablet</option>
+          <option>Syrup</option>
+          <option>Capsule</option>
+          <option>Injection</option>
+        </select>
+      </div>
+      <div className="ph-form-group ph-full-width">
+        <label>Category</label>
+        <select name="category" className="input" value={productData.category} onChange={handleChange}>
+          <option value="">Select category</option>
+          <option>Pain Killer</option>
+          <option>Antibiotic</option>
+          <option>Fever And Pain</option>
+          <option>Cold And Flu</option>
+          <option>Allergy</option>
+          <option>Digestive</option>
+          <option>Respiratory</option>
+          <option>Vitamin</option>
+          <option>Bone And Joint Pain</option>
+          <option>Cardiac Care</option>
+          <option>Derma Care</option>
+          <option>ENT Care</option>
+          <option>Eye And Ear Care</option>
+          <option>Mental Health</option>
+          <option>Lung And Liver Care</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div className="ph-drawer-section-label">Inventory & Pricing</div>
+    <div className="ph-form-grid-2">
+      <div className="ph-form-group">
+        <label>Price (Rs.)</label>
+        <input
+          type="number" name="price"
+          placeholder="0" className="input"
+          value={productData.price} onChange={handleChange} required
+        />
+      </div>
+      <div className="ph-form-group">
+        <label>Stock</label>
+        <input
+          type="number" name="stock"
+          placeholder="0" className="input"
+          value={productData.stock} onChange={handleChange} required
+        />
+      </div>
+      <div className="ph-form-group ph-full-width">
+        <label>Expiry Date</label>
+        <input
+          type="date" name="expiryDate"
+          className="input"
+          value={productData.expiryDate} onChange={handleChange} required
+        />
+      </div>
+    </div>
+
+    <div className="ph-drawer-section-label">Additional Details</div>
+    <div className="ph-form-grid-2">
+      <div className="ph-form-group ph-full-width">
+        <label>Description</label>
+        <textarea
+          name="description"
+          placeholder="Brief description…" className="input"
+          value={productData.description} onChange={handleChange} rows="3"
+        />
+      </div>
+    </div>
+
+    <div className="ph-drawer-section-label">Product Image</div>
+    <div className="ph-upload-zone">
+      {(isEdit ? editImagePreview : imagePreview) ? (
+        <div className="ph-preview-wrap">
+          <img
+            src={isEdit ? editImagePreview : imagePreview}
+            alt="Preview" className="ph-img-preview"
+          />
+          <div className="ph-preview-actions">
+            <span className="ph-preview-name">Image selected</span>
+            <button
+              type="button" className="ph-remove-img"
+              onClick={() => {
+                if (isEdit) {
+                  setEditSelectedImage(null);
+                  setEditImagePreview(null);
+                } else {
+                  setSelectedImage(null);
+                  setImagePreview(null);
+                }
+              }}
+            >
+              <FaTimes /> Remove
+            </button>
+          </div>
+        </div>
+      ) : (
+        <label className="ph-upload-label">
+          <div className="ph-upload-icon">📷</div>
+          <span className="ph-upload-text">
+            {isEdit ? "Click to change image" : "Click to upload image"}
+          </span>
+          <span className="ph-upload-sub">PNG, JPG, WEBP supported</span>
+          <input
+            type="file" accept="image/*" hidden
+            onChange={isEdit ? handleEditImageSelect : handleImageSelect}
+          />
+        </label>
+      )}
+    </div>
+  </>
+);
+
+// ═══════════════════════════════════════════════════════════
+// MAIN COMPONENT
+// ═══════════════════════════════════════════════════════════
 const PharmacyDashboard = ({ setCurrentPage }) => {
   // Core states
   const [products, setProducts] = useState([]);
   const [pharmacyName, setPharmacyName] = useState("");
   const [editProduct, setEditProduct] = useState(null);
-  const [userId, setUserId] = useState(null);
   const [pharmacyId, setPharmacyId] = useState(null);
   const [pharmacyDocId, setPharmacyDocId] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   // Master & selection modal
   const [masterMedicines, setMasterMedicines] = useState([]);
@@ -52,18 +252,14 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   const [editSelectedImage, setEditSelectedImage] = useState(null);
   const [editImagePreview, setEditImagePreview] = useState(null);
 
-  // ===========================
-  // NEW: LIVE CLOCK
-  // ===========================
+  // Live clock
   const [liveTime, setLiveTime] = useState(new Date());
   useEffect(() => {
     const t = setInterval(() => setLiveTime(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
 
-  // ===========================
-  // NEW: SEARCH
-  // ===========================
+  // Search
   const [searchMedicines, setSearchMedicines] = useState("");
 
   const filteredProducts = products.filter((p) => {
@@ -76,22 +272,22 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     );
   });
 
-  // ===========================
-  // DRAWER helpers
-  // ===========================
+  // Drawer helpers
   const addDrawerOpen = activePage === "add";
   const editDrawerOpen = !!editProduct;
   const anyDrawerOpen = addDrawerOpen || editDrawerOpen;
+
+  const emptyProductData = {
+    productName: "", formula: "", manufacturer: "", dose: "",
+    category: "", type: "", description: "", price: "", stock: "",
+    expiryDate: "", status: "Active", quantity: "",
+  };
 
   const closeAddDrawer = () => {
     setActivePage("medicines");
     setSelectedImage(null);
     setImagePreview(null);
-    setProductData({
-      productName: "", formula: "", manufacturer: "", dose: "",
-      category: "", type: "", description: "", price: "", stock: "",
-      expiryDate: "", status: "Active", quantity: "",
-    });
+    setProductData(emptyProductData);
     setDoseMode("dropdown");
   };
 
@@ -99,11 +295,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     setEditProduct(null);
     setEditSelectedImage(null);
     setEditImagePreview(null);
-    setProductData({
-      productName: "", formula: "", manufacturer: "", dose: "",
-      category: "", type: "", description: "", price: "", stock: "",
-      expiryDate: "", status: "Active", quantity: "",
-    });
+    setProductData(emptyProductData);
     setDoseMode("dropdown");
   };
 
@@ -113,20 +305,80 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   };
 
   // ===========================
-  // AUTH + initial fetch
+  // Firestore helpers
   // ===========================
+  const fetchPharmacyInfo = useCallback(async (phId) => {
+    try {
+      if (!phId) return;
+      const q = query(collection(db, "Pharmacies"), where("pharmacyId", "==", phId));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const pharmacyDoc = snap.docs[0];
+        setPharmacyName(pharmacyDoc.data().name || "Pharmacy Dashboard");
+        setPharmacyDocId(pharmacyDoc.id);
+        const productsSnap = await getDocs(
+          collection(db, "Pharmacies", pharmacyDoc.id, "products")
+        );
+        setProducts(productsSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      } else {
+        setPharmacyName("Pharmacy Dashboard");
+        setProducts([]);
+      }
+    } catch (err) {
+      console.error("Error fetching pharmacy info:", err);
+    }
+  }, []);
+
+  const fetchOrdersCount = useCallback(async (phId) => {
+    try {
+      if (!phId) return setOrdersCount(0);
+      const q1 = query(collection(db, "orders"), where("pharmacyId", "==", phId));
+      const snap1 = await getDocs(q1);
+      if (!snap1.empty) { setOrdersCount(snap1.size); return; }
+      const q2 = query(collection(db, "Pharmacies"), where("pharmacyId", "==", phId));
+      const snap = await getDocs(q2);
+      if (!snap.empty) {
+        const pdId = snap.docs[0].id;
+        const ordersSnap = await getDocs(collection(db, "Pharmacies", pdId, "orders"));
+        setOrdersCount(ordersSnap.size || 0);
+        return;
+      }
+      setOrdersCount(0);
+    } catch (err) {
+      console.error("fetchOrdersCount error:", err);
+      setOrdersCount(0);
+    }
+  }, []);
+
+  const fetchUserPharmacyInfo = useCallback(async (uid) => {
+    try {
+      const userRef = doc(db, "users", uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        const pid = data.pharmacyId;
+        setPharmacyId(pid);
+        await fetchPharmacyInfo(pid);
+        await fetchOrdersCount(pid);
+      } else {
+        setPharmacyName("Pharmacy Dashboard");
+      }
+    } catch (err) {
+      console.error("Error fetching user info:", err);
+    }
+  }, [fetchPharmacyInfo, fetchOrdersCount]);
+
+  // AUTH
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUserId(user.uid);
         await fetchUserPharmacyInfo(user.uid);
       } else {
         setCurrentPage("admin");
       }
-      setLoading(false);
     });
     return () => unsubscribe();
-  }, [setCurrentPage]);
+  }, [setCurrentPage, fetchUserPharmacyInfo]);
 
   useEffect(() => {
     if (activePage === "add") {
@@ -144,68 +396,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
       setEditImagePreview(editProduct.imageURL || null);
     }
   }, [editProduct]);
-
-  // ===========================
-  // Firestore helpers
-  // ===========================
-  const fetchUserPharmacyInfo = async (uid) => {
-    try {
-      const userRef = doc(db, "users", uid);
-      const userSnap = await getDoc(userRef);
-      if (userSnap.exists()) {
-        const data = userSnap.data();
-        const pid = data.pharmacyId;
-        setPharmacyId(pid);
-        await fetchPharmacyInfo(pid);
-        await fetchOrdersCount(pid);
-      } else {
-        setPharmacyName("Pharmacy Dashboard");
-      }
-    } catch (err) {
-      console.error("Error fetching user info:", err);
-    }
-  };
-
-  const fetchPharmacyInfo = async (phId) => {
-    try {
-      if (!phId) return;
-      const q = query(collection(db, "Pharmacies"), where("pharmacyId", "==", phId));
-      const snap = await getDocs(q);
-      if (!snap.empty) {
-        const pharmacyDoc = snap.docs[0];
-        setPharmacyName(pharmacyDoc.data().name || "Pharmacy Dashboard");
-        setPharmacyDocId(pharmacyDoc.id);
-        const productsSnap = await getDocs(collection(db, "Pharmacies", pharmacyDoc.id, "products"));
-        setProducts(productsSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
-      } else {
-        setPharmacyName("Pharmacy Dashboard");
-        setProducts([]);
-      }
-    } catch (err) {
-      console.error("Error fetching pharmacy info:", err);
-    }
-  };
-
-  const fetchOrdersCount = async (phId) => {
-    try {
-      if (!phId) return setOrdersCount(0);
-      const q1 = query(collection(db, "orders"), where("pharmacyId", "==", phId));
-      const snap1 = await getDocs(q1);
-      if (!snap1.empty) { setOrdersCount(snap1.size); return; }
-      const q2 = query(collection(db, "Pharmacies"), where("pharmacyId", "==", phId));
-      const snap = await getDocs(q2);
-      if (!snap.empty) {
-        const pharmacyDocId = snap.docs[0].id;
-        const ordersSnap = await getDocs(collection(db, "Pharmacies", pharmacyDocId, "orders"));
-        setOrdersCount(ordersSnap.size || 0);
-        return;
-      }
-      setOrdersCount(0);
-    } catch (err) {
-      console.error("fetchOrdersCount error:", err);
-      setOrdersCount(0);
-    }
-  };
 
   // ===========================
   // Master medicines
@@ -230,8 +420,8 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
       const q = query(collection(db, "Pharmacies"), where("pharmacyId", "==", pharmacyId));
       const snap = await getDocs(q);
       if (snap.empty) return alert("Pharmacy not found!");
-      const pharmacyDocId = snap.docs[0].id;
-      const ref = collection(db, "Pharmacies", pharmacyDocId, "products");
+      const pdId = snap.docs[0].id;
+      const ref = collection(db, "Pharmacies", pdId, "products");
       const existingSnap = await getDocs(ref);
       const existing = existingSnap.docs.map((d) => (d.data().productName || "").toLowerCase());
       let added = 0;
@@ -269,16 +459,17 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   // ===========================
   // Form handlers
   // ===========================
-  const handleChange = (e) => setProductData({ ...productData, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setProductData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleDoseChange = (e) => {
     const val = e.target.value;
     if (val === "Custom") {
       setDoseMode("custom");
-      setProductData({ ...productData, dose: "" });
+      setProductData((prev) => ({ ...prev, dose: "" }));
     } else {
       setDoseMode("dropdown");
-      setProductData({ ...productData, dose: val });
+      setProductData((prev) => ({ ...prev, dose: val }));
     }
   };
 
@@ -307,7 +498,9 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "medicines_upload");
-    const res = await fetch("https://api.cloudinary.com/v1_1/dvo9nyzgq/image/upload", { method: "POST", body: formData });
+    const res = await fetch("https://api.cloudinary.com/v1_1/dvo9nyzgq/image/upload", {
+      method: "POST", body: formData,
+    });
     if (!res.ok) { const text = await res.text(); throw new Error("Cloudinary upload failed: " + text); }
     const data = await res.json();
     return data.secure_url || data.url || null;
@@ -323,13 +516,13 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
       const today = new Date(); today.setHours(0, 0, 0, 0);
       const exp = new Date(productData.expiryDate); exp.setHours(0, 0, 0, 0);
       if (exp <= today) return alert("Expiry date must be in future.");
-    } catch (err) { return alert("Invalid expiry date."); }
+} catch { return alert("Invalid expiry date."); }
     try {
       const q = query(collection(db, "Pharmacies"), where("pharmacyId", "==", pharmacyId));
       const snap = await getDocs(q);
       if (snap.empty) return;
-      const pharmacyDocId = snap.docs[0].id;
-      const ref = collection(db, "Pharmacies", pharmacyDocId, "products");
+      const pdId = snap.docs[0].id;
+      const ref = collection(db, "Pharmacies", pdId, "products");
       let imageURL = "";
       if (!editProduct) {
         if (selectedImage) imageURL = await uploadToCloudinary(selectedImage);
@@ -347,7 +540,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
         await updateDoc(doc(ref, editProduct.id), finalData);
       }
       alert(editProduct ? "Updated!" : "Added!");
-      setProductData({ productName: "", formula: "", manufacturer: "", dose: "", category: "", type: "", description: "", price: "", stock: "", expiryDate: "", status: "Active", quantity: "" });
+      setProductData(emptyProductData);
       setDoseMode("dropdown");
       setEditProduct(null);
       setSelectedImage(null); setImagePreview(null);
@@ -387,8 +580,8 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
       const q = query(collection(db, "Pharmacies"), where("pharmacyId", "==", pharmacyId));
       const snap = await getDocs(q);
       if (snap.empty) return;
-      const pharmacyDocId = snap.docs[0].id;
-      await deleteDoc(doc(db, "Pharmacies", pharmacyDocId, "products", id));
+      const pdId = snap.docs[0].id;
+      await deleteDoc(doc(db, "Pharmacies", pdId, "products", id));
       alert("Deleted!");
       fetchPharmacyInfo(pharmacyId);
     } catch (err) {
@@ -407,7 +600,12 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   const computeOutOfStock = () => products.filter((p) => Number(p.stock) <= 0).length;
   const computeExpired = () => {
     const today = new Date(); today.setHours(0, 0, 0, 0);
-    return products.filter((p) => { const d = new Date(p.expiryDate); if (isNaN(d)) return false; d.setHours(0, 0, 0, 0); return d < today; }).length;
+    return products.filter((p) => {
+      const d = new Date(p.expiryDate);
+      if (isNaN(d)) return false;
+      d.setHours(0, 0, 0, 0);
+      return d < today;
+    }).length;
   };
   const computeLowStock = () => products.filter((p) => Number(p.stock) > 0 && Number(p.stock) <= 10).length;
 
@@ -423,112 +621,14 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
   const formatTime = (d) => d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   const formatDate = (d) => d.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
-  // Shared medicine form fields JSX
-  const MedicineFormFields = ({ isEdit }) => (
-    <>
-      <div className="ph-drawer-section-label">Basic Information</div>
-      <div className="ph-form-grid-2">
-        <div className="ph-form-group">
-          <label>Medicine Name</label>
-          <input type="text" name="productName" placeholder="e.g. Panadol" className="input" value={productData.productName} onChange={handleChange} required />
-        </div>
-        <div className="ph-form-group">
-          <label>Formula</label>
-          <input type="text" name="formula" placeholder="e.g. Paracetamol" className="input" value={productData.formula} onChange={handleChange} required />
-        </div>
-        <div className="ph-form-group">
-          <label>Manufacturer</label>
-          <input type="text" name="manufacturer" placeholder="e.g. GSK" className="input" value={productData.manufacturer} onChange={handleChange} required />
-        </div>
-        <div className="ph-form-group">
-          <label>Quantity</label>
-          <input type="text" name="quantity" placeholder="e.g. 10 Tablets" className="input" value={productData.quantity} onChange={handleChange} />
-        </div>
-      </div>
-
-      <div className="ph-drawer-section-label">Classification</div>
-      <div className="ph-form-grid-2">
-        <div className="ph-form-group">
-          <label>Dose</label>
-          <select className="input" value={doseMode === "dropdown" ? productData.dose : "Custom"} onChange={handleDoseChange}>
-            <option value="">Select dose</option>
-            {doseOptions.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
-          </select>
-          {doseMode === "custom" && (
-            <input type="text" name="dose" placeholder="Enter custom dose" className="input" value={productData.dose} onChange={handleChange} style={{ marginTop: 8 }} />
-          )}
-        </div>
-        <div className="ph-form-group">
-          <label>Type</label>
-          <select name="type" className="input" value={productData.type} onChange={handleChange}>
-            <option value="">Select type</option>
-            <option>Tablet</option><option>Syrup</option><option>Capsule</option><option>Injection</option>
-          </select>
-        </div>
-        <div className="ph-form-group ph-full-width">
-          <label>Category</label>
-          <select name="category" className="input" value={productData.category} onChange={handleChange}>
-            <option value="">Select category</option>
-            <option>Pain Killer</option><option>Antibiotic</option><option>Fever And Pain</option>
-            <option>Cold And Flu</option><option>Allergy</option><option>Digestive</option>
-            <option>Respiratory</option><option>Vitamin</option><option>Bone And Joint Pain</option>
-            <option>Cardiac Care</option><option>Derma Care</option><option>ENT Care</option>
-            <option>Eye And Ear Care</option><option>Mental Health</option>
-            <option>Lung And Liver Care</option><option>Other</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="ph-drawer-section-label">Inventory & Pricing</div>
-      <div className="ph-form-grid-2">
-        <div className="ph-form-group">
-          <label>Price (Rs.)</label>
-          <input type="number" name="price" placeholder="0" className="input" value={productData.price} onChange={handleChange} required />
-        </div>
-        <div className="ph-form-group">
-          <label>Stock</label>
-          <input type="number" name="stock" placeholder="0" className="input" value={productData.stock} onChange={handleChange} required />
-        </div>
-        <div className="ph-form-group ph-full-width">
-          <label>Expiry Date</label>
-          <input type="date" name="expiryDate" className="input" value={productData.expiryDate} onChange={handleChange} required />
-        </div>
-      </div>
-
-      <div className="ph-drawer-section-label">Additional Details</div>
-      <div className="ph-form-grid-2">
-        <div className="ph-form-group ph-full-width">
-          <label>Description</label>
-          <textarea name="description" placeholder="Brief description…" className="input" value={productData.description} onChange={handleChange} rows="3" />
-        </div>
-      </div>
-
-      <div className="ph-drawer-section-label">Product Image</div>
-      <div className="ph-upload-zone">
-        {(isEdit ? editImagePreview : imagePreview) ? (
-          <div className="ph-preview-wrap">
-            <img src={isEdit ? editImagePreview : imagePreview} alt="Preview" className="ph-img-preview" />
-            <div className="ph-preview-actions">
-              <span className="ph-preview-name">Image selected</span>
-              <button type="button" className="ph-remove-img" onClick={() => {
-                if (isEdit) { setEditSelectedImage(null); setEditImagePreview(null); }
-                else { setSelectedImage(null); setImagePreview(null); }
-              }}>
-                <FaTimes /> Remove
-              </button>
-            </div>
-          </div>
-        ) : (
-          <label className="ph-upload-label">
-            <div className="ph-upload-icon">📷</div>
-            <span className="ph-upload-text">{isEdit ? "Click to change image" : "Click to upload image"}</span>
-            <span className="ph-upload-sub">PNG, JPG, WEBP supported</span>
-            <input type="file" accept="image/*" hidden onChange={isEdit ? handleEditImageSelect : handleImageSelect} />
-          </label>
-        )}
-      </div>
-    </>
-  );
+  // Shared props object for MedicineFormFields
+  const formFieldProps = {
+    productData, handleChange, handleDoseChange, doseMode, doseOptions,
+    imagePreview, editImagePreview,
+    setSelectedImage, setImagePreview,
+    setEditSelectedImage, setEditImagePreview,
+    handleImageSelect, handleEditImageSelect,
+  };
 
   // ===========================
   // RENDER
@@ -537,7 +637,10 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
     <div className="ph-dashboard-container">
 
       {/* ── DRAWER BACKDROP ── */}
-      <div className={`ph-drawer-backdrop ${anyDrawerOpen ? "ph-backdrop-visible" : ""}`} onClick={handleBackdrop} />
+      <div
+        className={`ph-drawer-backdrop ${anyDrawerOpen ? "ph-backdrop-visible" : ""}`}
+        onClick={handleBackdrop}
+      />
 
       {/* ══════════════════════════════════════
           DRAWER — ADD MEDICINE
@@ -552,7 +655,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
         </div>
         <div className="ph-drawer-body">
           <form onSubmit={handleSubmit} className="ph-drawer-form" id="addMedForm">
-            <MedicineFormFields isEdit={false} />
+            <MedicineFormFields isEdit={false} {...formFieldProps} />
           </form>
         </div>
         <div className="ph-drawer-footer">
@@ -574,7 +677,7 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
         </div>
         <div className="ph-drawer-body">
           <form onSubmit={handleSubmit} className="ph-drawer-form" id="editMedForm">
-            <MedicineFormFields isEdit={true} />
+            <MedicineFormFields isEdit={true} {...formFieldProps} />
           </form>
         </div>
         <div className="ph-drawer-footer">
@@ -591,23 +694,39 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
         <h2 className="ph-sidebar-title">{pharmacyName || "Pharmacy"}</h2>
 
         <ul className="ph-sidebar-menu">
-          <li className={activePage === "dashboard" ? "active" : ""} onClick={() => { setActivePage("dashboard"); setEditProduct(null); }}>
+          <li
+            className={activePage === "dashboard" ? "active" : ""}
+            onClick={() => { setActivePage("dashboard"); setEditProduct(null); }}
+          >
             <MdDashboard className="ph-menu-icon" /> Dashboard
           </li>
-          <li className={activePage === "add" ? "active" : ""} onClick={() => {
-            setActivePage("add"); setEditProduct(null);
-            setProductData({ productName: "", formula: "", manufacturer: "", dose: "", category: "", type: "", description: "", price: "", stock: "", expiryDate: "", status: "Active", quantity: "" });
-            setDoseMode("dropdown"); setSelectedImage(null); setImagePreview(null);
-          }}>
+          <li
+            className={activePage === "add" ? "active" : ""}
+            onClick={() => {
+              setActivePage("add"); setEditProduct(null);
+              setProductData(emptyProductData);
+              setDoseMode("dropdown");
+              setSelectedImage(null); setImagePreview(null);
+            }}
+          >
             <AiOutlinePlus className="ph-menu-icon" /> Add Medicine
           </li>
-          <li className={activePage === "medicines" ? "active" : ""} onClick={() => { setActivePage("medicines"); setEditProduct(null); }}>
+          <li
+            className={activePage === "medicines" ? "active" : ""}
+            onClick={() => { setActivePage("medicines"); setEditProduct(null); }}
+          >
             <FaPills className="ph-menu-icon" /> Medicines
           </li>
-          <li className={activePage === "orders" ? "active" : ""} onClick={() => { setActivePage("orders"); setEditProduct(null); }}>
+          <li
+            className={activePage === "orders" ? "active" : ""}
+            onClick={() => { setActivePage("orders"); setEditProduct(null); }}
+          >
             <TbClipboardList className="ph-menu-icon" /> Orders
           </li>
-          <li className={activePage === "riders" ? "active" : ""} onClick={() => setActivePage("riders")}>
+          <li
+            className={activePage === "riders" ? "active" : ""}
+            onClick={() => setActivePage("riders")}
+          >
             <FaMotorcycle className="ph-menu-icon" /> Riders
           </li>
         </ul>
@@ -620,7 +739,11 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
         <div className="ph-header">
           <span>Welcome, {pharmacyName || "Pharmacy"} 👋</span>
           {pharmacyDocId && (
-            <NotificationBell pharmacyId={pharmacyDocId} recipientRole="admin" recipientId={null} />
+            <NotificationBell
+              pharmacyId={pharmacyDocId}
+              recipientRole="admin"
+              recipientId={null}
+            />
           )}
         </div>
 
@@ -630,7 +753,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
           {(activePage === "dashboard" || activePage === "add") && (
             <div className="ph-dashboard-section">
 
-              {/* Welcome Banner */}
               <div className="ph-welcome-banner">
                 <div className="ph-welcome-text">
                   <span className="ph-welcome-greeting">Welcome back, {pharmacyName} 👋</span>
@@ -639,7 +761,6 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 <div className="ph-welcome-clock">{formatTime(liveTime)}</div>
               </div>
 
-              {/* Stat Cards */}
               <div className="ph-stats-grid">
                 <div className="ph-stat-card ph-stat-green">
                   <div className="ph-stat-icon"><FaPills /></div>
@@ -678,16 +799,18 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 </div>
               </div>
 
-              {/* Tabs */}
               <div className="ph-dashboard-tabs">
                 {["all","expired","outofstock","lowstock"].map((tab) => (
-                  <button key={tab} className={`ph-tab-btn ${dashboardTab === tab ? "active" : ""}`} onClick={() => setDashboardTab(tab)}>
+                  <button
+                    key={tab}
+                    className={`ph-tab-btn ${dashboardTab === tab ? "active" : ""}`}
+                    onClick={() => setDashboardTab(tab)}
+                  >
                     {tab === "all" ? "All" : tab === "expired" ? "Expired" : tab === "outofstock" ? "Out of Stock" : "Low Stock (≤10)"}
                   </button>
                 ))}
               </div>
 
-              {/* Dashboard table */}
               <table className="ph-product-table">
                 <thead>
                   <tr>
@@ -722,18 +845,26 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
             <div className="ph-medicines-section">
               <div className="ph-section-top">
                 <h2 className="ph-section-title">{pharmacyName} Medicines</h2>
-                <button className="ph-common-btn" onClick={() => { fetchMasterMedicines(); setShowSelectModal(true); }}>
+                <button
+                  className="ph-common-btn"
+                  onClick={() => { fetchMasterMedicines(); setShowSelectModal(true); }}
+                >
                   Select Common Medicines
                 </button>
               </div>
 
-              {/* Search */}
               <div className="ph-search-wrap">
                 <FaSearch className="ph-search-icon" />
-                <input className="ph-search-input" type="text" placeholder="Search by name, formula, category…"
-                  value={searchMedicines} onChange={(e) => setSearchMedicines(e.target.value)} />
+                <input
+                  className="ph-search-input" type="text"
+                  placeholder="Search by name, formula, category…"
+                  value={searchMedicines}
+                  onChange={(e) => setSearchMedicines(e.target.value)}
+                />
                 {searchMedicines && (
-                  <span className="ph-search-count">{filteredProducts.length} result{filteredProducts.length !== 1 ? "s" : ""}</span>
+                  <span className="ph-search-count">
+                    {filteredProducts.length} result{filteredProducts.length !== 1 ? "s" : ""}
+                  </span>
                 )}
               </div>
 
@@ -747,9 +878,11 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
                 </thead>
                 <tbody>
                   {filteredProducts.length === 0 ? (
-                    <tr><td colSpan="11" className="ph-no-products">
-                      {searchMedicines ? "No medicines match your search." : "No products added yet."}
-                    </td></tr>
+                    <tr>
+                      <td colSpan="11" className="ph-no-products">
+                        {searchMedicines ? "No medicines match your search." : "No products added yet."}
+                      </td>
+                    </tr>
                   ) : (
                     filteredProducts.map((p) => (
                       <tr key={p.id}>
@@ -791,22 +924,39 @@ const PharmacyDashboard = ({ setCurrentPage }) => {
               <div className="ph-modal-content">
                 <div className="ph-modal-header">
                   <h2>Select Common Medicines</h2>
-                  <button className="ph-modal-close" onClick={() => setShowSelectModal(false)}><FaTimes /></button>
+                  <button className="ph-modal-close" onClick={() => setShowSelectModal(false)}>
+                    <FaTimes />
+                  </button>
                 </div>
                 <div className="ph-medicine-list">
                   {masterMedicines.map((med) => (
                     <label key={med.id} className="ph-med-check-item">
-                      <input type="checkbox" checked={selectedMedicines.includes(med.id)} onChange={() => toggleMedicine(med.id)} />
+                      <input
+                        type="checkbox"
+                        checked={selectedMedicines.includes(med.id)}
+                        onChange={() => toggleMedicine(med.id)}
+                      />
                       <span className="ph-med-check-name">{med.name || med.productName}</span>
                       <span className="ph-med-check-price">Rs. {med.price}</span>
                     </label>
                   ))}
                 </div>
                 <div className="ph-modal-actions">
-                  <button className="ph-modal-sel-all" onClick={() => setSelectedMedicines(masterMedicines.map((m) => m.id))}>Select All</button>
-                  <button className="ph-modal-unsel" onClick={() => setSelectedMedicines([])}>Unselect All</button>
-                  <button className="ph-drawer-save-btn" onClick={handleAddSelected}>Add Selected</button>
-                  <button className="ph-drawer-cancel-btn" onClick={() => setShowSelectModal(false)}>Cancel</button>
+                  <button
+                    className="ph-modal-sel-all"
+                    onClick={() => setSelectedMedicines(masterMedicines.map((m) => m.id))}
+                  >
+                    Select All
+                  </button>
+                  <button className="ph-modal-unsel" onClick={() => setSelectedMedicines([])}>
+                    Unselect All
+                  </button>
+                  <button className="ph-drawer-save-btn" onClick={handleAddSelected}>
+                    Add Selected
+                  </button>
+                  <button className="ph-drawer-cancel-btn" onClick={() => setShowSelectModal(false)}>
+                    Cancel
+                  </button>
                 </div>
               </div>
             </div>
